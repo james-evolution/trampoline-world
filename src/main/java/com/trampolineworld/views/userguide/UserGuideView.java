@@ -59,7 +59,7 @@ public class UserGuideView extends HorizontalLayout {
     	
     	header = new H2("How to Use This Application");
     	
-		desktopDemoFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/-ZnYEI14B8c");
+		desktopDemoFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/134bgAV4l8k");
 		desktopDemoFrame.getElement().setAttribute("title", "YouTube video player");
 		desktopDemoFrame.getElement().setAttribute("frameborder", "0");
 		desktopDemoFrame.getElement().setAttribute("allow", "accelerometer");
