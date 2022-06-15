@@ -1,8 +1,8 @@
 # Trampoline World
 
 Server-side and client-side source code for a full-stack web application used to log and track trampoline orders.
-It can also be installed a standalone desktop application or a mobile application. Compatible with both iOS and Android.
-Built for someone very dear to my heart.
+<br>It can also be installed a standalone desktop application or a mobile application. Compatible with both iOS and Android.
+<br>Built for someone very dear to my heart.
 
 ## Running the application
 
