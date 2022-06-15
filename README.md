@@ -9,7 +9,7 @@ A full-stack persistent web application that doubles as both a standalone deskto
 
 The project is a standard Maven project. To run it from the command line,
 type `mvnw` (Windows), or `./mvnw` (Mac & Linux), then open
-http://localhost:8080 in your browser.
+http://localhost:8090 in your browser.
 
 You can also import the project to your IDE of choice as you would with any
 Maven project. Read more on [how to import Vaadin projects to different 
