@@ -40,5 +40,5 @@ This application was predominantly developed in the Java programming language.
 It uses:
 - Spring Boot
 - Spring Security
-- Java Persistence API (JPA)
+- JPA (Java Persistence API)
 - Vaadin Flow Framework
