@@ -1,14 +1,15 @@
 # Trampoline World
 
-Server-side and client-side source code for a full-stack web application used to log and track trampoline orders.
-It can also be installed a standalone desktop application or a mobile application. Compatible with both iOS and Android.
 Built for someone very dear to my heart.
+
+A full-stack persistent web application that doubles as both a standalone desktop application and a mobile application.
+<br>Compatible with both iOS and Android, this is effectively a CRM intended for tracking trampoline orders.
 
 ## Running the application
 
 The project is a standard Maven project. To run it from the command line,
 type `mvnw` (Windows), or `./mvnw` (Mac & Linux), then open
-http://localhost:8080 in your browser.
+http://localhost:8090 in your browser.
 
 You can also import the project to your IDE of choice as you would with any
 Maven project. Read more on [how to import Vaadin projects to different 
@@ -39,5 +40,5 @@ This application was predominantly developed in the Java programming language.
 It uses:
 - Spring Boot
 - Spring Security
-- Java Persistence API (JPA)
+- JPA (Java Persistence API)
 - Vaadin Flow Framework
