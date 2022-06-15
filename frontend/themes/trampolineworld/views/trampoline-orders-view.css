@@ -1,3 +1,96 @@
+/*vaadin-grid-cell-content {
+	word-wrap: break-word !important;
+}*/
+
+
+/*
+BUTTON HEADER CONTAINER ON ALL ORDERS PAGE
+*/
+#ROOT-2521314 > vaadin-app-layout > div > vaadin-horizontal-layout {
+	background-color: black !important;
+	opacity: 0.7;
+	padding: 6px;
+}
+
+#ROOT-2521314 > vaadin-app-layout > div > vaadin-horizontal-layout > vaadin-button:nth-child(2), #ROOT-2521314 > vaadin-app-layout > div > vaadin-horizontal-layout > vaadin-button:nth-child(3) {
+	margin-left: 4px;
+}
+
+vaadin-grid-cell-content {
+   height: 50px !important;
+}
+
+body {
+    background: linear-gradient(-45deg, #23d5ab, #00465a, #23aaab, #00465a);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite !important;
+}
+
+vaadin-date-picker-overlay-content {
+	background-color: black !important;
+}
+
+.app-name {
+	margin: 10px;
+    font-family: sacramento,cursive !important;
+    font-size: 1.5em;
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE10+/Edge */
+    user-select: none; /* Standard */
+    cursor: pointer;
+    color: #ffffff;
+    animation-name: colorglide;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+/***************** ANIMATIONS *****************/
+@keyframes gradient { /* Background Gradient Animation */
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes colorglide { /* Header Text Shadow Animation */
+    0% {
+        text-shadow: 0 0 10px #00465a;
+    }
+    100% {
+        text-shadow: 0 0 5px cyan;
+    }
+}
+
+.view-header {
+	background-color: #054d4a !important;
+}
+
+.complete {
+	background-color: green !important;
+}
+
+vaadin-grid, .editor-layout {
+    background-color: black !important;
+    color: ffffff !important;
+}
+
+/*vaadin-grid-cell-content {
+	background-color: green !important;
+}*/
+
+vaadin-grid, .editor-layout {
+	opacity: 0.7 !important;	
+}
+
 .trampoline-orders-view {
   display: flex;
   flex-direction: column;

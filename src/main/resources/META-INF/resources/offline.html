@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>TW | Offline</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: sans-serif;
+            color: white;
+		    background: linear-gradient(-45deg, #23d5ab, #00465a, #23aaab, #00465a);
+		    background-size: 400% 400%;
+		    animation: gradient 15s ease infinite !important;
+		}
+		
+		/***************** ANIMATIONS *****************/
+		@keyframes gradient { /* Background Gradient Animation */
+		    0% {
+		        background-position: 0% 50%;
+		    }
+		
+		    50% {
+		        background-position: 100% 50%;
+		    }
+		
+		    100% {
+		        background-position: 0% 50%;
+		    }
+		}
+		
+		@keyframes colorglide { /* Header Text Shadow Animation */
+		    0% {
+		        text-shadow: 0 0 10px #00465a;
+		    }
+		    100% {
+		        text-shadow: 0 0 5px cyan;
+		    }
+		}	
+            
+        .content {
+            width: 80%;
+            background-color: black;
+            opacity: 0.7;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 3px 3px 5px #01252e !important;
+        }
+
+        .offline-image {
+            width: 100%;
+            margin: 4em 0px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="content">
+    <h1>Error: Failed to establish a connection to the server.</h1>
+    <br>
+    <p>Steps to take:</p>
+    <ul>
+	    <li>Make sure that the server is running.</li>
+	    <li>Ensure that you're connected to the Internet.</li>
+    </ul>
+    <br>
+    <p>If the above steps fail, please contact the developer.</p>
+    <ul>
+    	<li><b>Email:</b> admin@evolutioncoding.net</li>
+    	<li><b>Discord:</b> James Z#0136</li>
+    </ul>
+    <br>
+    <p>In the meanwhile, here's some music to offer minor consolation : )</p>
+	<iframe width="560" height="315" src="https://www.youtube.com/embed/4eu_BPxNGGc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
+<script>
+    window.addEventListener('online', () => window.location.reload()); 
+</script>
+</body>
+</html>

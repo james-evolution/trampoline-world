@@ -1,0 +1,65 @@
+[part="title"] {
+	margin: 10px;
+    font-family: sacramento,cursive !important;
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE10+/Edge */
+    user-select: none; /* Standard */
+    cursor: pointer;
+    color: #ffffff !important;
+    animation-name: colorglide;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;	
+    text-align: center;
+}
+
+/***************** ANIMATIONS *****************/
+@keyframes gradient { /* Background Gradient Animation */
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes colorglide { /* Header Text Shadow Animation */
+    0% {
+        text-shadow: 0 0 10px #00465a;
+    }
+    100% {
+        text-shadow: 0 0 5px cyan;
+    }
+}
+
+[part="card"] {
+	box-shadow: 3px 3px 5px #01252e !important;
+}
+
+/*
+Top half of the form with the logo.
+	background-color: #01252e;
+	background-color: var(--_lumo-button-primary-background-color, var(--lumo-primary-color));
+*/
+[part="brand"] {
+	background-color: var(--_lumo-button-primary-background-color, var(--lumo-primary-color));
+	opacity: 0.9;
+	border-top: 0px;
+	border-right: 0px;
+	border-left: 0px;
+	border-color: #adfff8;
+}
+
+/*
+Bottom half of the form where the user logs in.
+*/
+[part="form"] {
+	background-color: #01252e;
+	opacity: 0.9;
+}

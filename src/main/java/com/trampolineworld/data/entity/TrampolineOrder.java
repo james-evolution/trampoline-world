@@ -2,34 +2,30 @@ package com.trampolineworld.data.entity;
 
 import java.time.LocalDate;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
 
 @Entity
-public class TrampolineOrder extends AbstractEntity {
+public class TrampolineOrder extends AbstractEntity{
 
-    private boolean status;
-    private Integer orderId;
+    private boolean complete;
     private String firstName;
     private String lastName;
     private String phoneNumber;
     private String email;
     private String orderDescription;
     private String measurements;
-    private Integer price;
-    private Integer subtotal;
-    private Integer total;
+    private double subtotal;
+    private double total;
     private LocalDate date;
 
-    public boolean isStatus() {
-        return status;
+    public boolean isComplete() {
+        return complete;
     }
-    public void setStatus(boolean status) {
-        this.status = status;
-    }
-    public Integer getOrderId() {
-        return orderId;
-    }
-    public void setOrderId(Integer orderId) {
-        this.orderId = orderId;
+    public void setComplete(boolean complete) {
+        this.complete = complete;
     }
     public String getFirstName() {
         return firstName;
@@ -67,22 +63,16 @@ public class TrampolineOrder extends AbstractEntity {
     public void setMeasurements(String measurements) {
         this.measurements = measurements;
     }
-    public Integer getPrice() {
-        return price;
-    }
-    public void setPrice(Integer price) {
-        this.price = price;
-    }
-    public Integer getSubtotal() {
+    public double getSubtotal() {
         return subtotal;
     }
-    public void setSubtotal(Integer subtotal) {
+    public void setSubtotal(double subtotal) {
         this.subtotal = subtotal;
     }
-    public Integer getTotal() {
+    public double getTotal() {
         return total;
     }
-    public void setTotal(Integer total) {
+    public void setTotal(double total) {
         this.total = total;
     }
     public LocalDate getDate() {

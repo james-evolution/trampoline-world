@@ -3,7 +3,10 @@ package com.trampolineworld.views;
 import com.trampolineworld.data.entity.User;
 import com.trampolineworld.security.AuthenticatedUser;
 import com.trampolineworld.views.chat.ChatView;
+import com.trampolineworld.views.export.ExportView;
+import com.trampolineworld.views.installation.InstallationGuideView;
 import com.trampolineworld.views.trampolineorders.TrampolineOrdersView;
+import com.trampolineworld.views.userguide.UserGuideView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
@@ -80,7 +83,8 @@ public class MainLayout extends AppLayout {
         this.accessChecker = accessChecker;
 
         setPrimarySection(Section.DRAWER);
-        addToNavbar(true, createHeaderContent());
+        // First parameter is touchOptimized. If true, navbar will show at the bottom in mobile views.
+        addToNavbar(false, createHeaderContent());
         addToDrawer(createDrawerContent());
     }
 
@@ -130,9 +134,10 @@ public class MainLayout extends AppLayout {
     private MenuItemInfo[] createMenuItems() {
         return new MenuItemInfo[]{ //
                 new MenuItemInfo("Trampoline Orders", "la la-clipboard-list", TrampolineOrdersView.class), //
-
+                new MenuItemInfo("Export PDF / CSV", "las la-file-pdf", ExportView.class), //
+                new MenuItemInfo("User Guide", "las la-info-circle", UserGuideView.class), //
+                new MenuItemInfo("Installation Guide", "las la-download", InstallationGuideView.class), //
                 new MenuItemInfo("Chat", "la la-comments", ChatView.class), //
-
         };
     }
 

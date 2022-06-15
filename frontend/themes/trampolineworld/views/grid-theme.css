@@ -1,0 +1,23 @@
+.complete {
+	background-color: green !important;
+	background: green !important;
+}
+
+:host.complete {
+	background-color: green !important;
+	background: green !important;
+}
+
+ [part~="cell"].complete{
+	background-color: green !important;
+	background: green !important;
+ }
+ [part~="cell"].incomplete {
+	background: black;
+}
+
+[part~='header-cell'] {
+	background-color: black;
+	opacity: 1 !important;
+}
+

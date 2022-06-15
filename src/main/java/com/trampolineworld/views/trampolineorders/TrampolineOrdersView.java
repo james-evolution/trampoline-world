@@ -3,72 +3,95 @@ package com.trampolineworld.views.trampolineorders;
 import com.trampolineworld.data.entity.TrampolineOrder;
 import com.trampolineworld.data.service.TrampolineOrderService;
 import com.trampolineworld.views.MainLayout;
+import com.trampolineworld.views.viewsingleorder.ViewSingleOrder;
 import com.vaadin.collaborationengine.CollaborationAvatarGroup;
 import com.vaadin.collaborationengine.CollaborationBinder;
 import com.vaadin.collaborationengine.UserInfo;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.Uses;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.Notification.Position;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.converter.StringToDoubleConverter;
 import com.vaadin.flow.data.converter.StringToIntegerConverter;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
+
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.security.RolesAllowed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
-@PageTitle("Trampoline Orders")
+@PageTitle("All Orders")
 @Route(value = "trampoline_orders/:trampolineOrderID?/:action?(edit)", layout = MainLayout.class)
+@RouteAlias(value = "", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 @Uses(Icon.class)
+@CssImport(
+    themeFor = "vaadin-grid",
+    value = "/themes/trampolineworld/views/grid-theme.css"
+)
+@CssImport(value = "/themes/trampolineworld/views/dialog.css", themeFor = "vaadin-dialog-overlay")
 public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 
     private final String TRAMPOLINEORDER_ID = "trampolineOrderID";
     private final String TRAMPOLINEORDER_EDIT_ROUTE_TEMPLATE = "trampoline_orders/%s/edit";
-
+    private final String TRAMPOLINEORDER_VIEW_ROUTE_TEMPLATE = "view_order/%s";
+    private UUID targetId;
     private Grid<TrampolineOrder> grid = new Grid<>(TrampolineOrder.class, false);
-
     CollaborationAvatarGroup avatarGroup;
-
-    private Checkbox status;
-    private TextField orderId;
-    private TextField firstName;
-    private TextField lastName;
-    private TextField phoneNumber;
-    private TextField email;
-    private TextField orderDescription;
-    private TextField measurements;
-    private TextField price;
-    private TextField subtotal;
-    private TextField total;
+    H2 editTitle;
+    private TextField filterTextField = new TextField();
+    private Checkbox complete;
+    private TextField firstName, lastName, phoneNumber, email, subtotal, total;
+    private TextArea orderDescription, measurements;
     private DatePicker date;
-
+   
+    private GridContextMenu<TrampolineOrder> menu;
+    private Div editorLayoutDiv;
+    private HorizontalLayout buttonHeaderContainer = new HorizontalLayout();
+    
+    private Dialog confirmDeleteDialog = new Dialog();
+    
     private Button cancel = new Button("Cancel");
     private Button save = new Button("Save");
-
+    private Button newOrderButton = new Button("New Order");
+    private Button hideSidebarButton = new Button("Hide Sidebar");
     private CollaborationBinder<TrampolineOrder> binder;
-
     private TrampolineOrder trampolineOrder;
-
     private final TrampolineOrderService trampolineOrderService;
 
     @Autowired
@@ -82,75 +105,66 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
         // identifier, and the user's real name. You can also provide the users
         // avatar by passing an url to the image as a third parameter, or by
         // configuring an `ImageProvider` to `avatarGroup`.
-        UserInfo userInfo = new UserInfo(UUID.randomUUID().toString(), "Steve Lange");
-
-        // Create UI
+        UserInfo userInfo = new UserInfo(UUID.randomUUID().toString(), "TW Admin");
+        userInfo.setImage("https://static.wixstatic.com/media/759627_2ad5404df0dc4455af631dbeaf83e8bf~mv2.png/v1/fill/w_347,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/Trampoline-2.png");
+        
+        // Create split-view UI
         SplitLayout splitLayout = new SplitLayout();
 
+        // Configure avatar group (users / pfps)
         avatarGroup = new CollaborationAvatarGroup(userInfo, null);
-        avatarGroup.getStyle().set("visibility", "hidden");
+        avatarGroup.getStyle().set("visibility", "visible");
 
+        // Create grid and editor layouts.
         createGridLayout(splitLayout);
         createEditorLayout(splitLayout);
 
+        // Create button header bar.
+        createButtonHeader(splitLayout); // Requires splitLayout argument to define button functions.
+        
+        // Add buttonHeaderContainer and splitLayout to view.
+        add(buttonHeaderContainer);
         add(splitLayout);
 
-        // Configure Grid
-        LitRenderer<TrampolineOrder> statusRenderer = LitRenderer.<TrampolineOrder>of(
-                "<vaadin-icon icon='vaadin:${item.icon}' style='width: var(--lumo-icon-size-s); height: var(--lumo-icon-size-s); color: ${item.color};'></vaadin-icon>")
-                .withProperty("icon", status -> status.isStatus() ? "check" : "minus").withProperty("color",
-                        status -> status.isStatus()
-                                ? "var(--lumo-primary-text-color)"
-                                : "var(--lumo-disabled-text-color)");
+        // Create context menu.
+        createContextMenu(trampolineOrderService); // View & Delete buttons.
 
-        grid.addColumn(statusRenderer).setHeader("Status").setAutoWidth(true);
+        // Configure the grid.
+		configureGrid(trampolineOrderService, splitLayout);
+		
+		// Configure & add delete confirmation dialog.
+        configureDeleteDialog(trampolineOrderService);
+        add(confirmDeleteDialog);
 
-        grid.addColumn("orderId").setAutoWidth(true);
-        grid.addColumn("firstName").setAutoWidth(true);
-        grid.addColumn("lastName").setAutoWidth(true);
-        grid.addColumn("phoneNumber").setAutoWidth(true);
-        grid.addColumn("email").setAutoWidth(true);
-        grid.addColumn("orderDescription").setAutoWidth(true);
-        grid.addColumn("measurements").setAutoWidth(true);
-        grid.addColumn("price").setAutoWidth(true);
-        grid.addColumn("subtotal").setAutoWidth(true);
-        grid.addColumn("total").setAutoWidth(true);
-        grid.addColumn("date").setAutoWidth(true);
-        grid.setItems(query -> trampolineOrderService.list(
-                PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
-                .stream());
-        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+        // Configure the form.
+        configureForm(userInfo);
+		configureFormButtons(trampolineOrderService);
+    }
 
-        // when a row is selected or deselected, populate form
-        grid.asSingleSelect().addValueChangeListener(event -> {
-            if (event.getValue() != null) {
-                UI.getCurrent().navigate(String.format(TRAMPOLINEORDER_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
-            } else {
-                clearForm();
-                UI.getCurrent().navigate(TrampolineOrdersView.class);
-            }
-        });
+	private void configureDeleteDialog(TrampolineOrderService trampolineOrderService) {
+		confirmDeleteDialog.setHeaderTitle("Delete Order");
+        confirmDeleteDialog.setDraggable(true);
+        confirmDeleteDialog.addClassName("deleteDialog");
 
-        // Configure Form
-        binder = new CollaborationBinder<>(TrampolineOrder.class, userInfo);
+        VerticalLayout dialogLayout = createDialogLayout();
+        confirmDeleteDialog.add(dialogLayout);
 
-        // Bind fields. This is where you'd define e.g. validation rules
-        binder.forField(orderId, String.class).withConverter(new StringToIntegerConverter("Only numbers are allowed"))
-                .bind("orderId");
-        binder.forField(price, String.class).withConverter(new StringToIntegerConverter("Only numbers are allowed"))
-                .bind("price");
-        binder.forField(subtotal, String.class).withConverter(new StringToIntegerConverter("Only numbers are allowed"))
-                .bind("subtotal");
-        binder.forField(total, String.class).withConverter(new StringToIntegerConverter("Only numbers are allowed"))
-                .bind("total");
+        Button dialogDeleteOrderButton = createDialogDeleteOrderButton(confirmDeleteDialog, trampolineOrderService);
+        Button cancelButton = new Button("Cancel", e -> confirmDeleteDialog.close());
+        confirmDeleteDialog.getFooter().add(dialogDeleteOrderButton);
+        confirmDeleteDialog.getFooter().add(cancelButton);
+	}
 
-        binder.bindInstanceFields(this);
-
+	private void configureFormButtons(TrampolineOrderService trampolineOrderService) {
+		// When the cancel button is clicked, clear the form and refresh the grid.
         cancel.addClickListener(e -> {
             clearForm();
-            refreshGrid();
+//            refreshGrid();
+            updateGrid();
+            editorLayoutDiv.setVisible(false);
         });
 
+		// When the save button is clicked, save the new order.
         save.addClickListener(e -> {
             try {
                 if (this.trampolineOrder == null) {
@@ -160,14 +174,132 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 
                 trampolineOrderService.update(this.trampolineOrder);
                 clearForm();
-                refreshGrid();
-                Notification.show("TrampolineOrder details stored.");
+//                refreshGrid();
+                updateGrid();
+                editorLayoutDiv.setVisible(false);
+            	Notification.show("Order details stored.", 4000, Position.TOP_CENTER).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 UI.getCurrent().navigate(TrampolineOrdersView.class);
             } catch (ValidationException validationException) {
-                Notification.show("An exception happened while trying to store the trampolineOrder details.");
+            	Notification.show("Invalid form input.", 4000, Position.TOP_CENTER).addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
-    }
+	}
+
+	private void configureForm(UserInfo userInfo) {
+		binder = new CollaborationBinder<>(TrampolineOrder.class, userInfo);
+        // Bind fields. This is where you'd define e.g. validation rules
+        binder.forField(subtotal, String.class)
+        	.asRequired("Subtotal field cannot be empty.")
+        	.withConverter(new StringToDoubleConverter("Only numbers are allowed"))
+            .bind("subtotal");
+        binder.forField(total, String.class)
+        	.asRequired("Total field cannot be empty.")
+        	.withConverter(new StringToDoubleConverter("Only numbers are allowed"))
+            .bind("total");
+        binder.forField(date, LocalDate.class)
+        	.asRequired("Date field cannot be empty.")
+        	.bind("date");
+        binder.bindInstanceFields(this);
+	}
+
+	private void configureGrid(TrampolineOrderService trampolineOrderService, SplitLayout splitLayout) {
+		// Add columns to the grid.
+        grid.addColumn("complete").setAutoWidth(true).setResizable(true);
+        grid.addColumn("firstName").setAutoWidth(true).setResizable(true);
+        grid.addColumn("lastName").setAutoWidth(true).setResizable(true);
+        grid.addColumn("phoneNumber").setAutoWidth(true).setResizable(true);
+        grid.addColumn("email").setAutoWidth(true).setResizable(true);
+        grid.addColumn("orderDescription").setWidth("300px").setResizable(true);
+        grid.addColumn("measurements").setWidth("300px").setResizable(true);
+        grid.addColumn("subtotal").setAutoWidth(true).setResizable(true);
+        grid.addColumn("total").setAutoWidth(true).setResizable(true);
+        grid.addColumn("date").setAutoWidth(true).setResizable(true);
+        updateGrid();
+
+//        grid.setItems(query -> trampolineOrderService.list(
+//                PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
+//                .stream());
+        
+        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+        
+        // Class name generator.
+        grid.setClassNameGenerator(order -> {
+		    if (order.isComplete()) {
+		        return "complete";
+		    } else {
+		        return "incomplete";
+		    }
+		});        
+
+        // When a row is selected or deselected, populate form.
+        grid.asSingleSelect().addValueChangeListener(event -> {
+            if (event.getValue() != null) {
+                editorLayoutDiv.setVisible(true);
+                splitLayout.setSplitterPosition(0);
+                UI.getCurrent().navigate(String.format(TRAMPOLINEORDER_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+            } else {
+                editorLayoutDiv.setVisible(false);
+                clearForm();
+                UI.getCurrent().navigate(TrampolineOrdersView.class);
+            }
+        });
+	}
+
+	private void updateGrid() {
+		// TODO Auto-generated method stub
+        grid.setItems(trampolineOrderService.findAll(filterTextField.getValue()));
+	}
+
+	private void createContextMenu(TrampolineOrderService trampolineOrderService) {
+		// Add the context menu to the grid.
+        menu = grid.addContextMenu();
+
+		// Listen for the event in which the context menu is opened, then save the id of the TrampolineOrder that was right clicked on.
+        menu.addGridContextMenuOpenedListener(event -> {
+        	targetId = event.getItem().get().getId();
+        });
+       	// Add menu items to the grid, send user to the 'ViewSingleOrder' page with the TrampolineOrder id as an argument.
+        menu.addItem("View", event -> {
+        	UI.getCurrent().navigate(String.format(TRAMPOLINEORDER_VIEW_ROUTE_TEMPLATE, targetId.toString()));
+        });
+        menu.addItem("Delete", event -> {
+	        try {
+	        	confirmDeleteDialog.open();
+	        } catch (Exception e) {
+            	Notification.show("An error has occurred, please contact the developer.", 4000, Position.TOP_CENTER).addThemeVariants(NotificationVariant.LUMO_ERROR);
+	        }
+        });
+	}
+
+	private void createButtonHeader(SplitLayout splitLayout) {
+		// Configure button header container.
+        buttonHeaderContainer.setSpacing(false);
+        buttonHeaderContainer.setAlignItems(Alignment.BASELINE);
+
+        newOrderButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        newOrderButton.addClickListener(e -> {
+            clearForm();
+//            refreshGrid();
+            updateGrid();
+            editorLayoutDiv.setVisible(true);
+            splitLayout.setSplitterPosition(0);
+        });
+        
+        hideSidebarButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        hideSidebarButton.addClickListener(e -> {
+            clearForm();
+//            refreshGrid();
+            updateGrid();
+            editorLayoutDiv.setVisible(false);
+        });        
+        
+        filterTextField.setPlaceholder("Filter by name...");
+        filterTextField.setClearButtonVisible(true);
+        filterTextField.setValueChangeMode(ValueChangeMode.LAZY); // Don't hit database on every keystroke. Wait for user to finish typing.
+        filterTextField.addValueChangeListener(e -> updateGrid());
+
+        buttonHeaderContainer.add(filterTextField, newOrderButton, hideSidebarButton);
+	}
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
@@ -177,43 +309,69 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
             if (trampolineOrderFromBackend.isPresent()) {
                 populateForm(trampolineOrderFromBackend.get());
             } else {
-                Notification.show(
-                        String.format("The requested trampolineOrder was not found, ID = %d", trampolineOrderId.get()),
-                        3000, Notification.Position.BOTTOM_START);
-                // when a row is selected but the data is no longer available,
-                // refresh grid
-                refreshGrid();
+            	Notification.show(String.format("The requested trampolineOrder was not found, ID = %d", trampolineOrderId.get()), 4000, Position.TOP_CENTER).addThemeVariants(NotificationVariant.LUMO_ERROR);                
+                // When a row is selected but the data is no longer available, update the grid component.
+                updateGrid();
                 event.forwardTo(TrampolineOrdersView.class);
             }
         }
     }
+    
+    private static VerticalLayout createDialogLayout() {
+
+        Paragraph confirmationMessage = new Paragraph("Are you sure you want to delete this order?");
+        VerticalLayout dialogLayout = new VerticalLayout(confirmationMessage);
+        dialogLayout.setPadding(false);
+        dialogLayout.setSpacing(false);
+//        dialogLayout.setAlignItems(FlexComponent.Alignment.STRETCH);
+        dialogLayout.getStyle().set("width", "18rem").set("max-width", "100%");
+
+        return dialogLayout;
+    }
+
+    private Button createDialogDeleteOrderButton(Dialog dialog, TrampolineOrderService trampolineOrderService) {
+        Button dialogDeleteButton = new Button("Delete", e -> {
+        	try {
+	        	trampolineOrderService.delete(targetId);
+	        	Notification.show("Order deleted.", 4000, Position.TOP_CENTER).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        	} catch (Exception exception) {
+        		Notification.show("Operaton failed.", 4000, Position.TOP_CENTER).addThemeVariants(NotificationVariant.LUMO_ERROR);
+        	}
+        	dialog.close();
+//        	refreshGrid();        
+        	updateGrid();
+        });
+        dialogDeleteButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_ERROR);
+
+        return dialogDeleteButton;
+    }    
 
     private void createEditorLayout(SplitLayout splitLayout) {
-        Div editorLayoutDiv = new Div();
+    	editTitle = new H2("New Order");
+        editorLayoutDiv = new Div();
         editorLayoutDiv.setClassName("editor-layout");
+        editorLayoutDiv.setVisible(false);
 
         Div editorDiv = new Div();
         editorDiv.setClassName("editor");
         editorLayoutDiv.add(editorDiv);
 
         FormLayout formLayout = new FormLayout();
-        status = new Checkbox("Status");
-        orderId = new TextField("Order Id");
         firstName = new TextField("First Name");
         lastName = new TextField("Last Name");
         phoneNumber = new TextField("Phone Number");
         email = new TextField("Email");
-        orderDescription = new TextField("Order Description");
-        measurements = new TextField("Measurements");
-        price = new TextField("Price");
+        orderDescription = new TextArea("Order Description");
+        measurements = new TextArea("Measurements");
         subtotal = new TextField("Subtotal");
         total = new TextField("Total");
         date = new DatePicker("Date");
-        Component[] fields = new Component[]{status, orderId, firstName, lastName, phoneNumber, email, orderDescription,
-                measurements, price, subtotal, total, date};
+        complete = new Checkbox("Complete");
+        Component[] fields = new Component[]{firstName, lastName, phoneNumber, email, orderDescription,
+                measurements, subtotal, total, date, complete};
 
         formLayout.add(fields);
-        editorDiv.add(avatarGroup, formLayout);
+        editorDiv.add(avatarGroup, editTitle, formLayout);
         createButtonLayout(editorLayoutDiv);
 
         splitLayout.addToSecondary(editorLayoutDiv);
@@ -237,7 +395,8 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 
     private void refreshGrid() {
         grid.select(null);
-        grid.getLazyDataView().refreshAll();
+//        grid.getLazyDataView().refreshAll();
+        grid.getGenericDataView().refreshAll();
     }
 
     private void clearForm() {
@@ -249,12 +408,13 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
         String topic = null;
         if (this.trampolineOrder != null && this.trampolineOrder.getId() != null) {
             topic = "trampolineOrder/" + this.trampolineOrder.getId();
-            avatarGroup.getStyle().set("visibility", "visible");
+//            avatarGroup.getStyle().set("visibility", "visible");
+            editTitle.setText("Edit Order");
         } else {
-            avatarGroup.getStyle().set("visibility", "hidden");
+//            avatarGroup.getStyle().set("visibility", "hidden");
+            editTitle.setText("New Order");
         }
         binder.setTopic(topic, () -> this.trampolineOrder);
         avatarGroup.setTopic(topic);
-
     }
 }

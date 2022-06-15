@@ -1,6 +1,8 @@
 package com.trampolineworld.data.service;
 
 import com.trampolineworld.data.entity.TrampolineOrder;
+
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,4 +40,20 @@ public class TrampolineOrderService {
         return (int) repository.count();
     }
 
+//    public List<TrampolineOrder> findAll() {
+//    	return repository.findAll();
+//    }
+    
+    public List<TrampolineOrder> findAll(String filterText) {
+    	if (filterText == null || filterText.isEmpty()) {
+    		return repository.findAll();
+    	}
+    	else {
+    		return repository.search(filterText);
+    	}
+    }
+    
+    public List<TrampolineOrder> findAllNoFilter() {
+		return repository.findAll();
+    }    
 }

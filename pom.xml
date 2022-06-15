@@ -93,9 +93,28 @@
         </dependency>
 
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-        </dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <scope>runtime</scope>
+        </dependency>	    
+	    
+		<dependency>
+		   <groupId>org.vaadin.crudui</groupId>
+		   <artifactId>crudui</artifactId>
+		   <version>6.0.0</version>
+		</dependency>	    
+		
+		<dependency>
+		   <groupId>org.vaadin.reportui</groupId>
+		   <artifactId>report-ui</artifactId>
+		   <version>4.0.2</version>
+		</dependency>		
+	    
+	    <dependency>
+	      <groupId>org.projectlombok</groupId>
+	      <artifactId>lombok</artifactId>
+	      <optional>true</optional>
+	    </dependency>
 
         <dependency>
             <groupId>com.vaadin</groupId>
