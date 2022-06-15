@@ -1,8 +1,10 @@
 # Trampoline World
 
-A full-stack persistent web application that can be installed both as a standalone desktop application or a mobile app (compatible with both iOS and Android).
-<br>Effectively a CRM for tracking customer orders.
-<br><br>Built for someone very dear to my heart.
+Built for somoene very dear to my heart:
+
+A full-stack persistent web application that doubles as both a standalone desktop application and a mobile app.
+<br>Compatible with both iOS and Android.
+<br>Effectively a CRM for tracking trampoline orders.
 
 ## Running the application
 
