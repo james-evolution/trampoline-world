@@ -1,6 +1,6 @@
 # Trampoline World
 
-Built for somoene very dear to my heart:
+Built for someone very dear to my heart:
 
 A full-stack persistent web application that doubles as both a standalone desktop application and a mobile app.
 <br>Compatible with both iOS and Android.
