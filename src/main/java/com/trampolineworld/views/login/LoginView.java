@@ -45,7 +45,7 @@ public class LoginView extends LoginOverlay implements BeforeEnterObserver {
         .getQueryParameters()
         .getParameters()
         .containsKey("error")) {
-            Notification.show("Login failed. Incorrect credentials.", 4000, Position.TOP_CENTER).addThemeVariants(NotificationVariant.LUMO_ERROR);
+			this.setError(true);
         }
 	}    
 
