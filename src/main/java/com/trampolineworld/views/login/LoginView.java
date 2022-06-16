@@ -10,7 +10,7 @@ import com.vaadin.flow.router.Route;
 @Route(value = "login")
 @CssImport(
 	    themeFor = "vaadin-login-overlay-wrapper vaadin-login-form-wrapper",
-	    value = "/themes/trampolineworld/views/login-theme.css"
+	    value = "./themes/trampolineworld/views/login-theme.css"
 	)
 public class LoginView extends LoginOverlay {
     public LoginView() {

@@ -91,19 +91,27 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
+        
+        <!-- To prevent Jasper Reports from complaining about the Arial font -->
+        <dependency>
+		  <groupId>ar.com.fdvs</groupId>
+		  <artifactId>DynamicJasper-core-fonts</artifactId>
+		  <version>1.0</version>
+		</dependency>
 
-     <!--   <dependency>
+     	<!--   
+     	<dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
             <scope>runtime</scope>
         </dependency>	   
-     -->
-        
-    <dependency>
-      <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
-      <scope>runtime</scope>
-    </dependency>
+     	-->
+         
+	    <dependency>
+	      <groupId>mysql</groupId>
+	      <artifactId>mysql-connector-java</artifactId>
+	      <scope>runtime</scope>
+	    </dependency>
 	    
 		<dependency>
 		   <groupId>org.vaadin.crudui</groupId>
@@ -204,6 +212,7 @@
                     </execution>
                 </executions>
             </plugin>
+            
         </plugins>
     </build>
 
@@ -211,8 +220,29 @@
         <profile>
             <!-- Production mode is activated using -Pproduction -->
             <id>production</id>
+            <dependencies>
+    	    	<dependency>
+			      <groupId>mysql</groupId>
+			      <artifactId>mysql-connector-java</artifactId>
+			      <scope>runtime</scope>
+	    		</dependency>
+            </dependencies>
             <build>
                 <plugins>
+                	<!-- Adding this to fix heroku deployment -->
+		            <plugin>
+		                <groupId>org.apache.maven.plugins</groupId>
+		                <artifactId>maven-dependency-plugin</artifactId>
+		                <version>3.0.1</version>
+		                <executions>
+		                    <execution>
+		                        <id>copy-dependencies</id>
+		                        <phase>package</phase>
+		                        <goals><goal>copy-dependencies</goal></goals>
+		                    </execution>
+		                </executions>
+		            </plugin>                	
+                	
                     <plugin>
                         <groupId>com.vaadin</groupId>
                         <artifactId>vaadin-maven-plugin</artifactId>

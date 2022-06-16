@@ -21,7 +21,7 @@ import com.vaadin.flow.router.Route;
 @Route(value = "installationguide", layout = MainLayout.class)
 @CssImport(
 		themeFor = "vaadin-horizontal-layout",
-		value = "/themes/trampolineworld/views/installationguide-theme.css"
+		value = "./themes/trampolineworld/views/installationguide-theme.css"
 		)
 @PageTitle("Installation Guide")
 @RolesAllowed("ADMIN")

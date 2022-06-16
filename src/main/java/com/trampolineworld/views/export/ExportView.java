@@ -24,7 +24,7 @@ import com.vaadin.flow.server.StreamResource;
 @RolesAllowed("ADMIN")
 @CssImport(
 	    themeFor = "vaadin-vertical-layout vaadin-horizontal-layout",
-	    value = "/themes/trampolineworld/views/export-theme.css"
+	    value = "./themes/trampolineworld/views/export-theme.css"
 	)
 public class ExportView extends VerticalLayout {
 	

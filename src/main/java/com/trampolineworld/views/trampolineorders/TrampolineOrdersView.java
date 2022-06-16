@@ -62,9 +62,9 @@ import org.springframework.data.domain.PageRequest;
 @Uses(Icon.class)
 @CssImport(
     themeFor = "vaadin-grid",
-    value = "/themes/trampolineworld/views/grid-theme.css"
+    value = "./themes/trampolineworld/views/grid-theme.css"
 )
-@CssImport(value = "/themes/trampolineworld/views/dialog.css", themeFor = "vaadin-dialog-overlay")
+@CssImport(value = "./themes/trampolineworld/views/dialog.css", themeFor = "vaadin-dialog-overlay")
 public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 
     private final String TRAMPOLINEORDER_ID = "trampolineOrderID";

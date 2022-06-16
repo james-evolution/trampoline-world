@@ -31,7 +31,7 @@ import com.trampolineworld.views.trampolineorders.TrampolineOrdersView;
 //@RouteAlias(value = "", layout = MainLayout.class)
 @CssImport(
 	    themeFor = "vaadin-horizontal-layout",
-	    value = "/themes/trampolineworld/views/userguide-theme.css"
+	    value = "./themes/trampolineworld/views/userguide-theme.css"
 	)
 @RolesAllowed("ADMIN")
 public class UserGuideView extends HorizontalLayout {
