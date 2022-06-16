@@ -39,6 +39,10 @@ import com.trampolineworld.views.trampolineorders.TrampolineOrdersView;
 	    themeFor = "vaadin-vertical-layout",
 	    value = "./themes/trampolineworld/views/userguide-theme.css"
 	)
+@CssImport(
+	    themeFor = "vaadin-tabs",
+	    value = "./themes/trampolineworld/views/userguide-theme.css"
+	)
 @RolesAllowed("ADMIN")
 public class UserGuideView extends HorizontalLayout {
 	
