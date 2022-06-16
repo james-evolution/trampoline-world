@@ -1,5 +1,14 @@
 package com.trampolineworld;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLDecoder;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.Bean;
+
 import com.vaadin.collaborationengine.CollaborationEngineConfiguration;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.page.AppShellConfigurator;
@@ -7,10 +16,6 @@ import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
-import org.springframework.context.annotation.Bean;
 
 /**
  * The entry point of the Spring Boot application.
@@ -45,7 +50,28 @@ public class Application extends SpringBootServletInitializer implements AppShel
                 licenseEvent -> {
                     // See <<ce.production.license-events>>
                 });
-        configuration.setDataDir("/license");
+
+      //How to define path relative to current working directory 
+        
+//        File licensePath = new File("src/main/resources/META-INF/");
+//        System.out.println(licensePath.getAbsolutePath());
+       
+//        String licensePath = getClass().getResource("ce-license.json").toString();
+//        System.setProperty("vaadin.ce.dataDir", "./META-INF/resources");
+        
+        
+//        URL url = this.getClass().getProtectionDomain().getCodeSource().getLocation();
+//        String jarPath;
+//		try {
+//			jarPath = URLDecoder.decode(url.getFile(), "UTF-8");
+//			URL licensePath = new URL(jarPath + "/META-INF/resources");
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//      String licensePath = "/app/target/trampolineworld-1.0-SNAPSHOT.jar!/BOOT-INF/classes!/META-INF/resources/ce-license.json"
+        
+        String licensePath = "/app/target/trampolineworld-1.0-SNAPSHOT.jar!/META-INF/resources/";
+		configuration.setDataDir(licensePath);
         return configuration;
     }
 

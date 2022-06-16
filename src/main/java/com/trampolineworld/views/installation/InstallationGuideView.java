@@ -73,9 +73,10 @@ public class InstallationGuideView extends HorizontalLayout {
 	}
 
 	private void loadDesktopComponentData() {
-		installationHeader.setText("Installing the Standalone Desktop Application");
-		installationDescription.setText("The below video will walk you through the process of installing this web application as a standalone desktop application. "
-				+ "\nPlease make sure you're using the Google Chrome browser for this process.");
+		installationHeader.setText("Installing the Desktop Application");
+		installationDescription.setText("\nInstalling this system as a standalone desktop application is quite an easy process! It should take under a minute.\n"
+				+ "\nOn Windows, please make sure you're using the Google Chrome browser if you decide to do this, as not all browsers offer this capability."
+				+ "\nOn Apple devices, you'll want to use Safari. It's possible that the icon may look like a plus sign instead of the one showcased in the video.\n");
 		desktopInstallationFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/t65jdhNLmm8");
 		desktopInstallationFrame.getElement().setAttribute("title", "YouTube video player");
 		desktopInstallationFrame.getElement().setAttribute("frameborder", "0");
@@ -96,17 +97,20 @@ public class InstallationGuideView extends HorizontalLayout {
 		layout.removeAll();
         layout.add(tabs);
         layout.add(installationHeader);
-        layout.add(installationDescription);
         layout.add(desktopInstallationFrame);
+        layout.add(installationDescription);
 //        layout.add(demoHeader);
 //        layout.add(demoDescription);
 //        layout.add(desktopDemoFrame);
+        
+        this.setSizeFull();
 	}
 
 	private void loadMobileComponentData() {
 		installationHeader.setText("Installing the Mobile Application");
-		installationDescription.setText("The installation process for the mobile appplication is relatively the same for both iPhones and Androids, thankfully. "
-				+ "\nAlthough iPhone users should use the Safari browser, and Android users should use Chrome.");
+		installationDescription.setText("\nThe installation process for the mobile app is just as quick! The steps are relatively the same for both iPhone and Android devices.\n"
+				+ "\niPhone users should use Safari."
+				+ "\nAndroid users should use Google Chrome.\n\n");
 		mobileInstallationFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/9HWKx4NncvM");
 		mobileInstallationFrame.getElement().setAttribute("title", "YouTube video player");
 		mobileInstallationFrame.getElement().setAttribute("frameborder", "0");
@@ -128,8 +132,8 @@ public class InstallationGuideView extends HorizontalLayout {
 		layout.removeAll();
         layout.add(tabs);
         layout.add(installationHeader);
-        layout.add(installationDescription);
         layout.add(mobileInstallationFrame);
+        layout.add(installationDescription);
 //        layout.add(demoHeader);
 //        layout.add(demoDescription);
 //        layout.add(mobileDemoFrame);        

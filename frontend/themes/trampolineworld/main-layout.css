@@ -1,6 +1,7 @@
 iframe {
 	width: 560px !important;
 	height: 315px !important;
+    box-shadow: 0px 0px 5px 2px cyan !important;
 }
 
 /***************** MOBILE ***********/
@@ -95,7 +96,7 @@ iframe {
 
 .installationguide-layout {
 	background-color: black !important;
-	opacity: 0.8 !important;
+	opacity: 0.7 !important;
 }
 
 

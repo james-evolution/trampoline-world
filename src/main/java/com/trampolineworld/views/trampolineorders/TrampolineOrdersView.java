@@ -66,6 +66,8 @@ import org.springframework.data.domain.PageRequest;
 )
 @CssImport(value = "./themes/trampolineworld/views/dialog.css", themeFor = "vaadin-dialog-overlay")
 public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
+	
+	public static String username = "";
 
     private final String TRAMPOLINEORDER_ID = "trampolineOrderID";
     private final String TRAMPOLINEORDER_EDIT_ROUTE_TEMPLATE = "trampoline_orders/%s/edit";
@@ -98,6 +100,8 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
     public TrampolineOrdersView(TrampolineOrderService trampolineOrderService) {
         this.trampolineOrderService = trampolineOrderService;
         addClassNames("trampoline-orders-view");
+        
+//    	Notification.show("Welcome, " + username, 4000, Position.TOP_CENTER).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
         // UserInfo is used by Collaboration Engine and is used to share details
         // of users to each other to able collaboration. Replace this with
@@ -335,7 +339,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 	        	trampolineOrderService.delete(targetId);
 	        	Notification.show("Order deleted.", 4000, Position.TOP_CENTER).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
         	} catch (Exception exception) {
-        		Notification.show("Operaton failed.", 4000, Position.TOP_CENTER).addThemeVariants(NotificationVariant.LUMO_ERROR);
+        		Notification.show("Operation failed.", 4000, Position.TOP_CENTER).addThemeVariants(NotificationVariant.LUMO_ERROR);
         	}
         	dialog.close();
 //        	refreshGrid();        

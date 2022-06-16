@@ -7,7 +7,9 @@ import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.IFrame;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -33,14 +35,22 @@ import com.trampolineworld.views.trampolineorders.TrampolineOrdersView;
 	    themeFor = "vaadin-horizontal-layout",
 	    value = "./themes/trampolineworld/views/userguide-theme.css"
 	)
+@CssImport(
+	    themeFor = "vaadin-vertical-layout",
+	    value = "./themes/trampolineworld/views/userguide-theme.css"
+	)
 @RolesAllowed("ADMIN")
 public class UserGuideView extends HorizontalLayout {
 	
 	private Tabs tabs;
-	private H2 header;
-	private IFrame desktopDemoFrame = new IFrame();
-	private Label createLabel, editLabel, viewLabel, deleteLabel, fontSizeLabel, emailLabel, discordLabel;
+	private H2 header1, header2;
+	private IFrame videoFrame = new IFrame();
+	private Label createLabel, editLabel, viewLabel, deleteLabel, fontSizeLabel, emailLabel, discordLabel, featuresLabel;
 	private Paragraph createParagraph, editParagraph, viewParagraph, deleteParagraph, fontSizeParagraph, emailParagraph, discordParagraph, contactParagraph;
+	
+	private Paragraph videoCaption;
+	private UnorderedList featuresList;
+	
 	private Button goBackButton = new Button("Go Back");
 	private VerticalLayout layout;
 	private HorizontalLayout contactRow1, contactRow2;
@@ -57,14 +67,15 @@ public class UserGuideView extends HorizontalLayout {
         tabs = new Tabs(documentationTab, contactTab);
         tabs.setWidthFull();
     	
-    	header = new H2("How to Use This Application");
+    	header1 = new H2("Application Overview");
+    	header2 = new H2("The Basics: A Simple Guide");
     	
-		desktopDemoFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/134bgAV4l8k");
-		desktopDemoFrame.getElement().setAttribute("title", "YouTube video player");
-		desktopDemoFrame.getElement().setAttribute("frameborder", "0");
-		desktopDemoFrame.getElement().setAttribute("allow", "accelerometer");
-		desktopDemoFrame.getElement().setAttribute("autoplay", "true");
-		desktopDemoFrame.getElement().setAttribute("allowfullscreen", "true");
+		videoFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/134bgAV4l8k");
+		videoFrame.getElement().setAttribute("title", "YouTube video player");
+		videoFrame.getElement().setAttribute("frameborder", "0");
+		videoFrame.getElement().setAttribute("allow", "accelerometer");
+		videoFrame.getElement().setAttribute("autoplay", "true");
+		videoFrame.getElement().setAttribute("allowfullscreen", "true");
     	
     	createLabelElements();
         createParagraphElements();
@@ -79,14 +90,18 @@ public class UserGuideView extends HorizontalLayout {
         // Create layout & add components to it.
         layout = new VerticalLayout();
         layout.add(tabs);
-        layout.add(header);
-        layout.add(desktopDemoFrame);
+        layout.add(header1);
+        layout.add(videoFrame);
+        layout.add(videoCaption);
+        layout.add(featuresLabel);
+        layout.add(featuresList);
+        layout.add(header2);        
         layout.add(createLabel, createParagraph);
         layout.add(editLabel, editParagraph);
         layout.add(viewLabel, viewParagraph);
         layout.add(deleteLabel, deleteParagraph);
         layout.add(fontSizeLabel, fontSizeParagraph);
-        layout.add(goBackButton);
+//        layout.add(goBackButton);
         this.setClassName("userguide-layout");
 
         // Add layout to the view.
@@ -128,6 +143,20 @@ public class UserGuideView extends HorizontalLayout {
     	emailParagraph = new Paragraph("admin@evolutioncoding.net");
     	discordParagraph = new Paragraph("James Z#0136");
     	contactParagraph = new Paragraph("Feel free to reach out to the developer through email or Discord. If you know his personal number, you may reach him there as well.");
+
+    	videoCaption = new Paragraph("\nThe above video gives a comprehensive overview of this application's features, and will also teach you how to use it."
+    			+ "\nIn addition to this being a website, this system is also both a desktop and mobile application (compatible with macOS, Windows, iPhones, and Androids)");
+    	
+    	featuresList = new UnorderedList(
+    			new ListItem("Authentication & Authorization: Users must log in to access this application. Individual permissions depend upon account type."),
+    			new ListItem("CRUD Operations: Users can create, read, update, and delete orders."),
+    			new ListItem("Searching, Sorting, & Filtering: These features are available on the grid in which all orders are displayed."),
+    			new ListItem("Data Exports: Order information can be exported as needed in either PDF or CSV format."),
+    			new ListItem("Form Validation: The form used to create new orders and edit existing ones can validate input to meet any specified requirements."),
+    			new ListItem("Persistent Data Storage: This application uses a MySQL database to store & retrieve order information."),
+    			new ListItem("Live Chat: A still-in-development and optional feature is live-chat. This is showcased in the video."),
+    			new ListItem("Open Source: The full source code used to develop this application is freely available to the owners of Trampoline World.")
+		);
 	}
 
 	private void createLabelElements() {
@@ -146,30 +175,36 @@ public class UserGuideView extends HorizontalLayout {
         emailLabel.addClassName("coloredLabel");
         discordLabel = new Label("Discord:");
         discordLabel.addClassName("coloredLabel");
+        featuresLabel = new Label("Application Features:");
+        featuresLabel.addClassName("coloredLabel");
 	}
 
 	private void loadContactTab() {
 		layout.removeAll();
         layout.add(tabs);
-        header.setText("Need help?");
-        layout.add(header);
+        header1.setText("Need help?");
+        layout.add(header1);
         layout.add(contactParagraph);
         layout.add(contactRow1, contactRow2);
-        layout.add(goBackButton);
+//        layout.add(goBackButton);
 	}
 
 	private void loadDocumentationTab() {
 		// https://www.youtube.com/embed/-ZnYEI14B8c
 		layout.removeAll();
         layout.add(tabs);
-        header.setText("How to Use This Application");
-        layout.add(header);
-        layout.add(desktopDemoFrame);
+        header1.setText("Application Overview");
+        layout.add(header1);
+        layout.add(videoFrame);
+        layout.add(videoCaption);
+        layout.add(featuresLabel);
+        layout.add(featuresList);
+        layout.add(header2);
         layout.add(createLabel, createParagraph);
         layout.add(editLabel, editParagraph);
         layout.add(viewLabel, viewParagraph);
         layout.add(deleteLabel, deleteParagraph);
         layout.add(fontSizeLabel, fontSizeParagraph);
-        layout.add(goBackButton);		
+//        layout.add(goBackButton);		
 	}
 }
