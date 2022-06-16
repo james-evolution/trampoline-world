@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface TrampolineOrderRepository extends JpaRepository<TrampolineOrder, UUID> {
+public interface TrampolineOrderRepository extends JpaRepository<TrampolineOrder, Long> {
 
 	@Query("select o from TrampolineOrder o " + 
 	"where lower(o.firstName) like lower(concat('%', :filterText, '%')) "

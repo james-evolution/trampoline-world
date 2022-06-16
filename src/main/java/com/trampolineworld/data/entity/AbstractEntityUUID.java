@@ -2,24 +2,25 @@ package com.trampolineworld.data.entity;
 
 import java.util.UUID;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import org.hibernate.annotations.Type;
 
 @MappedSuperclass
-public abstract class AbstractEntity {
-	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public abstract class AbstractEntityUUID {
 
-	public Long getId() {
-		return id;
-	}
-	
-	public void setId(Long id) {
-		this.id = id;
-	}
+    @Id
+    @GeneratedValue
+    @Type(type = "uuid-char")
+    private UUID id;
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
     @Override
     public int hashCode() {
@@ -31,10 +32,10 @@ public abstract class AbstractEntity {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof AbstractEntity)) {
+        if (!(obj instanceof AbstractEntityUUID)) {
             return false; // null or other class
         }
-        AbstractEntity other = (AbstractEntity) obj;
+        AbstractEntityUUID other = (AbstractEntityUUID) obj;
 
         if (id != null) {
             return id.equals(other.id);

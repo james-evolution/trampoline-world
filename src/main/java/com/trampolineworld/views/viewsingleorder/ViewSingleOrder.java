@@ -152,7 +152,7 @@ public class ViewSingleOrder extends HorizontalLayout implements BeforeEnterObse
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
     	// Fetch order id from route URL parameters.
-        Optional<UUID> trampolineOrderId = event.getRouteParameters().get(TRAMPOLINEORDER_ID).map(UUID::fromString);
+        Optional<Long> trampolineOrderId = event.getRouteParameters().get(TRAMPOLINEORDER_ID).map(Long::valueOf);
         
         if (trampolineOrderId.isPresent()) {
         	// Get the TrampolineOrder object from the database.

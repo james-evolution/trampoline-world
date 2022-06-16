@@ -13,7 +13,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "application_user")
-public class User extends AbstractEntity {
+public class User extends AbstractEntityUUID {
 
     private String username;
     private String name;

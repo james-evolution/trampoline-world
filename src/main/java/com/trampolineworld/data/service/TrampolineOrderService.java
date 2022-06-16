@@ -4,7 +4,6 @@ import com.trampolineworld.data.entity.TrampolineOrder;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +19,7 @@ public class TrampolineOrderService {
         this.repository = repository;
     }
 
-    public Optional<TrampolineOrder> get(UUID id) {
+    public Optional<TrampolineOrder> get(Long id) {
         return repository.findById(id);
     }
 
@@ -28,7 +27,7 @@ public class TrampolineOrderService {
         return repository.save(entity);
     }
 
-    public void delete(UUID id) {
+    public void delete(Long id) {
         repository.deleteById(id);
     }
 

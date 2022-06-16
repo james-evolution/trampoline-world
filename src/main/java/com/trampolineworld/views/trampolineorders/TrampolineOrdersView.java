@@ -70,7 +70,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
     private final String TRAMPOLINEORDER_ID = "trampolineOrderID";
     private final String TRAMPOLINEORDER_EDIT_ROUTE_TEMPLATE = "trampoline_orders/%s/edit";
     private final String TRAMPOLINEORDER_VIEW_ROUTE_TEMPLATE = "view_order/%s";
-    private UUID targetId;
+    private Long targetId;
     private Grid<TrampolineOrder> grid = new Grid<>(TrampolineOrder.class, false);
     CollaborationAvatarGroup avatarGroup;
     H2 editTitle;
@@ -303,7 +303,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        Optional<UUID> trampolineOrderId = event.getRouteParameters().get(TRAMPOLINEORDER_ID).map(UUID::fromString);
+        Optional<Long> trampolineOrderId = event.getRouteParameters().get(TRAMPOLINEORDER_ID).map(Long::valueOf);
         if (trampolineOrderId.isPresent()) {
             Optional<TrampolineOrder> trampolineOrderFromBackend = trampolineOrderService.get(trampolineOrderId.get());
             if (trampolineOrderFromBackend.isPresent()) {
