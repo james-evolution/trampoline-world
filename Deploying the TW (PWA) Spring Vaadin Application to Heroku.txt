@@ -1,0 +1,21 @@
+1. LOG INTO HEROKU:
+heroku login
+
+2. BUILD & DEPLOY IN ONE LINE (NO CLEAN):
+mvnw package -Pproduction && heroku deploy:jar target\trampolineworld-1.0-SNAPSHOT.jar -a trampolineworld && heroku open
+
+BUILD & DEPLOY IN ONE LINE (CLEAN):
+mvnw clean package -Pproduction && heroku deploy:jar target\trampolineworld-1.0-SNAPSHOT.jar -a trampolineworld && heroku open
+
+3. OPEN A LINUX SHELL ON THE HEROKU SERVER:
+heroku ps:exec
+
+4. CREATE THE LICENSE FILE:
+ 
+METHOD 1: jar -xf target/trampolineworld-1.0-SNAPSHOT.jar /META-INF/resources/ce-license.json 
+METHOD 2:
+Type this:
+cat > ce-license.json
+Paste this: 
+{"content":{"key":"8b91663f-e7bc-45b2-9e01-0ea1ac1474ce","owner":"Vaadin Core License","quota":20,"endDate":"2100-01-01"},"checksum":"Q1sl676t10ofL0x23/TTwXrHK6Sc1VRujTetRpEBF4I="}
+Hit Ctrl D to save.
