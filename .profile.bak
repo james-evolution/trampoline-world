@@ -1,0 +1,4 @@
+echo 'test' > /app/target/ce-license.json
+echo 'test' > app/target/ce-license.json
+echo 'test' > /app/ce-license.json
+echo 'test' > app/ce-license.json

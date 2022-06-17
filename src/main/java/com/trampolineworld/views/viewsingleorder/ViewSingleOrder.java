@@ -16,10 +16,17 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouteAlias;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.security.RolesAllowed;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 
 import com.trampolineworld.data.entity.TrampolineOrder;
 import com.trampolineworld.data.service.TrampolineOrderService;
@@ -32,6 +39,7 @@ import com.trampolineworld.views.trampolineorders.TrampolineOrdersView;
 //@RouteAlias(value = "", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 public class ViewSingleOrder extends HorizontalLayout implements BeforeEnterObserver {
+
 	private Button goBackButton = new Button("Go Back");
 	
 	private H2 orderIdTitle;
@@ -148,9 +156,11 @@ public class ViewSingleOrder extends HorizontalLayout implements BeforeEnterObse
         dateParagraph = new Paragraph();
         completeParagraph = new Paragraph();
 	}
+	
     
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
+    	
     	// Fetch order id from route URL parameters.
         Optional<Long> trampolineOrderId = event.getRouteParameters().get(TRAMPOLINEORDER_ID).map(Long::valueOf);
         
