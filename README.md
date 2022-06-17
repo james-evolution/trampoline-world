@@ -2,8 +2,8 @@
 
 Built for someone very dear to my heart.
 
-A full-stack persistent web application that doubles as both a standalone desktop application and a mobile application.
-<br>Compatible with both iOS and Android, this is effectively a CRM intended for tracking trampoline orders.
+A full-stack persistent web application that doubles as both a desktop and mobile application.
+<br>Compatible with macOS, Windows, iOS, and Android. This application is effectively a CRM intended for tracking trampoline orders.
 
 ## Running the application locally
 
