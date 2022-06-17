@@ -67,7 +67,7 @@ public class Application extends SpringBootServletInitializer implements AppShel
          * CREATING / EXTRACTING THE LICENSE FILE ON HEROKU:
          * 
          * Vaadin's setDataDir() method seems to reject file paths that navigate into a jar file to find ce-license.json
-         * Unfortunately, Heroku only allows us to place the license file in the jar.
+         * Unfortunately, when deploying, Heroku only allows us to place the license file in the jar.
          * 
          * A workaround is to create the license file in either the /app or app/target folder via linux shell.
          * Alternatively, you can extract the license file from the jar and place it in one of those two folders.
