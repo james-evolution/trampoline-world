@@ -1,5 +1,8 @@
 package com.trampolineworld.views.chat;
 
+import com.trampolineworld.data.entity.User;
+import com.trampolineworld.data.service.UserRepository;
+import com.trampolineworld.data.service.UserService;
 import com.trampolineworld.views.MainLayout;
 import com.vaadin.collaborationengine.CollaborationMessageInput;
 import com.vaadin.collaborationengine.CollaborationMessageList;
@@ -9,28 +12,39 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinRequest;
+
 import java.util.UUID;
 import javax.annotation.security.RolesAllowed;
 
 @PageTitle("Chat")
 @Route(value = "chat", layout = MainLayout.class)
-@RolesAllowed("ADMIN")
+@RolesAllowed({"ADMIN", "USER"})
 public class ChatView extends VerticalLayout {
 
-    public ChatView() {
+	private final UserService userService;
+	private final UserRepository userRepository;
+	
+    public ChatView(UserService userService, UserRepository userRepository) {
+		this.userService = userService;
+		this.userRepository = userRepository;
         addClassName("chat-view");
         setSpacing(false);
+        
+		String currentUsername = VaadinRequest.getCurrent().getUserPrincipal().getName();
+		User currentUser = userRepository.findByUsername(currentUsername);
+		
         // UserInfo is used by Collaboration Engine and is used to share details
         // of users to each other to able collaboration. Replace this with
         // information about the actual user that is logged, providing a user
         // identifier, and the user's real name. You can also provide the users
         // avatar by passing an url to the image as a third parameter, or by
         // configuring an `ImageProvider` to `avatarGroup`.
+		UserInfo userInfo = new UserInfo(currentUser.getId().toString(), currentUser.getName());
+		userInfo.setImage(
+				"https://static.wixstatic.com/media/759627_2ad5404df0dc4455af631dbeaf83e8bf~mv2.png/v1/fill/w_347,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/Trampoline-2.png");
         
-        UserInfo userInfo = new UserInfo(UUID.randomUUID().toString(), "TW Admin");
-        userInfo.setImage("https://static.wixstatic.com/media/759627_2ad5404df0dc4455af631dbeaf83e8bf~mv2.png/v1/fill/w_347,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/Trampoline-2.png");
-
-        // Tabs allow us to change chat rooms.
+		// Tabs allow us to change chat rooms.
         Tabs tabs = new Tabs(new Tab("#general"), new Tab("#notes"), new Tab("#issues"));
         tabs.setWidthFull();
 
@@ -63,7 +77,7 @@ public class ChatView extends VerticalLayout {
         tabs.addSelectedChangeListener(event -> {
             String channelName = event.getSelectedTab().getLabel();
             list.setTopic("chat/" + channelName);
-        });
-    }
+		});
+	}
 
 }

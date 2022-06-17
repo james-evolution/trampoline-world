@@ -1,4 +1,4 @@
-package com.trampolineworld.views.trampolineorders;
+package com.trampolineworld.views.trampolineordersreadonly;
 
 import com.trampolineworld.data.entity.TrampolineOrder;
 import com.trampolineworld.data.entity.User;
@@ -61,18 +61,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
 @PageTitle("All Orders")
-@Route(value = "trampoline_orders/:trampolineOrderID?/:action?(edit)", layout = MainLayout.class)
-@RouteAlias(value = "", layout = MainLayout.class)
-@RolesAllowed({"ADMIN"})
+@Route(value = "trampoline_orders_read/:trampolineOrderID?/:action?(edit)", layout = MainLayout.class)
+@RolesAllowed({"USER"})
 @Uses(Icon.class)
 @CssImport(themeFor = "vaadin-grid", value = "./themes/trampolineworld/views/grid-theme.css")
 @CssImport(value = "./themes/trampolineworld/views/dialog.css", themeFor = "vaadin-dialog-overlay")
-public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
+public class TrampolineOrdersReadOnlyView extends Div implements BeforeEnterObserver {
 
 	public static String username = "";
 
 	private final String TRAMPOLINEORDER_ID = "trampolineOrderID";
-	private final String TRAMPOLINEORDER_EDIT_ROUTE_TEMPLATE = "trampoline_orders/%s/edit";
+	private final String TRAMPOLINEORDER_EDIT_ROUTE_TEMPLATE = "trampoline_orders_read/%s/edit";
 	private final String TRAMPOLINEORDER_VIEW_ROUTE_TEMPLATE = "view_order/%s";
 	private Long targetId;
 	private Grid<TrampolineOrder> grid = new Grid<>(TrampolineOrder.class, false);
@@ -101,7 +100,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 	private final UserRepository userRepository;
 
 	@Autowired
-	public TrampolineOrdersView(TrampolineOrderService trampolineOrderService, UserService userService, UserRepository userRepository) {
+	public TrampolineOrdersReadOnlyView(TrampolineOrderService trampolineOrderService, UserService userService, UserRepository userRepository) {
 		this.trampolineOrderService = trampolineOrderService;
 		this.userService = userService;
 		this.userRepository = userRepository;
@@ -194,7 +193,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 				editorLayoutDiv.setVisible(false);
 				Notification.show("Order details stored.", 4000, Position.TOP_CENTER)
 						.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-				UI.getCurrent().navigate(TrampolineOrdersView.class);
+				UI.getCurrent().navigate(TrampolineOrdersReadOnlyView.class);
 			} catch (ValidationException validationException) {
 				Notification.show("Invalid form input.", 4000, Position.TOP_CENTER)
 						.addThemeVariants(NotificationVariant.LUMO_ERROR);
@@ -251,7 +250,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 			} else {
 				editorLayoutDiv.setVisible(false);
 				clearForm();
-				UI.getCurrent().navigate(TrampolineOrdersView.class);
+				UI.getCurrent().navigate(TrampolineOrdersReadOnlyView.class);
 			}
 		});
 	}
@@ -273,14 +272,6 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 		// TrampolineOrder id as an argument.
 		menu.addItem("View", event -> {
 			UI.getCurrent().navigate(String.format(TRAMPOLINEORDER_VIEW_ROUTE_TEMPLATE, targetId.toString()));
-		});
-		menu.addItem("Delete", event -> {
-			try {
-				confirmDeleteDialog.open();
-			} catch (Exception e) {
-				Notification.show("An error has occurred, please contact the developer.", 4000, Position.TOP_CENTER)
-						.addThemeVariants(NotificationVariant.LUMO_ERROR);
-			}
 		});
 	}
 
@@ -328,7 +319,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 				// When a row is selected but the data is no longer available, update the grid
 				// component.
 				updateGrid();
-				event.forwardTo(TrampolineOrdersView.class);
+				event.forwardTo(TrampolineOrdersReadOnlyView.class);
 			}
 		}
 	}

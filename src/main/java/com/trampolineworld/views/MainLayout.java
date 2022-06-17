@@ -1,13 +1,18 @@
 package com.trampolineworld.views;
 
+import com.trampolineworld.data.Role;
 import com.trampolineworld.data.entity.User;
+import com.trampolineworld.data.service.UserRepository;
+import com.trampolineworld.data.service.UserService;
 import com.trampolineworld.security.AuthenticatedUser;
 import com.trampolineworld.views.chat.ChatView;
 import com.trampolineworld.views.export.ExportView;
 import com.trampolineworld.views.installation.InstallationGuideView;
 import com.trampolineworld.views.trampolineorders.TrampolineOrdersView;
+import com.trampolineworld.views.trampolineordersreadonly.TrampolineOrdersReadOnlyView;
 import com.trampolineworld.views.userguide.UserGuideView;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
@@ -25,8 +30,10 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -81,6 +88,7 @@ public class MainLayout extends AppLayout {
     public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker) {
         this.authenticatedUser = authenticatedUser;
         this.accessChecker = accessChecker;
+		
 
         setPrimarySection(Section.DRAWER);
         // First parameter is touchOptimized. If true, navbar will show at the bottom in mobile views.
@@ -121,10 +129,10 @@ public class MainLayout extends AppLayout {
         UnorderedList list = new UnorderedList();
         list.addClassNames("navigation-list");
         nav.add(list);
-
+        
         for (MenuItemInfo menuItem : createMenuItems()) {
             if (accessChecker.hasAccess(menuItem.getView())) {
-                list.add(menuItem);
+            	list.add(menuItem);
             }
 
         }
@@ -132,8 +140,10 @@ public class MainLayout extends AppLayout {
     }
 
     private MenuItemInfo[] createMenuItems() {
+    	
         return new MenuItemInfo[]{ //
                 new MenuItemInfo("Trampoline Orders", "la la-clipboard-list", TrampolineOrdersView.class), //
+                new MenuItemInfo("Trampoline Orders", "la la-clipboard-list", TrampolineOrdersReadOnlyView.class), //
                 new MenuItemInfo("Export PDF / CSV", "las la-file-pdf", ExportView.class), //
                 new MenuItemInfo("User Guide", "las la-info-circle", UserGuideView.class), //
                 new MenuItemInfo("Installation Guide", "las la-download", InstallationGuideView.class), //
