@@ -15,7 +15,7 @@ You can also import the project to your IDE of choice as you would with any
 Maven project. Read more on [how to import Vaadin projects to different 
 IDEs](https://vaadin.com/docs/latest/flow/guide/step-by-step/importing) (Eclipse, IntelliJ IDEA, NetBeans, and VS Code).
 
-## Deploying to Production
+## Deploying to Production (General Guidelines)
 
 To create a production build, call `mvnw clean package -Pproduction` (Windows),
 or `./mvnw clean package -Pproduction` (Mac & Linux).
@@ -25,9 +25,12 @@ ready to be deployed. The file can be found in the `target` folder after the bui
 Once the JAR file is built, you can run it using
 `java -jar target/trampolineworld-1.0-SNAPSHOT.jar`
 
-## Deploying to Heroku
+## Deploying to Production (Heroku)
+
+At current, this application is hosted on Heroku. However, if redeployment is ever needed, this is how to go about it.
+
 1. Ensure you have the Heroku CLI installed.
-2. Open a terminal or cmd prompt from the project's root folder.
+2. Open a terminal or command prompt from the project's root folder.
 3. Run `heroku login`
 4. Run `mvnw package -Pproduction && heroku deploy:jar target\trampolineworld-1.0-SNAPSHOT.jar -a trampolineworld && heroku open`
 5. Run `heroku ps:exec` to open a shell on the remote Heroku Linux server.
