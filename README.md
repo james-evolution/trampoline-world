@@ -15,16 +15,6 @@ You can also import the project to your IDE of choice as you would with any
 Maven project. Read more on [how to import Vaadin projects to different 
 IDEs](https://vaadin.com/docs/latest/flow/guide/step-by-step/importing) (Eclipse, IntelliJ IDEA, NetBeans, and VS Code).
 
-## Deploying to Production (General Guidelines)
-
-To create a production build, call `mvnw clean package -Pproduction` (Windows),
-or `./mvnw clean package -Pproduction` (Mac & Linux).
-This will build a JAR file with all the dependencies and front-end resources,
-ready to be deployed. The file can be found in the `target` folder after the build completes.
-
-Once the JAR file is built, you can run it using
-`java -jar target/trampolineworld-1.0-SNAPSHOT.jar`
-
 ## Deploying to Production (Heroku)
 
 At current, this application is hosted on Heroku. However, if redeployment is ever needed, this is how to go about it.
@@ -35,6 +25,19 @@ At current, this application is hosted on Heroku. However, if redeployment is ev
 4. Run `mvnw package -Pproduction && heroku deploy:jar target\trampolineworld-1.0-SNAPSHOT.jar -a trampolineworld && heroku open`
 5. Run `heroku ps:exec` to open a shell on the remote Heroku Linux server.
 6. Run ``jar -xf target/trampolineworld-1.0-SNAPSHOT.jar /META-INF/resources/ce-license.json`` to extract the ce-license.json file from the jar file and into the Heroku linux server at /app/META-INF/resources. This is essential for enabling Vaadin's collabration engine features. Order editing and live chat features will not work without this.
+
+## Deploying to Production (General)
+
+This section is only relevant if you intend on deploying this application somewhere aside from Heroku.
+Bear in mind that you will need to create a /META-INF/resouces folder in the host's root folder and place your ce-license.json file there for Collabration Engine features to work.
+
+To create a production build, call `mvnw clean package -Pproduction` (Windows),
+or `./mvnw clean package -Pproduction` (Mac & Linux).
+This will build a JAR file with all the dependencies and front-end resources,
+ready to be deployed. The file can be found in the `target` folder after the build completes.
+
+Once the JAR file is built, you can run it using
+`java -jar target/trampolineworld-1.0-SNAPSHOT.jar`
 
 ## Project structure
 
