@@ -5,7 +5,7 @@ Built for someone very dear to my heart.
 A full-stack persistent web application that doubles as both a standalone desktop application and a mobile application.
 <br>Compatible with both iOS and Android, this is effectively a CRM intended for tracking trampoline orders.
 
-## Running the application
+## Running the application locally
 
 The project is a standard Maven project. To run it from the command line,
 type `mvnw` (Windows), or `./mvnw` (Mac & Linux), then open
