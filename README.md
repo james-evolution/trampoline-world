@@ -53,6 +53,9 @@ Once the JAR file is built, you can run it using
 This application was predominantly developed in the Java programming language.
 It uses:
 - Spring Boot
+- Spring Boot Starter Mail 
 - Spring Security
 - JPA (Java Persistence API)
+- MySQL Connector & Database
 - Vaadin Flow Framework
+- Jasper Reports
