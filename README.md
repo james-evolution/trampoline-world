@@ -25,6 +25,14 @@ ready to be deployed. The file can be found in the `target` folder after the bui
 Once the JAR file is built, you can run it using
 `java -jar target/trampolineworld-1.0-SNAPSHOT.jar`
 
+## Deploying to Heroku
+1. Ensure you have the Heroku CLI installed.
+2. Open a terminal or cmd prompt from the project's root folder.
+3. Run `heroku login`
+4. Run `mvnw package -Pproduction && heroku deploy:jar target\trampolineworld-1.0-SNAPSHOT.jar -a trampolineworld && heroku open`
+5. Run `heroku ps:exec` to open a shell on the remote Heroku Linux server.
+6. Run ``jar -xf target/trampolineworld-1.0-SNAPSHOT.jar /META-INF/resources/ce-license.json`` to extract the ce-license.json file from the jar file and into the Heroku linux server at /app/META-INF/resources. This is essential for enabling Vaadin's collabration engine features. Order editing and live chat features will not work without this.
+
 ## Project structure
 
 - `MainLayout.java` in `src/main/java` contains the navigation setup (i.e., the
