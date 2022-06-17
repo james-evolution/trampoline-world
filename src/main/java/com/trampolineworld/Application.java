@@ -5,9 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -49,7 +46,6 @@ import com.vaadin.flow.theme.lumo.Lumo;
 		offlinePath = "offline.html",
 		offlineResources = {"icons/icon.png", "images/offline.png"})
 @Push
-// 		offlineResources = {"images/logo.png", "images/offline.png"}
 @NpmPackage(value = "line-awesome", version = "1.3.0")
 public class Application extends SpringBootServletInitializer implements AppShellConfigurator {
 	
@@ -66,30 +62,46 @@ public class Application extends SpringBootServletInitializer implements AppShel
                 licenseEvent -> {
                     // See <<ce.production.license-events>>
                 });
+
+        /*
+         * CREATING / EXTRACTING THE LICENSE FILE ON HEROKU:
+         * 
+         * Vaadin's setDataDir() method seems to reject file paths that navigate into a jar file to find ce-license.json
+         * Unfortunately, Heroku only allows us to place the license file in the jar.
+         * 
+         * A workaround is to create the license file in either the /app or app/target folder via linux shell.
+         * Alternatively, you can extract the license file from the jar and place it in one of those two folders.
+         * 
+         * Wherever you place create or place it, you'll have to reference it with setDataDir()
+         * 
+         * The following commands were attempts to do this programmatically, however, it seems that Heroku prevents the application from generating files.
+         * These commands work when manually entered into a shell by hand, but not when done via code. Perhaps it's due to lacking write permissions.
+
+	        executeShellScript(new String[]{"cd target", "jar -xf trampolineworld-1.0-SNAPSHOT.jar /META-INF/resources/ce-license.json"});
+	        executeShellScript(new String[]{"cd target && jar -xf trampolineworld-1.0-SNAPSHOT.jar /META-INF/resources/ce-license.json"});
+	        executeShellScript(new String[]{"cd target ; jar -xf trampolineworld-1.0-SNAPSHOT.jar /META-INF/resources/ce-license.json >> output.txt"});
+	        executeShellScript(new String[]{"jar -xf target/trampolineworld-1.0-SNAPSHOT.jar META-INF/resources/ce-license.json"});
+	        executeShellScript(new String[]{"ls"});
+
+         A separate method for attempting to execute shell commands:
+    		extractLicenseFromJar();
+         */
         
-        
-//        ProcessBuilder processBuilder = new ProcessBuilder("/target", "-c", "jar -xf trampolineworld-1.0-SNAPSHOT.jar /META-INF/resources/ce-license.json");
-//        try {
-//			processBuilder.start();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-        
-//        executeShellScript(new String[]{"cd target", "jar -xf trampolineworld-1.0-SNAPSHOT.jar /META-INF/resources/ce-license.json"});
-//        executeShellScript(new String[]{"cd target && jar -xf trampolineworld-1.0-SNAPSHOT.jar /META-INF/resources/ce-license.json"});
-//        executeShellScript(new String[]{"cd target ; jar -xf trampolineworld-1.0-SNAPSHOT.jar /META-INF/resources/ce-license.json >> output.txt"});
-//        executeShellScript(new String[]{"jar -xf target/trampolineworld-1.0-SNAPSHOT.jar META-INF/resources/ce-license.json"});
-//        executeShellScript(new String[]{"ls"});
-        
-        extractLicenseFromJar();
-        
-//        String licensePath = "target"; // This works.
+        /*
+         * CONFIGURING THE LICENSE PATH ON HEROKU:
+         * Two paths have been successful so far:
+         * 
+         * String licensePath = "target";
+         * String licensePath = "/app/META-INF/resources/"; 
+         */
         String licensePath = "/app/META-INF/resources/"; // This works.
 		configuration.setDataDir(licensePath);
         return configuration;
     }
     
+    /*
+     * Robert's method for executing shell scripts (modified)
+     */
     public void executeShellScript(final String[] command) {
     	boolean isWindows = false;
 
@@ -137,16 +149,22 @@ public class Application extends SpringBootServletInitializer implements AppShel
     	public void run() {}
     }
 
+    /*
+     * Jeremy's method for executing shell scripts & routing console output to email.
+     */
 	private void extractLicenseFromJar() {
 		StringBuilder output = new StringBuilder(); 
         try {
-//			Process process = Runtime.getRuntime().exec(new String[]{"cd target", "jar -xf trampolineworld-1.0-SNAPSHOT.jar /META-INF/resources/ce-license.json"}); 
-//			Process process = Runtime.getRuntime().exec("/app/.jdk/bin/jar -xf target/trampolineworld-1.0-SNAPSHOT.jar META-INF/resources/ce-license.json");
-//			Process process = Runtime.getRuntime().exec("/app/.jdk/bin/jar");
-//        	String key = "{\"content\":{\"key\":\"8b91663f-e7bc-45b2-9e01-0ea1ac1474ce\",\"owner\":\"Vaadin Core License\",\"quota\":20,\"endDate\":\"2100-01-01\"},\"checksum\":\"Q1sl676t10ofL0x23/TTwXrHK6Sc1VRujTetRpEBF4I=\"}";
-//			Process process = Runtime.getRuntime().exec("echo \"" + key + "\" > target/ce-license.json");
-//			Process process = Runtime.getRuntime().exec("echo 'test' > target/ce-license.json"); // This works if manually typed only.
-//			Process process = Runtime.getRuntime().exec("umask");
+        	/*
+        	 * A variety of attempts:
+	        	Process process = Runtime.getRuntime().exec(new String[]{"cd target", "jar -xf trampolineworld-1.0-SNAPSHOT.jar /META-INF/resources/ce-license.json"}); 
+				Process process = Runtime.getRuntime().exec("/app/.jdk/bin/jar -xf target/trampolineworld-1.0-SNAPSHOT.jar META-INF/resources/ce-license.json");
+				Process process = Runtime.getRuntime().exec("/app/.jdk/bin/jar");
+	        	String key = "{\"content\":{\"key\":\"8b91663f-e7bc-45b2-9e01-0ea1ac1474ce\",\"owner\":\"Vaadin Core License\",\"quota\":20,\"endDate\":\"2100-01-01\"},\"checksum\":\"Q1sl676t10ofL0x23/TTwXrHK6Sc1VRujTetRpEBF4I=\"}";
+				Process process = Runtime.getRuntime().exec("echo \"" + key + "\" > target/ce-license.json");
+				Process process = Runtime.getRuntime().exec("echo 'test' > target/ce-license.json"); // This works if manually typed only.
+				Process process = Runtime.getRuntime().exec("umask");
+        	 */
 			Process process = Runtime.getRuntime().exec("/app/.jdk/bin/jar -xf target/trampolineworld-1.0-SNAPSHOT.jar /META-INF/resources/ce-license.json");
 			
 			BufferedReader reader = new BufferedReader(new InputStreamReader (process.getInputStream()));
@@ -164,10 +182,13 @@ public class Application extends SpringBootServletInitializer implements AppShel
         sendEmail("james.evolution.1993@gmail.com", "Application: License Extraction", consoleOutput);
 	}
 	
-    public void sendEmail(String to, String subject, String text) {
+	/*
+	 * Method for sending e-mails.
+	 */
+    public void sendEmail(String recipient, String subject, String text) {
   	        SimpleMailMessage message = new SimpleMailMessage(); 
   	        message.setFrom("james.evolution.1996@gmail.com");
-  	        message.setTo(to); 
+  	        message.setTo(recipient); 
   	        message.setSubject(subject); 
   	        message.setText(text);
   	        emailSender.send(message);
