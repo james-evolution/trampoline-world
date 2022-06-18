@@ -2,6 +2,10 @@ package com.trampolineworld.views.login;
 
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+
 import com.trampolineworld.data.Role;
 import com.trampolineworld.data.entity.User;
 import com.trampolineworld.data.service.UserRepository;
@@ -25,13 +29,15 @@ import com.vaadin.flow.router.Route;
 @Route(value = "login")
 @CssImport(themeFor = "vaadin-login-overlay-wrapper vaadin-login-form-wrapper", value = "./themes/trampolineworld/views/login-theme.css")
 public class LoginView extends LoginOverlay implements BeforeEnterObserver {
-	
+
+    @Autowired
+    private JavaMailSender emailSender;
 	private final UserService userService;
 	private final UserRepository userRepository;
-	
+
 	public LoginView(UserService userService, UserRepository userRepository) {
 		setAction("login");
-		
+
 		this.userService = userService;
 		this.userRepository = userRepository;
 
@@ -43,19 +49,25 @@ public class LoginView extends LoginOverlay implements BeforeEnterObserver {
 		i18n.setAdditionalInformation(null);
 		setI18n(i18n);
 
-		setForgotPasswordButtonVisible(false);
+		setForgotPasswordButtonVisible(true);
 		setOpened(true);
+		
+		this.addForgotPasswordListener(e -> {
+//			Notification.show("An error has occurred, please contact the developer.", 4000, Position.TOP_CENTER);
+			sendEmail("alkireson@gmail.com", "Forgot Password", "Test");
+		});
+		
 
 		addLoginListener(event -> {
-			// Get current user name & object.
+			// Get current username & object.
 			String currentUsername = event.getUsername();
 			User currentUser = userRepository.findByUsername(currentUsername);
 			Set<Role> roles = currentUser.getRoles();
-			// Check roles. If just a basic user and not an admin, forward to the page that doesn't allow order deletion.
+			// Check roles. If just a basic user and not an admin, forward to the page that
+			// doesn't allow order deletion.
 			if (roles.contains(Role.USER) && !roles.contains(Role.ADMIN)) {
 				UI.getCurrent().navigate(TrampolineOrdersReadOnlyView.class);
-			}
-			else if (roles.contains(Role.TECH)) {
+			} else if (roles.contains(Role.TECH)) {
 				UI.getCurrent().navigate(DebugView.class);
 			}
 		});
@@ -63,10 +75,18 @@ public class LoginView extends LoginOverlay implements BeforeEnterObserver {
 
 	@Override
 	public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
-		// inform the user about an authentication error
+		// Inform the user about an authentication error.
 		if (beforeEnterEvent.getLocation().getQueryParameters().getParameters().containsKey("error")) {
 			this.setError(true);
 		}
 	}
-
+	
+    public void sendEmail(String recipient, String subject, String text) {
+	        SimpleMailMessage message = new SimpleMailMessage(); 
+	        message.setFrom("james.evolution.1993@gmail.com");
+	        message.setTo(recipient); 
+	        message.setSubject(subject); 
+	        message.setText(text);
+	        emailSender.send(message);
+	    }
 }

@@ -92,7 +92,8 @@ public class TrampolineOrdersReadOnlyView extends Div implements BeforeEnterObse
 	private Button cancel = new Button("Cancel");
 	private Button save = new Button("Save");
 	private Button newOrderButton = new Button("New Order");
-	private Button hideSidebarButton = new Button("Hide Sidebar");
+	private Button hideSidebarButton = new Button("Hide");
+	
 	private CollaborationBinder<TrampolineOrder> binder;
 	private TrampolineOrder trampolineOrder;
 	private final TrampolineOrderService trampolineOrderService;
@@ -176,6 +177,7 @@ public class TrampolineOrdersReadOnlyView extends Div implements BeforeEnterObse
 //            refreshGrid();
 			updateGrid();
 			editorLayoutDiv.setVisible(false);
+			hideSidebarButton.setVisible(false);
 		});
 
 		// When the save button is clicked, save the new order.
@@ -188,9 +190,9 @@ public class TrampolineOrdersReadOnlyView extends Div implements BeforeEnterObse
 
 				trampolineOrderService.update(this.trampolineOrder);
 				clearForm();
-//                refreshGrid();
 				updateGrid();
 				editorLayoutDiv.setVisible(false);
+				hideSidebarButton.setVisible(false);
 				Notification.show("Order details stored.", 4000, Position.TOP_CENTER)
 						.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 				UI.getCurrent().navigate(TrampolineOrdersReadOnlyView.class);
@@ -245,6 +247,7 @@ public class TrampolineOrdersReadOnlyView extends Div implements BeforeEnterObse
 		grid.asSingleSelect().addValueChangeListener(event -> {
 			if (event.getValue() != null) {
 				editorLayoutDiv.setVisible(true);
+				hideSidebarButton.setVisible(true);
 				splitLayout.setSplitterPosition(0);
 				UI.getCurrent().navigate(String.format(TRAMPOLINEORDER_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
 			} else {
@@ -281,18 +284,26 @@ public class TrampolineOrdersReadOnlyView extends Div implements BeforeEnterObse
 		buttonHeaderContainer.setAlignItems(Alignment.BASELINE);
 
 		newOrderButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		newOrderButton.getElement().getStyle().set("margin-left", "6px");
+		newOrderButton.getElement().getStyle().set("margin-right", "6px");
 		newOrderButton.addClickListener(e -> {
 			clearForm();
 			updateGrid();
 			editorLayoutDiv.setVisible(true);
+			hideSidebarButton.setVisible(true);
 			splitLayout.setSplitterPosition(0);
 		});
 
-		hideSidebarButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		hideSidebarButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+		hideSidebarButton.getElement().getStyle().set("margin-left", "0px !important");
+		hideSidebarButton.getElement().getStyle().set("margin-right", "6px");
+		hideSidebarButton.setVisible(false);
+		
 		hideSidebarButton.addClickListener(e -> {
 			clearForm();
 			updateGrid();
 			editorLayoutDiv.setVisible(false);
+			hideSidebarButton.setVisible(false);
 		});
 
 		filterTextField.setPlaceholder("Filter by name...");

@@ -12,9 +12,9 @@ BUTTON HEADER CONTAINER ON ALL ORDERS PAGE
 	padding: 6px;
 }
 
-#ROOT-2521314 > vaadin-app-layout > div > vaadin-horizontal-layout > vaadin-button:nth-child(2), #ROOT-2521314 > vaadin-app-layout > div > vaadin-horizontal-layout > vaadin-button:nth-child(3) {
+/*#ROOT-2521314 > vaadin-app-layout > div > vaadin-horizontal-layout > vaadin-button:nth-child(2), #ROOT-2521314 > vaadin-app-layout > div > vaadin-horizontal-layout > vaadin-button:nth-child(3) {
 	margin-left: 4px;
-}
+}*/
 
 vaadin-grid-cell-content {
    height: 50px !important;

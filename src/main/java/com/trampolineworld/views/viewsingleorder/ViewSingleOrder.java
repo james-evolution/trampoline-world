@@ -44,7 +44,7 @@ import com.trampolineworld.views.trampolineordersreadonly.TrampolineOrdersReadOn
 @PageTitle("View Details")
 //@CssImport("./styles/views/view_order/single-order-view.css")
 //@RouteAlias(value = "", layout = MainLayout.class)
-@RolesAllowed({"ADMIN", "USER"})
+@RolesAllowed({ "ADMIN", "USER" })
 public class ViewSingleOrder extends HorizontalLayout implements BeforeEnterObserver {
 
 	private Button goBackButton = new Button("Go Back");
@@ -62,10 +62,11 @@ public class ViewSingleOrder extends HorizontalLayout implements BeforeEnterObse
 	private final TrampolineOrderService trampolineOrderService;
 	private final UserService userService;
 	private final UserRepository userRepository;
-	
+
 	private final String TRAMPOLINEORDER_ID = "trampolineOrderID";
 
-	public ViewSingleOrder(TrampolineOrderService trampolineOrderService, UserService userService, UserRepository userRepository) {
+	public ViewSingleOrder(TrampolineOrderService trampolineOrderService, UserService userService,
+			UserRepository userRepository) {
 		this.trampolineOrderService = trampolineOrderService;
 		this.userService = userService;
 		this.userRepository = userRepository;
@@ -80,11 +81,11 @@ public class ViewSingleOrder extends HorizontalLayout implements BeforeEnterObse
 			String currentUsername = VaadinRequest.getCurrent().getUserPrincipal().getName();
 			User currentUser = userRepository.findByUsername(currentUsername);
 			Set<Role> roles = currentUser.getRoles();
-			// Check roles. If just a basic user and not an admin, forward to the page that doesn't allow order deletion.
+			// Check roles. If just a basic user and not an admin, forward to the page that
+			// doesn't allow order deletion.
 			if (roles.contains(Role.USER) && !roles.contains(Role.ADMIN)) {
 				UI.getCurrent().navigate(TrampolineOrdersReadOnlyView.class);
-			}
-			else if (roles.contains(Role.ADMIN)) {
+			} else if (roles.contains(Role.ADMIN)) {
 				UI.getCurrent().navigate(TrampolineOrdersView.class); // Send user back to the Trampoline Orders page.
 			}
 		});

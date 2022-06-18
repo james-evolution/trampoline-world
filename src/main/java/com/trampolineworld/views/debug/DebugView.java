@@ -34,7 +34,7 @@ import javax.annotation.security.RolesAllowed;
 
 @PageTitle("Debug")
 @Route(value = "debug", layout = MainLayout.class)
-@RolesAllowed({"TECH"})
+@RolesAllowed({ "TECH" })
 public class DebugView extends VerticalLayout {
 
 	private final UserService userService;
@@ -43,7 +43,7 @@ public class DebugView extends VerticalLayout {
 	private TextField shellCommandTextField = new TextField();
 	private HorizontalLayout shellHeaderContainer = new HorizontalLayout();
 	private Paragraph consoleParagraph = new Paragraph();
-	
+
 	public DebugView(UserService userService, UserRepository userRepository) {
 		this.userService = userService;
 		this.userRepository = userRepository;
@@ -51,65 +51,68 @@ public class DebugView extends VerticalLayout {
 		setSpacing(false);
 
 		configureShellComponents();
-		
-		shellHeaderContainer.add(shellCommandTextField,shellCommandButton);
-		
+
+		shellHeaderContainer.add(shellCommandTextField, shellCommandButton);
+
 		add(shellHeaderContainer, consoleParagraph);
 		setSizeFull();
 	}
-	
-    /*
-     * Robert's method for executing shell scripts (modified)
-     */
-    public void executeShellScript(final String[] command) {
-    	
-    	StringBuilder consoleOutput = new StringBuilder();
-    	
-    	try {
-    		ProcessBuilder builder = new ProcessBuilder();
-    		
-    		List<String> cmds = new ArrayList<String>(Arrays.asList(command));
+
+	/*
+	 * Robert's method for executing shell scripts (modified)
+	 */
+	public void executeShellScript(final String[] command) {
+
+		StringBuilder consoleOutput = new StringBuilder();
+
+		try {
+			ProcessBuilder builder = new ProcessBuilder();
+
+			List<String> cmds = new ArrayList<String>(Arrays.asList(command));
 			cmds.add(0, "-c");
 			cmds.add(0, "sh");
-			
+
 //			consoleOutput.append("SHELL: Command to be executed: " + cmds);
-			
+
 			System.out.println("----------------------------------");
 			System.out.println("COMMAND TO BE EXECUTED: \n" + cmds.get(2));
 			System.out.println("---------- SHELL OUTPUT ----------\n\n");
-			
+
 			builder.command(cmds.toArray(new String[] {}));
-    		builder.directory(new File("/app"));
-    		Process process = builder.start();
-    		
-			BufferedReader reader = new BufferedReader(new InputStreamReader (process.getInputStream()));
+			builder.directory(new File("/app"));
+			Process process = builder.start();
+
+			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 			String line;
-			while((line = reader.readLine()) != null) {
+			while ((line = reader.readLine()) != null) {
 				consoleOutput.append("SHELL: " + line + "\n");
 //				System.out.println("SHELL: " + line + "\n");
-			}    		
-			
+			}
+
 			System.out.println(consoleOutput.toString());
 			consoleParagraph.setText(consoleOutput.toString());
 			System.out.println("\n\n----------  END OUTPUT  ----------\n\n");
-    		
+
 //    		StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), System.out::println);
 //    		Executors.newSingleThreadExecutor().submit(streamGobbler);
-    		
-    		int exitCode = process.waitFor();
-    	} catch (Exception e ) {
-    		System.out.println(e);
-    		consoleOutput.append(e);
-    	}
-    }
-    
-    private static class StreamGobbler implements Runnable {
-    	private InputStream inputStream;
-    	private Consumer<String> consumer;
-    	
-    	public StreamGobbler(InputStream inputStream, Consumer<String> consumer) {}
-    	public void run() {}
-    }    	
+
+			int exitCode = process.waitFor();
+		} catch (Exception e) {
+			System.out.println(e);
+			consoleOutput.append(e);
+		}
+	}
+
+	private static class StreamGobbler implements Runnable {
+		private InputStream inputStream;
+		private Consumer<String> consumer;
+
+		public StreamGobbler(InputStream inputStream, Consumer<String> consumer) {
+		}
+
+		public void run() {
+		}
+	}
 
 	private void configureShellComponents() {
 		// TODO Auto-generated method stub

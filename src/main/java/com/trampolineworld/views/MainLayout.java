@@ -8,7 +8,6 @@ import com.trampolineworld.security.AuthenticatedUser;
 import com.trampolineworld.views.chat.ChatView;
 import com.trampolineworld.views.debug.DebugView;
 import com.trampolineworld.views.export.ExportView;
-import com.trampolineworld.views.installation.InstallationGuideView;
 import com.trampolineworld.views.trampolineorders.TrampolineOrdersView;
 import com.trampolineworld.views.trampolineordersreadonly.TrampolineOrdersReadOnlyView;
 import com.trampolineworld.views.userguide.UserGuideView;
@@ -41,155 +40,173 @@ import java.util.Set;
  */
 public class MainLayout extends AppLayout {
 
-    /**
-     * A simple navigation item component, based on ListItem element.
-     */
-    public static class MenuItemInfo extends ListItem {
+	/**
+	 * A simple navigation item component, based on ListItem element.
+	 */
+	public static class MenuItemInfo extends ListItem {
 
-        private final Class<? extends Component> view;
+		private final Class<? extends Component> view;
 
-        public MenuItemInfo(String menuTitle, String iconClass, Class<? extends Component> view) {
-            this.view = view;
-            RouterLink link = new RouterLink();
-            link.addClassNames("menu-item-link");
-            link.setRoute(view);
+		public MenuItemInfo(String menuTitle, String iconClass, Class<? extends Component> view) {
+			this.view = view;
+			RouterLink link = new RouterLink();
+			link.addClassNames("menu-item-link");
+			link.setRoute(view);
 
-            Span text = new Span(menuTitle);
-            text.addClassNames("menu-item-text");
+			Span text = new Span(menuTitle);
+			text.addClassNames("menu-item-text");
 
-            link.add(new LineAwesomeIcon(iconClass), text);
-            add(link);
-        }
+			link.add(new LineAwesomeIcon(iconClass), text);
+			add(link);
+		}
 
-        public Class<?> getView() {
-            return view;
-        }
+		public Class<?> getView() {
+			return view;
+		}
 
-        /**
-         * Simple wrapper to create icons using LineAwesome iconset. See
-         * https://icons8.com/line-awesome
-         */
-        @NpmPackage(value = "line-awesome", version = "1.3.0")
-        public static class LineAwesomeIcon extends Span {
-            public LineAwesomeIcon(String lineawesomeClassnames) {
-                addClassNames("menu-item-icon");
-                if (!lineawesomeClassnames.isEmpty()) {
-                    addClassNames(lineawesomeClassnames);
-                }
-            }
-        }
+		/**
+		 * Simple wrapper to create icons using LineAwesome iconset. See
+		 * https://icons8.com/line-awesome
+		 */
+		@NpmPackage(value = "line-awesome", version = "1.3.0")
+		public static class LineAwesomeIcon extends Span {
+			public LineAwesomeIcon(String lineawesomeClassnames) {
+				addClassNames("menu-item-icon");
+				if (!lineawesomeClassnames.isEmpty()) {
+					addClassNames(lineawesomeClassnames);
+				}
+			}
+		}
 
-    }
+	}
 
-    private H1 viewTitle;
+	private H1 viewTitle;
 
-    private AuthenticatedUser authenticatedUser;
-    private AccessAnnotationChecker accessChecker;
+	private AuthenticatedUser authenticatedUser;
+	private AccessAnnotationChecker accessChecker;
+	private final UserService userService;
+	private final UserRepository userRepository;
 
-    public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker) {
-        this.authenticatedUser = authenticatedUser;
-        this.accessChecker = accessChecker;
-		
+	public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker,
+			UserService userService, UserRepository userRepository) {
+		this.authenticatedUser = authenticatedUser;
+		this.accessChecker = accessChecker;
+		this.userService = userService;
+		this.userRepository = userRepository;
 
-        setPrimarySection(Section.DRAWER);
-        // First parameter is touchOptimized. If true, navbar will show at the bottom in mobile views.
-        addToNavbar(false, createHeaderContent());
-        addToDrawer(createDrawerContent());
-    }
+		setPrimarySection(Section.DRAWER);
+		// First parameter is touchOptimized. If true, navbar will show at the bottom in
+		// mobile views.
+		addToNavbar(false, createHeaderContent());
+		addToDrawer(createDrawerContent());
+	}
 
-    private Component createHeaderContent() {
-        DrawerToggle toggle = new DrawerToggle();
-        toggle.addClassNames("view-toggle");
-        toggle.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
-        toggle.getElement().setAttribute("aria-label", "Menu toggle");
+	private Component createHeaderContent() {
+		DrawerToggle toggle = new DrawerToggle();
+		toggle.addClassNames("view-toggle");
+		toggle.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+		toggle.getElement().setAttribute("aria-label", "Menu toggle");
 
-        viewTitle = new H1();
-        viewTitle.addClassNames("view-title");
+		viewTitle = new H1();
+		viewTitle.addClassNames("view-title");
 
-        Header header = new Header(toggle, viewTitle);
-        header.addClassNames("view-header");
-        return header;
-    }
+		Header header = new Header(toggle, viewTitle);
+		header.addClassNames("view-header");
+		return header;
+	}
 
-    private Component createDrawerContent() {
-        H2 appName = new H2("Trampoline World");
-        appName.addClassNames("app-name");
+	private Component createDrawerContent() {
+		H2 appName = new H2("Trampoline World");
+		appName.addClassNames("app-name");
 
-        com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(appName,
-                createNavigation(), createFooter());
-        section.addClassNames("drawer-section");
-        return section;
-    }
+		appName.addClickListener(e -> {
+			// Get user.
+			String currentUsername = VaadinRequest.getCurrent().getUserPrincipal().getName();
+			User currentUser = userRepository.findByUsername(currentUsername);
+			// Get roles.
+			Set<Role> roles = currentUser.getRoles();
+			// Forward user to the proper page based upon role.
+			if (roles.contains(Role.USER) && !roles.contains(Role.ADMIN)) {
+				UI.getCurrent().navigate(TrampolineOrdersReadOnlyView.class);
+			} else if (roles.contains(Role.ADMIN)) {
+				UI.getCurrent().navigate(TrampolineOrdersView.class);
+			}
+		});
 
-    private Nav createNavigation() {
-        Nav nav = new Nav();
-        nav.addClassNames("menu-item-container");
-        nav.getElement().setAttribute("aria-labelledby", "views");
+		com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(appName,
+				createNavigation(), createFooter());
+		section.addClassNames("drawer-section");
+		return section;
+	}
 
-        // Wrap the links in a list; improves accessibility
-        UnorderedList list = new UnorderedList();
-        list.addClassNames("navigation-list");
-        nav.add(list);
-        
-        for (MenuItemInfo menuItem : createMenuItems()) {
-            if (accessChecker.hasAccess(menuItem.getView())) {
-            	list.add(menuItem);
-            }
+	private Nav createNavigation() {
+		Nav nav = new Nav();
+		nav.addClassNames("menu-item-container");
+		nav.getElement().setAttribute("aria-labelledby", "views");
 
-        }
-        return nav;
-    }
+		// Wrap the links in a list; improves accessibility
+		UnorderedList list = new UnorderedList();
+		list.addClassNames("navigation-list");
+		nav.add(list);
 
-    private MenuItemInfo[] createMenuItems() {
-    	
-        return new MenuItemInfo[]{ //
-        		new MenuItemInfo("Debug", "las la-bug", DebugView.class), //
-                new MenuItemInfo("Trampoline Orders", "la la-clipboard-list", TrampolineOrdersView.class), //
-                new MenuItemInfo("Trampoline Orders", "la la-clipboard-list", TrampolineOrdersReadOnlyView.class), //
-                new MenuItemInfo("Export PDF / CSV", "las la-file-pdf", ExportView.class), //
-                new MenuItemInfo("User Guide", "las la-info-circle", UserGuideView.class), //
-                new MenuItemInfo("Installation Guide", "las la-download", InstallationGuideView.class), //
-                new MenuItemInfo("Chat", "la la-comments", ChatView.class), //
-        };
-    }
+		for (MenuItemInfo menuItem : createMenuItems()) {
+			if (accessChecker.hasAccess(menuItem.getView())) {
+				list.add(menuItem);
+			}
 
-    private Footer createFooter() {
-        Footer layout = new Footer();
-        layout.addClassNames("footer");
+		}
+		return nav;
+	}
 
-        Optional<User> maybeUser = authenticatedUser.get();
-        if (maybeUser.isPresent()) {
-            User user = maybeUser.get();
+	private MenuItemInfo[] createMenuItems() {
 
-            Avatar avatar = new Avatar(user.getName(), user.getProfilePictureUrl());
-            avatar.addClassNames("me-xs");
+		return new MenuItemInfo[] { //
+				new MenuItemInfo("Debug", "las la-bug", DebugView.class), //
+				new MenuItemInfo("Trampoline Orders", "la la-clipboard-list", TrampolineOrdersView.class), //
+				new MenuItemInfo("Trampoline Orders", "la la-clipboard-list", TrampolineOrdersReadOnlyView.class), //
+				new MenuItemInfo("Export PDF / CSV", "las la-file-pdf", ExportView.class), //
+				new MenuItemInfo("User Guide", "las la-info-circle", UserGuideView.class), //
+				new MenuItemInfo("Chat", "la la-comments", ChatView.class), //
+		};
+	}
 
-            ContextMenu userMenu = new ContextMenu(avatar);
-            userMenu.setOpenOnClick(true);
-            userMenu.addItem("Logout", e -> {
-                authenticatedUser.logout();
-            });
+	private Footer createFooter() {
+		Footer layout = new Footer();
+		layout.addClassNames("footer");
 
-            Span name = new Span(user.getName());
-            name.addClassNames("font-medium", "text-s", "text-secondary");
+		Optional<User> maybeUser = authenticatedUser.get();
+		if (maybeUser.isPresent()) {
+			User user = maybeUser.get();
 
-            layout.add(avatar, name);
-        } else {
-            Anchor loginLink = new Anchor("login", "Sign in");
-            layout.add(loginLink);
-        }
+			Avatar avatar = new Avatar(user.getName(), user.getProfilePictureUrl());
+			avatar.addClassNames("me-xs");
 
-        return layout;
-    }
+			ContextMenu userMenu = new ContextMenu(avatar);
+			userMenu.setOpenOnClick(true);
+			userMenu.addItem("Logout", e -> {
+				authenticatedUser.logout();
+			});
 
-    @Override
-    protected void afterNavigation() {
-        super.afterNavigation();
-        viewTitle.setText(getCurrentPageTitle());
-    }
+			Span name = new Span(user.getName());
+			name.addClassNames("font-medium", "text-s", "text-secondary");
 
-    private String getCurrentPageTitle() {
-        PageTitle title = getContent().getClass().getAnnotation(PageTitle.class);
-        return title == null ? "" : title.value();
-    }
+			layout.add(avatar, name);
+		} else {
+			Anchor loginLink = new Anchor("login", "Sign in");
+			layout.add(loginLink);
+		}
+
+		return layout;
+	}
+
+	@Override
+	protected void afterNavigation() {
+		super.afterNavigation();
+		viewTitle.setText(getCurrentPageTitle());
+	}
+
+	private String getCurrentPageTitle() {
+		PageTitle title = getContent().getClass().getAnnotation(PageTitle.class);
+		return title == null ? "" : title.value();
+	}
 }
