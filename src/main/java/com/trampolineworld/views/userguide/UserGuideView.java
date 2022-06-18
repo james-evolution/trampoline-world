@@ -32,7 +32,7 @@ import javax.annotation.security.RolesAllowed;
 import com.trampolineworld.views.*;
 import com.trampolineworld.views.trampolineorders.TrampolineOrdersView;
 
-@Route(value = "documentation", layout = MainLayout.class)
+@Route(value = "userguide", layout = MainLayout.class)
 @PageTitle("User Guide")
 //@CssImport("./styles/views/view_order/single-order-view.css")
 //@RouteAlias(value = "", layout = MainLayout.class)

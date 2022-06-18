@@ -166,7 +166,7 @@ public class MainLayout extends AppLayout {
 				new MenuItemInfo("Trampoline Orders", "la la-clipboard-list", TrampolineOrdersView.class), //
 				new MenuItemInfo("Trampoline Orders", "la la-clipboard-list", TrampolineOrdersReadOnlyView.class), //
 				new MenuItemInfo("Chat Room", "la la-comments", ChatView.class), //
-				new MenuItemInfo("Documentation", "las la-info-circle", UserGuideView.class), //
+				new MenuItemInfo("User Guide", "las la-info-circle", UserGuideView.class), //
 				new MenuItemInfo("Export PDF / CSV", "las la-file-pdf", ExportView.class), //
 				new MenuItemInfo("Contact", "las la-at", ContactView.class), //
 		};
@@ -176,7 +176,7 @@ public class MainLayout extends AppLayout {
 		Footer layout = new Footer();
 		layout.addClassNames("footer");
 
-		Optional<User> maybeUser = authenticatedUser.get();
+		Optional<User> maybeUser = authenticatedUser.get();	
 		if (maybeUser.isPresent()) {
 			User user = maybeUser.get();
 
