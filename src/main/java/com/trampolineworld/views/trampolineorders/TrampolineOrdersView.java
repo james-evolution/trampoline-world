@@ -40,8 +40,6 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.converter.StringToDoubleConverter;
-import com.vaadin.flow.data.converter.StringToIntegerConverter;
-import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -49,21 +47,17 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.VaadinServletRequest;
-import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Optional;
-import java.util.UUID;
+
 import javax.annotation.security.RolesAllowed;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 
 @PageTitle("All Orders")
 @Route(value = "trampoline_orders/:trampolineOrderID?/:action?(edit)", layout = MainLayout.class)
 @RouteAlias(value = "", layout = MainLayout.class)
-@RolesAllowed({"ADMIN"})
+@RolesAllowed({ "ADMIN" })
 @Uses(Icon.class)
 @CssImport(themeFor = "vaadin-grid", value = "./themes/trampolineworld/views/grid-theme.css")
 @CssImport(value = "./themes/trampolineworld/views/dialog.css", themeFor = "vaadin-dialog-overlay")
@@ -94,6 +88,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 	private Button save = new Button("Save");
 	private Button newOrderButton = new Button("New Order");
 	private Button hideSidebarButton = new Button("Hide Sidebar");
+
 	private CollaborationBinder<TrampolineOrder> binder;
 	private TrampolineOrder trampolineOrder;
 	private final TrampolineOrderService trampolineOrderService;
@@ -101,7 +96,8 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 	private final UserRepository userRepository;
 
 	@Autowired
-	public TrampolineOrdersView(TrampolineOrderService trampolineOrderService, UserService userService, UserRepository userRepository) {
+	public TrampolineOrdersView(TrampolineOrderService trampolineOrderService, UserService userService,
+			UserRepository userRepository) {
 		this.trampolineOrderService = trampolineOrderService;
 		this.userService = userService;
 		this.userRepository = userRepository;
@@ -121,8 +117,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 		UserInfo userInfo = new UserInfo(currentUser.getId().toString(), currentUser.getName());
 		userInfo.setImage(
 				"https://static.wixstatic.com/media/759627_2ad5404df0dc4455af631dbeaf83e8bf~mv2.png/v1/fill/w_347,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/Trampoline-2.png");
-		
-		
+
 		// Create split-view UI
 		SplitLayout splitLayout = new SplitLayout();
 

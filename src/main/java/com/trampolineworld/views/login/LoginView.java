@@ -6,6 +6,7 @@ import com.trampolineworld.data.Role;
 import com.trampolineworld.data.entity.User;
 import com.trampolineworld.data.service.UserRepository;
 import com.trampolineworld.data.service.UserService;
+import com.trampolineworld.views.debug.DebugView;
 import com.trampolineworld.views.trampolineorders.TrampolineOrdersView;
 import com.trampolineworld.views.trampolineordersreadonly.TrampolineOrdersReadOnlyView;
 import com.vaadin.flow.component.UI;
@@ -53,6 +54,9 @@ public class LoginView extends LoginOverlay implements BeforeEnterObserver {
 			// Check roles. If just a basic user and not an admin, forward to the page that doesn't allow order deletion.
 			if (roles.contains(Role.USER) && !roles.contains(Role.ADMIN)) {
 				UI.getCurrent().navigate(TrampolineOrdersReadOnlyView.class);
+			}
+			else if (roles.contains(Role.TECH)) {
+				UI.getCurrent().navigate(DebugView.class);
 			}
 		});
 	}

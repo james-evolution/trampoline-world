@@ -4,12 +4,16 @@ import com.trampolineworld.data.entity.User;
 import com.trampolineworld.data.service.UserRepository;
 import com.trampolineworld.data.service.UserService;
 import com.trampolineworld.views.MainLayout;
+import com.vaadin.collaborationengine.CollaborationAvatarGroup;
 import com.vaadin.collaborationengine.CollaborationMessageInput;
 import com.vaadin.collaborationengine.CollaborationMessageList;
 import com.vaadin.collaborationengine.UserInfo;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinRequest;
@@ -20,10 +24,12 @@ import javax.annotation.security.RolesAllowed;
 @PageTitle("Chat")
 @Route(value = "chat", layout = MainLayout.class)
 @RolesAllowed({"ADMIN", "USER"})
-public class ChatView extends VerticalLayout {
+public class ChatView extends VerticalLayout implements BeforeEnterObserver {
 
 	private final UserService userService;
 	private final UserRepository userRepository;
+	private String channelName;
+	CollaborationAvatarGroup avatarGroup;
 	
     public ChatView(UserService userService, UserRepository userRepository) {
 		this.userService = userService;
@@ -44,6 +50,9 @@ public class ChatView extends VerticalLayout {
 		userInfo.setImage(
 				"https://static.wixstatic.com/media/759627_2ad5404df0dc4455af631dbeaf83e8bf~mv2.png/v1/fill/w_347,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/Trampoline-2.png");
         
+		avatarGroup = new CollaborationAvatarGroup(userInfo, null);
+		avatarGroup.getStyle().set("visibility", "visible");
+		
 		// Tabs allow us to change chat rooms.
         Tabs tabs = new Tabs(new Tab("#general"), new Tab("#notes"), new Tab("#issues"));
         tabs.setWidthFull();
@@ -68,16 +77,22 @@ public class ChatView extends VerticalLayout {
         input.addClassNames("chat-view-message-input");
         input.setWidthFull();
 
-        // Layouting
-        add(tabs, list, input);
+        // Add components to layout.
+        add(avatarGroup, new Paragraph(), tabs, list, input);
         setSizeFull();
         expand(list);
 
         // Change the topic id of the chat when a new tab is selected
         tabs.addSelectedChangeListener(event -> {
-            String channelName = event.getSelectedTab().getLabel();
+            channelName = event.getSelectedTab().getLabel();
             list.setTopic("chat/" + channelName);
 		});
+	}
+
+	@Override
+	public void beforeEnter(BeforeEnterEvent event) {
+		// TODO Auto-generated method stub
+		avatarGroup.setTopic("chat/" + channelName);
 	}
 
 }

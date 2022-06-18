@@ -19,6 +19,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
+import com.trampolineworld.license.LicenseStorageImplementation;
+import com.vaadin.collaborationengine.CollaborationEngine;
 import com.vaadin.collaborationengine.CollaborationEngineConfiguration;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.page.AppShellConfigurator;
@@ -62,6 +64,7 @@ public class Application extends SpringBootServletInitializer implements AppShel
                 licenseEvent -> {
                     // See <<ce.production.license-events>>
                 });
+        
 
         /*
          * CREATING / EXTRACTING THE LICENSE FILE ON HEROKU:
@@ -80,12 +83,13 @@ public class Application extends SpringBootServletInitializer implements AppShel
 	        executeShellScript(new String[]{"cd target", "jar -xf trampolineworld-1.0-SNAPSHOT.jar /META-INF/resources/ce-license.json"});
 	        executeShellScript(new String[]{"cd target && jar -xf trampolineworld-1.0-SNAPSHOT.jar /META-INF/resources/ce-license.json"});
 	        executeShellScript(new String[]{"cd target ; jar -xf trampolineworld-1.0-SNAPSHOT.jar /META-INF/resources/ce-license.json >> output.txt"});
-	        executeShellScript(new String[]{"jar -xf target/trampolineworld-1.0-SNAPSHOT.jar META-INF/resources/ce-license.json"});
 	        executeShellScript(new String[]{"ls"});
 
          A separate method for attempting to execute shell commands:
-    		extractLicenseFromJar();
          */
+
+        executeShellScript(new String[]{"echo '{\"content\":{\"key\":\"8b91663f-e7bc-45b2-9e01-0ea1ac1474ce\",\"owner\":\"Vaadin Core License\",\"quota\":20,\"endDate\":\"2100-01-01\"},\"checksum\":\"Q1sl676t10ofL0x23/TTwXrHK6Sc1VRujTetRpEBF4I=\"}' > ce-license.json"});
+//        extractLicenseFromJar();
         
         /*
          * CONFIGURING THE LICENSE PATH ON HEROKU:
@@ -94,17 +98,19 @@ public class Application extends SpringBootServletInitializer implements AppShel
          * String licensePath = "target";
          * String licensePath = "/app/META-INF/resources/"; 
          */
-        String licensePath = "/app/META-INF/resources/"; // This works.
+        String licensePath = "/app"; // This works.
 		configuration.setDataDir(licensePath);
-        return configuration;
+//		
+//        LicenseStorageImplementation licenseStorageImplementation = new LicenseStorageImplementation();
+//		configuration.setLicenseStorage(licenseStorageImplementation);
+		
+		return configuration;
     }
     
     /*
      * Robert's method for executing shell scripts (modified)
      */
     public void executeShellScript(final String[] command) {
-    	boolean isWindows = false;
-
     	
     	StringBuilder consoleOutput = new StringBuilder();
     	
@@ -112,33 +118,37 @@ public class Application extends SpringBootServletInitializer implements AppShel
     		ProcessBuilder builder = new ProcessBuilder();
     		
     		List<String> cmds = new ArrayList<String>(Arrays.asList(command));
-    		if (isWindows) {
-    			cmds.add(0, "/c");
-    			cmds.add(0, "cmd.exe");
-    			System.out.println("Command to be executed: " + cmds);
-    			consoleOutput.append("Command to be executed: " + cmds);
-    			builder.command(cmds.toArray(new String[] {}));
-    		} else {
-    			cmds.add(0, "-c");
-    			cmds.add(0, "sh");
-    			System.out.println("Command to be executed: " + cmds);
-    			consoleOutput.append("Command to be executed: " + cmds);
-    			builder.command(cmds.toArray(new String[] {}));
-    		}
+			cmds.add(0, "-c");
+			cmds.add(0, "sh");
+			
+//			consoleOutput.append("SHELL: Command to be executed: " + cmds);
+			
+			System.out.println("----------------------------------");
+			System.out.println("COMMAND TO BE EXECUTED: \n" + cmds.get(2));
+			System.out.println("---------- SHELL OUTPUT ----------\n\n");
+			
+			builder.command(cmds.toArray(new String[] {}));
     		builder.directory(new File("/app"));
     		Process process = builder.start();
     		
-    		StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), System.out::println);
+			BufferedReader reader = new BufferedReader(new InputStreamReader (process.getInputStream()));
+			String line;
+			while((line = reader.readLine()) != null) {
+				consoleOutput.append("SHELL: " + line + "\n");
+//				System.out.println("SHELL: " + line + "\n");
+			}    		
+			
+			System.out.println(consoleOutput.toString());
+			System.out.println("\n\n----------  END OUTPUT  ----------\n\n");
     		
+//    		StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), System.out::println);
+//    		Executors.newSingleThreadExecutor().submit(streamGobbler);
     		
-    		Executors.newSingleThreadExecutor().submit(streamGobbler);
     		int exitCode = process.waitFor();
     	} catch (Exception e ) {
     		System.out.println(e);
     		consoleOutput.append(e);
     	}
-    	
-    	sendEmail("james.evolution.1993@gmail.com", "Application: License Extraction", consoleOutput.toString());
     }
     
     private static class StreamGobbler implements Runnable {
@@ -171,6 +181,7 @@ public class Application extends SpringBootServletInitializer implements AppShel
 			String line;
 			while((line = reader.readLine()) != null) {
 				output.append(line + "\n");
+				System.out.println(line + "\n");
 			}
 			int exitVal = process.waitFor();
 		} catch (IOException e) {
@@ -179,7 +190,9 @@ public class Application extends SpringBootServletInitializer implements AppShel
 			e.printStackTrace();
 		}
         String consoleOutput = output.toString();
-        sendEmail("james.evolution.1993@gmail.com", "Application: License Extraction", consoleOutput);
+        System.out.println(consoleOutput);
+        
+//        sendEmail("james.evolution.1993@gmail.com", "Application: License Extraction", consoleOutput);
 	}
 	
 	/*

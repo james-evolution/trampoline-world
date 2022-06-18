@@ -1,4 +1,2 @@
-echo 'test' > /app/target/ce-license.json
-echo 'test' > app/target/ce-license.json
-echo 'test' > /app/ce-license.json
-echo 'test' > app/ce-license.json
+ls >> output.txt
+echo "Hi Jeremy" > greeting.txt

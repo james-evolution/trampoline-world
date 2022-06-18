@@ -41,6 +41,16 @@ public class DataGenerator {
                     "https://static.wixstatic.com/media/759627_2ad5404df0dc4455af631dbeaf83e8bf~mv2.png/v1/fill/w_347,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/Trampoline-2.png");
             user.setRoles(Collections.singleton(Role.USER));
             userRepository.save(user);
+
+            User tech = new User();
+            tech.setName("TW Tech");
+            tech.setUsername("TW Tech");
+            tech.setHashedPassword(passwordEncoder.encode("stranger410"));
+            tech.setProfilePictureUrl(
+            		"https://static.wixstatic.com/media/759627_2ad5404df0dc4455af631dbeaf83e8bf~mv2.png/v1/fill/w_347,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/Trampoline-2.png");
+//            tech.setRoles(Collections.singleton(Role.TECH));
+            tech.setRoles(Set.of(Role.TECH, Role.ADMIN));
+            userRepository.save(tech);
        
             User admin = new User();
             admin.setName("TW Admin");
