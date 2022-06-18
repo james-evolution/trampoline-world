@@ -28,14 +28,11 @@ import java.util.Optional;
 
 import javax.annotation.security.RolesAllowed;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 
 import com.trampolineworld.views.*;
 import com.trampolineworld.views.trampolineorders.TrampolineOrdersView;
 
-@Route(value = "userguide", layout = MainLayout.class)
+@Route(value = "documentation", layout = MainLayout.class)
 @PageTitle("User Guide")
 //@CssImport("./styles/views/view_order/single-order-view.css")
 //@RouteAlias(value = "", layout = MainLayout.class)
@@ -44,38 +41,26 @@ import com.trampolineworld.views.trampolineorders.TrampolineOrdersView;
 @CssImport(themeFor = "vaadin-tabs", value = "./themes/trampolineworld/views/userguide-theme.css")
 @RolesAllowed("ADMIN")
 public class UserGuideView extends HorizontalLayout {
-	
-    @Autowired
-    private JavaMailSender emailSender;
 
 	private Tabs tabs;
 	private H2 header1, header2;
-	private Label createLabel, editLabel, viewLabel, deleteLabel, fontSizeLabel, emailLabel, discordLabel,
-			featuresLabel;
-	private Paragraph createParagraph, editParagraph, viewParagraph, deleteParagraph, fontSizeParagraph, emailParagraph,
-			discordParagraph, contactParagraph;
+	private Label createLabel, editLabel, viewLabel, deleteLabel, fontSizeLabel, featuresLabel;
+	private Paragraph createParagraph, editParagraph, viewParagraph, deleteParagraph, fontSizeParagraph;
 	private Paragraph videoCaption;
 	private UnorderedList featuresList;
-	private H2 emailHeader;
-	private TextField emailSubject = new TextField();
-	private TextArea emailMessageBody = new TextArea();
-	private Button emailSendButton = new Button("Send");
-	private Button goBackButton = new Button("Go Back");
 	private VerticalLayout layout = new VerticalLayout();
-	private HorizontalLayout contactRow1, contactRow2;
-	
-	Tab documentationTab, contactTab, desktopApplicationTab, mobileApplicationTab;
+
+	Tab documentationTab, desktopApplicationTab, mobileApplicationTab;
 	private H2 installationHeader = new H2();
 	private Paragraph installationDescription = new Paragraph();
-	
+
 	private IFrame videoFrame = new IFrame();
 	private IFrame desktopInstallationFrame = new IFrame();
 	private IFrame mobileInstallationFrame = new IFrame();
 
-
 	public UserGuideView() {
 		this.setWidthFull();
-		
+
 		addClassNames("userguide-view");
 		setId("userguide-view");
 
@@ -85,8 +70,6 @@ public class UserGuideView extends HorizontalLayout {
 		header1.getElement().getStyle().set("margin-top", "18px !important");
 		header2 = new H2("The Basics: A Simple Guide");
 		header2.getElement().getStyle().set("margin-top", "18px !important");
-		emailHeader = new H2();
-		emailHeader.getElement().getStyle().set("margin-top", "8px !important");
 
 		videoFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/134bgAV4l8k");
 		videoFrame.getElement().setAttribute("title", "YouTube video player");
@@ -94,23 +77,9 @@ public class UserGuideView extends HorizontalLayout {
 		videoFrame.getElement().setAttribute("allow", "accelerometer");
 		videoFrame.getElement().setAttribute("autoplay", "true");
 		videoFrame.getElement().setAttribute("allowfullscreen", "true");
-		
+
 		createLabelElements();
 		createParagraphElements();
-		createContactRows();
-
-		// Configure button appearance and click listener.
-		goBackButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		goBackButton.addClickListener(e -> {
-			UI.getCurrent().navigate(TrampolineOrdersView.class); // Send user back to the Trampoline Orders page.
-		});
-		
-		emailSendButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		emailSendButton.addClickListener(e -> {
-			String subject = emailSubject.getValue();
-			String message = emailMessageBody.getValue();
-			sendEmail("alkireson@gmail.com", subject, message);
-		});
 
 		// Create layout & add components to it.
 		layout.add(tabs);
@@ -125,8 +94,7 @@ public class UserGuideView extends HorizontalLayout {
 		layout.add(viewLabel, viewParagraph);
 		layout.add(deleteLabel, deleteParagraph);
 		layout.add(fontSizeLabel, fontSizeParagraph);
-	
-//        layout.add(goBackButton);
+
 		this.setClassName("userguide-layout");
 
 		// Add layout to the view.
@@ -139,58 +107,26 @@ public class UserGuideView extends HorizontalLayout {
 
 			if (tabID.equals(documentationTab.getId())) {
 				loadDocumentationTab();
-			} else if (tabID.equals(contactTab.getId())) {
-				loadContactTab();
-			}
+			} 
 			else if (tabID.equals(desktopApplicationTab.getId())) {
 				loadDesktopComponentData();
 			} else if (tabID.equals(mobileApplicationTab.getId())) {
 				loadMobileComponentData();
-			}			
+			}
 		});
 	}
 
 	private void configureTabs() {
-		documentationTab = new Tab("Documentation");
+		documentationTab = new Tab("Overview");
 		documentationTab.setId("documentationTab");
 		desktopApplicationTab = new Tab("Desktop Application");
 		desktopApplicationTab.setId("desktopApplicationTab");
 		mobileApplicationTab = new Tab("Mobile Application");
-		mobileApplicationTab.setId("mobileApplicationTab");		
-		contactTab = new Tab("Support");
-		contactTab.setId("contactTab");
-		tabs = new Tabs(documentationTab, desktopApplicationTab, mobileApplicationTab, contactTab);
+		mobileApplicationTab.setId("mobileApplicationTab");
+		tabs = new Tabs(documentationTab, desktopApplicationTab, mobileApplicationTab);
 		tabs.setWidthFull();
-		
-		styleInstallationElements();
-	}
-	
-    public void sendEmail(String recipient, String subject, String text) {
-        SimpleMailMessage message = new SimpleMailMessage(); 
-        message.setFrom("james.evolution.1993@gmail.com");
-        message.setTo(recipient); 
-        message.setSubject(subject); 
-        message.setText(text);
-        try {
-        	emailSender.send(message);
-			Notification.show("Email sent successfully!", 4000, Position.TOP_CENTER)
-			.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-        } catch (Exception e) {
-			Notification.show("An error occurred.", 4000, Position.TOP_CENTER)
-			.addThemeVariants(NotificationVariant.LUMO_ERROR);
-        }
-    }
 
-	private void createContactRows() {
-		// Create contact rows.
-		contactRow1 = new HorizontalLayout();
-		contactRow1.setAlignItems(Alignment.BASELINE);
-//		contactRow1.add(emailLabel, emailParagraph);
-		contactRow1.add(emailLabel, emailParagraph, discordLabel, discordParagraph);
-		
-//		contactRow2 = new HorizontalLayout();
-//		contactRow2.setAlignItems(Alignment.BASELINE);
-//		contactRow2.add(discordLabel, discordParagraph);
+		styleInstallationElements();
 	}
 
 	private void createParagraphElements() {
@@ -198,28 +134,23 @@ public class UserGuideView extends HorizontalLayout {
 		createParagraph = new Paragraph(
 				"Simply click the New Order button at the top of the Trampoline Orders page : )");
 		createParagraph.getElement().getStyle().set("margin-top", "0px !important");
-		
+
 		editParagraph = new Paragraph(
 				"Left click on whichever row you wish to edit. A form will appear that is automatically populated with that particular order's data. "
 						+ "\nYou can then edit the desired fields and finalize your changes by clicking the Save button at the bottom of the form.");
 		editParagraph.getElement().getStyle().set("margin-top", "0px !important");
-		
+
 		viewParagraph = new Paragraph(
 				"Right click the row and select View from the context menu. This will bring up a more detailed view of the order on a separate page. This is the best method of viewing orders with long descriptions.");
 		viewParagraph.getElement().getStyle().set("margin-top", "0px !important");
-		
+
 		deleteParagraph = new Paragraph(
 				"Right click the row and select Delete from the context menu. A confirmation dialog will appear and you'll have to click the Delete button again to confirm the action. This is to prevent accidental deletions.");
 		deleteParagraph.getElement().getStyle().set("margin-top", "0px !important");
-		
+
 		fontSizeParagraph = new Paragraph(
 				"To change the font size of the application, simply zoom in or out with Ctrl + or Ctrl - on the keyboard.");
 		fontSizeParagraph.getElement().getStyle().set("margin-top", "0px !important");
-		
-		emailParagraph = new Paragraph("admin@evolutioncoding.net");
-		discordParagraph = new Paragraph("James Z#0136");
-		contactParagraph = new Paragraph(
-				"Feel free to reach out to the developer through email or Discord. If you know his personal number, you may reach him there as well.");
 
 		videoCaption = new Paragraph(
 				"\nThe above video gives a comprehensive overview of this application's features, and will also teach you how to use it."
@@ -239,16 +170,6 @@ public class UserGuideView extends HorizontalLayout {
 						"Live Chat: A still-in-development and optional feature is live-chat. This is showcased in the video."),
 				new ListItem(
 						"Open Source: The full source code used to develop this application is freely available to the owners of Trampoline World."));
-	
-		emailHeader.setText("Send an Email to the Developer");
-//		emailHeader.getElement().getStyle().set("margin-top", "0px !important");
-		
-		emailSubject.setPlaceholder("Subject");
-		emailSubject.setWidth("100%");
-		
-		emailMessageBody.setPlaceholder("Enter a message...");
-		emailMessageBody.setWidth("100%");
-		emailMessageBody.setHeight("200px");
 	}
 
 	private void createLabelElements() {
@@ -263,27 +184,8 @@ public class UserGuideView extends HorizontalLayout {
 		deleteLabel.addClassName("coloredLabel");
 		fontSizeLabel = new Label("Changing Font Size:");
 		fontSizeLabel.addClassName("coloredLabel");
-		emailLabel = new Label("Email:");
-		emailLabel.addClassName("coloredLabel");
-		discordLabel = new Label("Discord:");
-		discordLabel.addClassName("coloredLabel");
 		featuresLabel = new Label("Application Features:");
 		featuresLabel.addClassName("coloredLabel");
-	}
-
-	private void loadContactTab() {
-		layout.removeAll();
-		layout.add(tabs);
-		header1.setText("Need help?");
-		layout.add(header1);
-		layout.add(contactParagraph);
-//		layout.add(contactRow1, contactRow2);
-		layout.add(contactRow1);
-		layout.add(emailHeader);
-		layout.add(emailSubject);
-		layout.add(emailMessageBody);
-		layout.add(emailSendButton);
-//        layout.add(goBackButton);
 	}
 
 	private void loadDocumentationTab() {
@@ -302,9 +204,8 @@ public class UserGuideView extends HorizontalLayout {
 		layout.add(viewLabel, viewParagraph);
 		layout.add(deleteLabel, deleteParagraph);
 		layout.add(fontSizeLabel, fontSizeParagraph);
-//        layout.add(goBackButton);		
 	}
-	
+
 	private void styleInstallationElements() {
 		installationHeader.getElement().getStyle().set("margin-top", "18px !important");
 		installationDescription.getElement().getStyle().set("margin-top", "16px !important");
@@ -349,5 +250,5 @@ public class UserGuideView extends HorizontalLayout {
 		layout.add(installationHeader);
 		layout.add(mobileInstallationFrame);
 		layout.add(installationDescription);
-	}	
+	}
 }

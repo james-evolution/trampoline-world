@@ -25,7 +25,7 @@ import com.vaadin.flow.server.VaadinRequest;
 import java.util.UUID;
 import javax.annotation.security.RolesAllowed;
 
-@PageTitle("Chat")
+@PageTitle("Chat Room")
 @Route(value = "chat", layout = MainLayout.class)
 @RolesAllowed({ "ADMIN", "USER" })
 public class ChatView extends VerticalLayout implements BeforeEnterObserver, AfterNavigationObserver {

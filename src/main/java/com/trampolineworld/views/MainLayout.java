@@ -6,6 +6,7 @@ import com.trampolineworld.data.service.UserRepository;
 import com.trampolineworld.data.service.UserService;
 import com.trampolineworld.security.AuthenticatedUser;
 import com.trampolineworld.views.chat.ChatView;
+import com.trampolineworld.views.contact.ContactView;
 import com.trampolineworld.views.debug.DebugView;
 import com.trampolineworld.views.export.ExportView;
 import com.trampolineworld.views.trampolineorders.TrampolineOrdersView;
@@ -164,9 +165,10 @@ public class MainLayout extends AppLayout {
 				new MenuItemInfo("Debug", "las la-bug", DebugView.class), //
 				new MenuItemInfo("Trampoline Orders", "la la-clipboard-list", TrampolineOrdersView.class), //
 				new MenuItemInfo("Trampoline Orders", "la la-clipboard-list", TrampolineOrdersReadOnlyView.class), //
+				new MenuItemInfo("Chat Room", "la la-comments", ChatView.class), //
+				new MenuItemInfo("Documentation", "las la-info-circle", UserGuideView.class), //
 				new MenuItemInfo("Export PDF / CSV", "las la-file-pdf", ExportView.class), //
-				new MenuItemInfo("User Guide", "las la-info-circle", UserGuideView.class), //
-				new MenuItemInfo("Chat", "la la-comments", ChatView.class), //
+				new MenuItemInfo("Contact", "las la-at", ContactView.class), //
 		};
 	}
 
