@@ -137,7 +137,7 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 //		contextMenu.setOpenOnClick(true);
 //		contextMenu.setTarget(profilePicture);
 //		contextMenu.addItem("Change Picture", event -> {});
-		configureUploadButton();
+//		configureUploadButton();
 
 		// Populate role components & configure rows.
 		populateRoleComponents(roles);
@@ -166,9 +166,8 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 
 		// Add components to layout.
 		layout.add(headerAccount);
-//		layout.add(avatarMenuBar);
-		layout.add(profilePicture);
-		layout.add(upload);
+//		layout.add(profilePicture);
+//		layout.add(upload);
 //		layout.add(rowAccountName);
 		layout.add(rowAccountEmail);
 		layout.add(rowAccountRoles);
@@ -254,41 +253,46 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 		});
 	}
 
-	private void configureUploadButton() {
-		buffer = new FileBuffer();
-        upload = new Upload(buffer);
-        upload.setAutoUpload(true);
-        upload.setAcceptedFileTypes("image/jpeg", "image/jpg", "image/png", ".jpg", ".png");
-
-        upload.addFileRejectedListener(event -> {
-            String errorMessage = event.getErrorMessage();
-
-            Notification notification = Notification.show(
-                    errorMessage,
-                    5000,
-                    Notification.Position.TOP_CENTER
-            );
-            notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-        });
-        
-        upload.addSucceededListener(event -> {
-            Notification notification = Notification.show(
-                    "File uploaded successfully.",
-                    5000,
-                    Notification.Position.TOP_CENTER
-            );
-            notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            
-            String fileName = event.getFileName();
-            InputStream inputStream = buffer.getInputStream();
-            FileData fData = buffer.getFileData();
-            File uploadedFile = fData.getFile();
-            String absolutePath = uploadedFile.getAbsolutePath();
-            System.out.println("\n\n--------------- UPLOADED FILE PATH ---------------");
-            System.out.println(absolutePath);
-            System.out.println("\n\n---------------- END OF FILE PATH ----------------");
-        });
-	}
+/*
+ * This method doesn't work as intended. It needs to be rewritten.
+ */
+//	private void configureUploadButton() {
+//		buffer = new FileBuffer();
+//        upload = new Upload(buffer);
+//        upload.setAutoUpload(true);
+//        upload.setAcceptedFileTypes("image/jpeg", "image/jpg", "image/png", ".jpg", ".png");
+//
+//        upload.addFileRejectedListener(event -> {
+//            String errorMessage = event.getErrorMessage();
+//
+//            Notification notification = Notification.show(
+//                    errorMessage,
+//                    5000,
+//                    Notification.Position.TOP_CENTER
+//            );
+//            notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+//        });
+//        
+//        upload.addSucceededListener(event -> {
+//            Notification notification = Notification.show(
+//                    "File uploaded successfully.",
+//                    5000,
+//                    Notification.Position.TOP_CENTER
+//            );
+//            notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+//            
+//            String fileName = event.getFileName();
+//            InputStream inputStream = buffer.getInputStream();
+//            FileData fData = buffer.getFileData();
+//            File uploadedFile = fData.getFile();
+//            String absolutePath = uploadedFile.getAbsolutePath();
+//            
+//            
+//            System.out.println("\n\n--------------- UPLOADED FILE PATH ---------------");
+//            System.out.println(absolutePath);
+//            System.out.println("\n\n---------------- END OF FILE PATH ----------------");
+//        });
+//	}
 
 	private void configureHeaders() {
 		headerUsername.getElement().getStyle().set("margin-top", "18px");
