@@ -23,7 +23,9 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.server.VaadinRequest;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import javax.annotation.security.RolesAllowed;
@@ -32,6 +34,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
+import com.trampolineworld.data.entity.User;
+import com.trampolineworld.data.service.UserRepository;
+import com.trampolineworld.data.service.UserService;
+import com.trampolineworld.utilities.DiscordWebhook;
 import com.trampolineworld.views.*;
 import com.trampolineworld.views.trampolineorders.TrampolineOrdersView;
 
@@ -47,21 +53,32 @@ public class ContactView extends HorizontalLayout {
 
 	@Autowired
 	private JavaMailSender emailSender;
+	private final String webhookURL = "https://ptb.discord.com/api/webhooks/988205702688407592/Ty12xlORzrWDraIt1NvPQB2RQmoNzXFYvvxEqK-w9myHntDM0tcTE5_78PctkhA6ESjS";
+	
+	private final UserService userService;
+	private final UserRepository userRepository;
 	
 	private Label emailLabel, discordLabel;
-	private Paragraph emailParagraph, discordParagraph, contactParagraph;
+	private Paragraph emailParagraph, discordParagraph, contactParagraph, webhookCaptionParagraph;
 	
 	private H2 header1 = new H2();
 	private H2 emailHeader = new H2();
+	private H2 webhookHeader = new H2();
 	private TextField emailSubject = new TextField();
 	private TextArea emailMessageBody = new TextArea();
+	private TextArea webhookMessageBody = new TextArea();
+	
 	private Button emailSendButton = new Button("Send");
+	private Button webhookSendButton = new Button("Send");
+	
 	private VerticalLayout layout = new VerticalLayout();
 	private HorizontalLayout contactRow1;
 	private HorizontalLayout contactRow2;
 
-	public ContactView() {
+	public ContactView(UserService userService, UserRepository userRepository) {
 		this.setWidthFull();
+		this.userService = userService;
+		this.userRepository = userRepository;
 
 		addClassNames("userguide-view");
 		setId("userguide-view");
@@ -69,6 +86,7 @@ public class ContactView extends HorizontalLayout {
 		createLabelElements();
 		createParagraphElements();
 		createContactRows();
+		configureWebhookElements();
 
 		header1.getElement().getStyle().set("margin-top", "18px !important");
 		emailHeader.getElement().getStyle().set("margin-top", "8px !important");
@@ -78,6 +96,37 @@ public class ContactView extends HorizontalLayout {
 			String subject = emailSubject.getValue();
 			String message = emailMessageBody.getValue();
 			sendEmail("alkireson@gmail.com", subject, message);
+		});
+		
+		
+		webhookSendButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		webhookSendButton.addClickListener(e -> {
+			// Get webhook message from text field.
+			String webhookMessage = webhookMessageBody.getValue();
+			// Create webhook object.
+			DiscordWebhook webhook = new DiscordWebhook(webhookURL);
+			// Get current user.
+			String currentUsername = VaadinRequest.getCurrent().getUserPrincipal().getName();
+			User currentUser = userRepository.findByUsername(currentUsername);
+			String avatarURL = currentUser.getProfilePictureUrl();
+			/*
+			 * To ping James Z#0136: <@178357031302987777>
+			 * To ping the Developer role: <@&988212618059726870>
+			 */
+			// Configure webhook message information.
+			webhook.setUsername(currentUsername);
+			webhook.setContent("<@&988212618059726870> " + webhookMessage);
+			webhook.setAvatarUrl(avatarURL);
+			webhook.setTts(false); // Text to speech.
+			try {
+				webhook.execute();
+				Notification.show("Message sent successfully!", 4000, Position.TOP_CENTER)
+				.addThemeVariants(NotificationVariant.LUMO_SUCCESS);				
+			} catch (IOException e1) {
+				e1.printStackTrace();
+				Notification.show("Message failed to send!", 4000, Position.TOP_CENTER)
+				.addThemeVariants(NotificationVariant.LUMO_SUCCESS);				
+			}
 		});
 
 		// Create layout & add components to it.
@@ -90,6 +139,10 @@ public class ContactView extends HorizontalLayout {
 		layout.add(emailSubject);
 		layout.add(emailMessageBody);
 		layout.add(emailSendButton);
+		layout.add(webhookHeader);
+		layout.add(webhookCaptionParagraph);
+		layout.add(webhookMessageBody);
+		layout.add(webhookSendButton);
 
 		this.setClassName("userguide-layout");
 
@@ -98,6 +151,18 @@ public class ContactView extends HorizontalLayout {
 		
 		this.setWidthFull();
 		this.setHeightFull();
+	}
+
+	private void configureWebhookElements() {
+		webhookHeader.setText("Send a Discord Message");
+		webhookHeader.getElement().getStyle().set("margin-top", "16px !important");
+		webhookHeader.setWidth("100%");
+		webhookCaptionParagraph = new Paragraph("This will tag the developer on Discord and he'll receive a notification alerting him that you're trying to contact him."
+				+ "\nIdeally, upon receiving this message, he'll join the Chat Room (as soon as possible) to respond.");
+		webhookCaptionParagraph.getElement().getStyle().set("margin-top", "0px !important");
+		webhookMessageBody.setPlaceholder("Enter a message...");
+		webhookMessageBody.setWidth("100%");
+		webhookMessageBody.setHeight("200px");
 	}
 
 	public void sendEmail(String recipient, String subject, String text) {
