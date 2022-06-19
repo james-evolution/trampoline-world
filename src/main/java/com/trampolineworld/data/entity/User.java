@@ -17,6 +17,7 @@ public class User extends AbstractEntityUUID {
 
     private String username;
     private String name;
+    private String email;
     @JsonIgnore
     private String hashedPassword;
     @Enumerated(EnumType.STRING)
@@ -55,5 +56,11 @@ public class User extends AbstractEntityUUID {
     public void setProfilePictureUrl(String profilePictureUrl) {
         this.profilePictureUrl = profilePictureUrl;
     }
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
 }

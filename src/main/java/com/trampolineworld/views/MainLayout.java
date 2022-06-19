@@ -162,27 +162,29 @@ public class MainLayout extends AppLayout {
 
 	private MenuItemInfo[] createMenuItems() {
 
+		/*
+		 * Other icons:
+				"la la-clipboard-list"
+				"la la-clipboard-list"
+				"las la-scroll"
+				"las la-users"
+				"lar la-save"
+				"las la-code"
+				"lar la-user"
+				"las la-cog"
+	 	*/
 		return new MenuItemInfo[] { //
 				new MenuItemInfo("Debug", "las la-bug", DebugView.class), //
-//				new MenuItemInfo("Trampoline Orders", "la la-clipboard-list", TrampolineOrdersView.class), //
-//				new MenuItemInfo("Trampoline Orders", "las la-scroll", TrampolineOrdersView.class), //
 				new MenuItemInfo("Trampoline Orders", "las la-clipboard-check", TrampolineOrdersView.class), //
-//				new MenuItemInfo("Trampoline Orders", "la la-clipboard-list", TrampolineOrdersReadOnlyView.class), //
 				new MenuItemInfo("Trampoline Orders", "las la-clipboard-check", TrampolineOrdersReadOnlyView.class), //
 				new MenuItemInfo("Chat Room", "la la-comments", ChatView.class), //
-//				new MenuItemInfo("Chat Room", "las la-users", ChatView.class), //
-				new MenuItemInfo("User Guide", "las la-info-circle", UserGuideView.class), //
 				new MenuItemInfo("Export PDF / CSV", "las la-file-pdf", ExportView.class), //
-//				new MenuItemInfo("Export PDF / CSV", "lar la-save", ExportView.class), //
-//				new MenuItemInfo("Technical Documentation", "las la-code", UserGuideView.class), //
+				new MenuItemInfo("", "", ChatView.class),
 				new MenuItemInfo("Account", "lar la-user", AccountView.class), //
+				new MenuItemInfo("User Guide", "las la-info-circle", UserGuideView.class), //
 				new MenuItemInfo("Contact", "las la-at", ContactView.class), //
-//				new MenuItemInfo("Contact", "lar la-user", ContactView.class), //
 		};
 	}
-
-	
-	// SETTINGS ICON: <i class="las la-cog"></i>
 	
 	
 	private Footer createFooter() {

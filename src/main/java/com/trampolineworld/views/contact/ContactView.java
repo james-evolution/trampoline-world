@@ -58,8 +58,7 @@ public class ContactView extends HorizontalLayout {
 	private Button emailSendButton = new Button("Send");
 	private VerticalLayout layout = new VerticalLayout();
 	private HorizontalLayout contactRow1;
-
-
+	private HorizontalLayout contactRow2;
 
 	public ContactView() {
 		this.setWidthFull();
@@ -86,6 +85,7 @@ public class ContactView extends HorizontalLayout {
 		layout.add(header1);
 		layout.add(contactParagraph);
 		layout.add(contactRow1);
+		layout.add(contactRow2);
 		layout.add(emailHeader);
 		layout.add(emailSubject);
 		layout.add(emailMessageBody);
@@ -120,14 +120,23 @@ public class ContactView extends HorizontalLayout {
 		// Create contact rows.
 		contactRow1 = new HorizontalLayout();
 		contactRow1.setAlignItems(Alignment.BASELINE);
-		contactRow1.add(emailLabel, emailParagraph, discordLabel, discordParagraph);
+		contactRow1.add(emailLabel, emailParagraph);
+		
+		contactRow2 = new HorizontalLayout();
+		contactRow2.setAlignItems(Alignment.BASELINE);
+		contactRow2.add(discordLabel, discordParagraph);
+		
 
 	}
 
 	private void createParagraphElements() {
 		// Create HTML paragraph elements.
 		emailParagraph = new Paragraph("admin@evolutioncoding.net");
+		emailParagraph.getElement().getStyle().set("margin-bottom", "0px !important");
+		
 		discordParagraph = new Paragraph("James Z#0136");
+		discordParagraph.getElement().getStyle().set("margin-top", "0px !important");
+		
 		contactParagraph = new Paragraph(
 				"Feel free to reach out to the developer through email or Discord. If you know his personal number, you may reach him there as well.");
 
