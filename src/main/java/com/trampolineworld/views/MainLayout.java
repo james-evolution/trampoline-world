@@ -5,6 +5,7 @@ import com.trampolineworld.data.entity.User;
 import com.trampolineworld.data.service.UserRepository;
 import com.trampolineworld.data.service.UserService;
 import com.trampolineworld.security.AuthenticatedUser;
+import com.trampolineworld.views.account.AccountView;
 import com.trampolineworld.views.chat.ChatView;
 import com.trampolineworld.views.contact.ContactView;
 import com.trampolineworld.views.debug.DebugView;
@@ -174,6 +175,7 @@ public class MainLayout extends AppLayout {
 				new MenuItemInfo("Export PDF / CSV", "las la-file-pdf", ExportView.class), //
 //				new MenuItemInfo("Export PDF / CSV", "lar la-save", ExportView.class), //
 //				new MenuItemInfo("Technical Documentation", "las la-code", UserGuideView.class), //
+				new MenuItemInfo("Account", "lar la-user", AccountView.class), //
 				new MenuItemInfo("Contact", "las la-at", ContactView.class), //
 //				new MenuItemInfo("Contact", "lar la-user", ContactView.class), //
 		};
