@@ -125,7 +125,7 @@ public class ContactView extends HorizontalLayout {
 			} catch (IOException e1) {
 				e1.printStackTrace();
 				Notification.show("Message failed to send!", 4000, Position.TOP_CENTER)
-				.addThemeVariants(NotificationVariant.LUMO_SUCCESS);				
+				.addThemeVariants(NotificationVariant.LUMO_ERROR);				
 			}
 		});
 

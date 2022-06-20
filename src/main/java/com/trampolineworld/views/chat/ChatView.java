@@ -51,8 +51,7 @@ public class ChatView extends VerticalLayout implements BeforeEnterObserver, Aft
 		// avatar by passing an url to the image as a third parameter, or by
 		// configuring an `ImageProvider` to `avatarGroup`.
 		UserInfo userInfo = new UserInfo(currentUser.getId().toString(), currentUser.getName());
-		userInfo.setImage(
-				"https://static.wixstatic.com/media/759627_2ad5404df0dc4455af631dbeaf83e8bf~mv2.png/v1/fill/w_347,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/Trampoline-2.png");
+		userInfo.setImage(currentUser.getProfilePictureUrl());
 
 		avatarGroup = new CollaborationAvatarGroup(userInfo, null);
 		avatarGroup.getStyle().set("visibility", "visible");
