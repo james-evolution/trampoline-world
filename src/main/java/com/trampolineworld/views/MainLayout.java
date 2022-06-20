@@ -174,7 +174,6 @@ public class MainLayout extends AppLayout {
 				"las la-cog"
 	 	*/
 		return new MenuItemInfo[] { //
-				new MenuItemInfo("Debug", "las la-bug", DebugView.class), //
 				new MenuItemInfo("Trampoline Orders", "las la-clipboard-check", TrampolineOrdersView.class), //
 				new MenuItemInfo("Trampoline Orders", "las la-clipboard-check", TrampolineOrdersReadOnlyView.class), //
 				new MenuItemInfo("Chat Room", "la la-comments", ChatView.class), //
@@ -183,6 +182,7 @@ public class MainLayout extends AppLayout {
 				new MenuItemInfo("Account", "lar la-user", AccountView.class), //
 				new MenuItemInfo("User Guide", "las la-info-circle", UserGuideView.class), //
 				new MenuItemInfo("Contact", "las la-at", ContactView.class), //
+				new MenuItemInfo("Debug", "las la-bug", DebugView.class), //
 		};
 	}
 	

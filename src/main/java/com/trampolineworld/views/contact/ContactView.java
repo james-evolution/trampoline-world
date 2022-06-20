@@ -76,7 +76,6 @@ public class ContactView extends HorizontalLayout {
 	private HorizontalLayout contactRow2;
 
 	public ContactView(UserService userService, UserRepository userRepository) {
-		this.setWidthFull();
 		this.userService = userService;
 		this.userRepository = userRepository;
 
@@ -150,7 +149,7 @@ public class ContactView extends HorizontalLayout {
 		this.add(layout);
 		
 		this.setWidthFull();
-		this.setHeightFull();
+//		this.setHeightFull();
 	}
 
 	private void configureWebhookElements() {

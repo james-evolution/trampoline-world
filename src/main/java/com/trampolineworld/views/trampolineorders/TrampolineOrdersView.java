@@ -116,6 +116,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 		// configuring an `ImageProvider` to `avatarGroup`.
 		UserInfo userInfo = new UserInfo(currentUser.getId().toString(), currentUser.getName());
 		userInfo.setImage(currentUser.getProfilePictureUrl());
+		userInfo.setColorIndex(currentUser.getColorIndex());
 
 		// Create split-view UI
 		SplitLayout splitLayout = new SplitLayout();

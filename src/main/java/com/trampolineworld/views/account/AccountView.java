@@ -1,5 +1,8 @@
 package com.trampolineworld.views.account;
 
+import com.vaadin.collaborationengine.UserInfo;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
@@ -8,6 +11,7 @@ import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.IFrame;
 import com.vaadin.flow.component.html.Image;
@@ -59,61 +63,63 @@ import com.trampolineworld.data.entity.User;
 import com.trampolineworld.data.service.UserRepository;
 import com.trampolineworld.data.service.UserService;
 import com.trampolineworld.views.*;
-import com.trampolineworld.views.debug.DebugView;
 import com.trampolineworld.views.login.LoginView;
-import com.trampolineworld.views.trampolineorders.TrampolineOrdersView;
+
 
 @Route(value = "account", layout = MainLayout.class)
 @PageTitle("Account")
-//@CssImport("./styles/views/view_order/single-order-view.css")
-//@RouteAlias(value = "", layout = MainLayout.class)
-@CssImport(themeFor = "vaadin-horizontal-layout", value = "./themes/trampolineworld/views/userguide-theme.css")
-@CssImport(themeFor = "vaadin-vertical-layout", value = "./themes/trampolineworld/views/userguide-theme.css")
-@CssImport(themeFor = "vaadin-tabs", value = "./themes/trampolineworld/views/userguide-theme.css")
 @RolesAllowed("ADMIN")
 public class AccountView extends HorizontalLayout implements BeforeEnterObserver {
 
 	private final UserService userService;
 	private final UserRepository userRepository;
-	String currentUsername = "";
-
-	private Image profilePicture;
+	private String currentUsername = "";
+	private User currentUser;
+	
+	private Avatar avatar = new Avatar();
+	private Dialog changeProfilePictureDialog = new Dialog();
 	private Upload upload;
 	private FileBuffer buffer;
 
 	private H2 headerAccount = new H2();
+	private H2 headerProfilePicture = new H2("Profile Picture");
 	private H2 headerUsername = new H2("Change Username");
 	private H2 headerEmail = new H2("Change Email");
 	private H2 headerPassword = new H2("Change Password");
 
 	VerticalLayout layout = new VerticalLayout();
+	HorizontalLayout rowAccountTitle = new HorizontalLayout();
 	HorizontalLayout rowAccountName = new HorizontalLayout();
+	HorizontalLayout rowChangeProfilePicture = new HorizontalLayout();
+	HorizontalLayout rowAvatarColors = new HorizontalLayout();
 	HorizontalLayout rowAccountEmail = new HorizontalLayout();
 	HorizontalLayout rowAccountRoles = new HorizontalLayout();
 	HorizontalLayout rowChangeUsername = new HorizontalLayout();
 	HorizontalLayout rowChangeEmail = new HorizontalLayout();
 	HorizontalLayout rowCurrentPassword = new HorizontalLayout();
 	HorizontalLayout rowNewPassword = new HorizontalLayout();
-	HorizontalLayout buttonRow = new HorizontalLayout();
 
-	private Label accountNameLabel = new Label("Username:");
-	private Label emailLabel = new Label("Email:");
-	private Label rolesLabel = new Label("Roles:");
-	private Label currentPasswordLabel = new Label("Current Password:");
-	private Label newPasswordLabel = new Label("New Password:");
+	private Label labelProfileColor = new Label("Profile Color:");
+	private Label labelAccountName = new Label("Username:");
+	private Label labelEmail = new Label("Email:");
+	private Label labelRoles = new Label("Roles:");
+	private Label labelCurrentPassword = new Label("Old Password:");
+	private Label labelNewPassword = new Label("New Password:");
 
-	private Paragraph accountNameParagraph = new Paragraph();
-	private Paragraph emailParagraph = new Paragraph();
-	private Paragraph rolesParagraph = new Paragraph();
+	private Paragraph paragraphAccountName = new Paragraph();
+	private Paragraph paragraphEmail = new Paragraph();
+	private Paragraph paragraphRoles = new Paragraph();
 
-	private TextField newEmailTextField = new TextField();
-	private TextField newUsernameTextField = new TextField();
-	private PasswordField currentPasswordTextField = new PasswordField();
-	private PasswordField newPasswordTextField = new PasswordField();
+	private TextField inputProfileUrl = new TextField();
+	private TextField inputNewEmail = new TextField();
+	private TextField inputNewUsername = new TextField();
+	private PasswordField inputCurrentPassword = new PasswordField();
+	private PasswordField inputNewPassword = new PasswordField();
 
-	private Button saveEmailButton = new Button("Save");
-	private Button saveUsernameButton = new Button("Save");
-	private Button savePasswordButton = new Button("Save");
+	private Button buttonSaveProfileUrl = new Button("Save");
+	private Button buttonSaveEmail = new Button("Save");
+	private Button buttonSaveUsername = new Button("Save");
+	private Button buttonSavePassword = new Button("Save Password");
 
 	public AccountView(UserService userService, UserRepository userRepository, PasswordEncoder passwordEncoder) {
 		this.userService = userService;
@@ -123,21 +129,19 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 		setId("userguide-view");
 
 		// Get current user information.
-		String currentUsername = VaadinRequest.getCurrent().getUserPrincipal().getName();
-		User currentUser = userRepository.findByUsername(currentUsername);
+		currentUsername = VaadinRequest.getCurrent().getUserPrincipal().getName();
+		currentUser  = userRepository.findByUsername(currentUsername);
 		String avatarImageUrl = currentUser.getProfilePictureUrl();
 		String currentHashedPassword = currentUser.getHashedPassword();
 		Set<Role> roles = currentUser.getRoles();
 
-		// Display profile picture, add listener to allow users to change it.
-		profilePicture = new Image(avatarImageUrl, "");
-		profilePicture.setWidth("5%");
-
-//		ContextMenu contextMenu = new ContextMenu();
-//		contextMenu.setOpenOnClick(true);
-//		contextMenu.setTarget(profilePicture);
-//		contextMenu.addItem("Change Picture", event -> {});
-//		configureUploadButton();
+		// Configure avatar.
+		avatar.setName(currentUsername);
+		avatar.setImage(avatarImageUrl);
+		avatar.setColorIndex(currentUser.getColorIndex());
+		
+		// Row to show avatar color previews.
+		configureAvatarPreviews(currentUsername, avatarImageUrl);
 
 		// Populate role components & configure rows.
 		populateRoleComponents(roles);
@@ -147,9 +151,10 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 		headerAccount.setText(currentUsername);
 		headerAccount.getElement().getStyle().set("margin-top", "18px !important");
 		headerAccount.getElement().getStyle().set("margin-bottom", "0px !important");
-		accountNameParagraph.setText(currentUser.getName());
-		emailParagraph.setText(currentUser.getEmail());
-		rolesParagraph.setText(roles.toString());
+		inputProfileUrl.setPlaceholder("Enter an image URL...");
+		paragraphAccountName.setText(currentUser.getName());
+		paragraphEmail.setText(currentUser.getEmail());
+		paragraphRoles.setText(roles.toString());
 
 		styleButtons();
 		configureHeaders();
@@ -157,20 +162,24 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 		configureLabels();
 
 		// Populate rows.
-		rowAccountName.add(accountNameLabel, accountNameParagraph);
-		rowAccountEmail.add(emailLabel, emailParagraph);
-		rowChangeEmail.add(newEmailTextField, saveEmailButton);
-		rowChangeUsername.add(newUsernameTextField, saveUsernameButton);
-		rowCurrentPassword.add(currentPasswordLabel, currentPasswordTextField);
-		rowNewPassword.add(newPasswordLabel, newPasswordTextField);
+		rowAccountTitle.add(avatar, headerAccount);
+		rowChangeProfilePicture.add(inputProfileUrl, buttonSaveProfileUrl);
+		rowAccountName.add(labelAccountName, paragraphAccountName);
+		rowAccountEmail.add(labelEmail, paragraphEmail);
+		rowChangeEmail.add(inputNewEmail, buttonSaveEmail);
+		rowChangeUsername.add(inputNewUsername, buttonSaveUsername);
+		rowCurrentPassword.add(labelCurrentPassword, inputCurrentPassword);
+		rowNewPassword.add(labelNewPassword, inputNewPassword);
 
 		// Add components to layout.
-		layout.add(headerAccount);
-//		layout.add(profilePicture);
+		layout.add(rowAccountTitle);
 //		layout.add(upload);
-//		layout.add(rowAccountName);
 		layout.add(rowAccountEmail);
 		layout.add(rowAccountRoles);
+		layout.add(headerProfilePicture);
+		layout.add(rowChangeProfilePicture);
+		layout.add(new Paragraph("Select one of the previews below to change your profile color. Changes are automatically applied."));
+		layout.add(rowAvatarColors);
 		layout.add(headerUsername);
 		layout.add(rowChangeUsername);
 		layout.add(headerEmail);
@@ -178,19 +187,28 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 		layout.add(headerPassword);
 		layout.add(rowCurrentPassword);
 		layout.add(rowNewPassword);
-		layout.add(savePasswordButton);
-		layout.setClassName("userguide-layout");
+		layout.add(buttonSavePassword);
+		layout.setClassName("account-layout");
 
 		// Configure layout.
 		this.add(layout);
-		this.setClassName("userguide-layout");
+		this.setClassName("account-layout");
 
 		/*
-		 * saveUsernameButton click listener
+		 * buttonSaveProfileUrl click listener
 		 */
-		saveUsernameButton.addClickListener(e -> {
+		buttonSaveProfileUrl.addClickListener(e -> {
+			currentUser.setProfilePictureUrl(inputProfileUrl.getValue());
+			userService.update(currentUser);
+			UI.getCurrent().getPage().reload();
+		});
+		
+		/*
+		 * buttonSaveUsername click listener
+		 */
+		buttonSaveUsername.addClickListener(e -> {
 
-			String desiredName = newUsernameTextField.getValue();
+			String desiredName = inputNewUsername.getValue();
 			currentUser.setName(desiredName);
 			currentUser.setUsername(desiredName);
 
@@ -209,10 +227,10 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 		});
 
 		/*
-		 * saveEmailButton click listener
+		 * buttonSaveEmail click listener
 		 */
-		saveEmailButton.addClickListener(e -> {
-			currentUser.setEmail(newEmailTextField.getValue());
+		buttonSaveEmail.addClickListener(e -> {
+			currentUser.setEmail(inputNewEmail.getValue());
 
 			try {
 				userService.update(currentUser);
@@ -228,11 +246,11 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 		});
 
 		/*
-		 * savePasswordButton click listener
+		 * buttonSavePassword click listener
 		 */
-		savePasswordButton.addClickListener(e -> {
-			if (passwordEncoder.matches(currentPasswordTextField.getValue(), currentHashedPassword)) {
-				String desiredHashedPassword = passwordEncoder.encode(newPasswordTextField.getValue());
+		buttonSavePassword.addClickListener(e -> {
+			if (passwordEncoder.matches(inputCurrentPassword.getValue(), currentHashedPassword)) {
+				String desiredHashedPassword = passwordEncoder.encode(inputNewPassword.getValue());
 				currentUser.setHashedPassword(desiredHashedPassword);
 
 				try {
@@ -251,6 +269,38 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 						.addThemeVariants(NotificationVariant.LUMO_ERROR);
 			}
 		});
+	}
+
+	private void configureAvatarPreviews(String currentUsername, String avatarImageUrl) {
+		Avatar avatarNone = new Avatar(currentUsername, avatarImageUrl);
+		Avatar avatarPink = new Avatar(currentUsername, avatarImageUrl);
+		Avatar avatarPurple = new Avatar(currentUsername, avatarImageUrl);
+		Avatar avatarGreen = new Avatar(currentUsername, avatarImageUrl);
+		Avatar avatarOrange = new Avatar(currentUsername, avatarImageUrl);
+		Avatar avatarMagenta = new Avatar(currentUsername, avatarImageUrl);
+		Avatar avatarBlue = new Avatar(currentUsername, avatarImageUrl);
+		Avatar avatarYellow = new Avatar(currentUsername, avatarImageUrl);
+
+		avatarNone.setColorIndex(7);
+		avatarPink.setColorIndex(0);
+		avatarPurple.setColorIndex(1);
+		avatarGreen.setColorIndex(2);
+		avatarOrange.setColorIndex(3);
+		avatarMagenta.setColorIndex(4);
+		avatarBlue.setColorIndex(5);
+		avatarYellow.setColorIndex(6);
+
+		avatarNone.getElement().addEventListener("click", e -> {avatar.setColorIndex(7); currentUser.setColorIndex(7); userService.update(currentUser);});
+		avatarPink.getElement().addEventListener("click", e -> {avatar.setColorIndex(0); currentUser.setColorIndex(0); userService.update(currentUser);});
+		avatarPurple.getElement().addEventListener("click", e -> {avatar.setColorIndex(1); currentUser.setColorIndex(1); userService.update(currentUser);});
+		avatarGreen.getElement().addEventListener("click", e -> {avatar.setColorIndex(2); currentUser.setColorIndex(2); userService.update(currentUser);});
+		avatarOrange.getElement().addEventListener("click", e -> {avatar.setColorIndex(3); currentUser.setColorIndex(3); userService.update(currentUser);});
+		avatarMagenta.getElement().addEventListener("click", e -> {avatar.setColorIndex(4); currentUser.setColorIndex(4); userService.update(currentUser);});
+		avatarBlue.getElement().addEventListener("click", e -> {avatar.setColorIndex(5); currentUser.setColorIndex(5); userService.update(currentUser);});
+		avatarYellow.getElement().addEventListener("click", e -> {avatar.setColorIndex(6); currentUser.setColorIndex(6); userService.update(currentUser);});
+		
+//		rowAvatarColors.add(profileColorLabel, avatarNone, avatarPink, avatarPurple, avatarGreen, avatarOrange, avatarMagenta, avatarBlue, avatarYellow);
+		rowAvatarColors.add(avatarNone, avatarPink, avatarPurple, avatarGreen, avatarOrange, avatarMagenta, avatarBlue, avatarYellow);
 	}
 
 /*
@@ -295,27 +345,29 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 //	}
 
 	private void configureHeaders() {
+		headerProfilePicture.getElement().getStyle().set("margin-top", "18px");
+		headerProfilePicture.getElement().getStyle().set("margin-bottom", "0px");
 		headerUsername.getElement().getStyle().set("margin-top", "18px");
 		headerEmail.getElement().getStyle().set("margin-top", "18px");
 		headerPassword.getElement().getStyle().set("margin-top", "18px");
 	}
 
 	private void configureParagraphs() {
-		accountNameParagraph.getElement().getStyle().set("margin-bottom", "0px !important");
-		emailParagraph.getElement().getStyle().set("margin-top", "0px !important");
-		emailParagraph.getElement().getStyle().set("margin-bottom", "0px !important");
-		rolesParagraph.getElement().getStyle().set("margin-top", "0px !important");
-		rolesParagraph.getElement().getStyle().set("margin-bottom", "0px !important");
+		paragraphAccountName.getElement().getStyle().set("margin-bottom", "0px !important");
+//		emailParagraph.getElement().getStyle().set("margin-top", "0px !important");
+		paragraphEmail.getElement().getStyle().set("margin-bottom", "0px !important");
+		paragraphRoles.getElement().getStyle().set("margin-top", "0px !important");
+		paragraphRoles.getElement().getStyle().set("margin-bottom", "0px !important");
 	}
 
 	private void populateRoleComponents(Set<Role> roles) {
 		if (roles.size() == 1) {
-			rolesLabel.setText("Role:");
+			labelRoles.setText("Role:");
 		} else if (roles.size() > 1) {
-			rolesLabel.setText("Roles:");
+			labelRoles.setText("Roles:");
 		}
 
-		rowAccountRoles.add(rolesLabel);
+		rowAccountRoles.add(labelRoles);
 
 		for (Role r : roles) {
 			String roleName = r.toString();
@@ -349,27 +401,30 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 	}
 
 	private void styleButtons() {
-		saveUsernameButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		saveEmailButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		savePasswordButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		buttonSaveProfileUrl.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		buttonSaveUsername.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		buttonSaveEmail.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		buttonSavePassword.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 	}
 
 	private void configureRows() {
+		rowAccountTitle.setAlignItems(Alignment.CENTER);
 		rowAccountName.setAlignItems(Alignment.BASELINE);
+		rowAvatarColors.setAlignItems(Alignment.CENTER);
 		rowAccountEmail.setAlignItems(Alignment.BASELINE);
 		rowAccountRoles.setAlignItems(Alignment.BASELINE);
 		rowChangeEmail.setAlignItems(Alignment.BASELINE);
 		rowChangeUsername.setAlignItems(Alignment.BASELINE);
 		rowCurrentPassword.setAlignItems(Alignment.BASELINE);
 		rowNewPassword.setAlignItems(Alignment.BASELINE);
-		buttonRow.setAlignItems(Alignment.BASELINE);
 	}
 
 	private void configureLabels() {
 		// Create HTML label elements.
-		accountNameLabel.addClassName("coloredLabel");
-		emailLabel.addClassName("coloredLabel");
-		rolesLabel.addClassName("coloredLabel");
+		labelProfileColor.addClassName("coloredLabel");
+		labelAccountName.addClassName("coloredLabel");
+		labelEmail.addClassName("coloredLabel");
+		labelRoles.addClassName("coloredLabel");
 	}
 
 	@Override

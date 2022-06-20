@@ -25,6 +25,7 @@ public class User extends AbstractEntityUUID {
     private Set<Role> roles;
     @Lob
     private String profilePictureUrl;
+    private Integer colorIndex;
 
     public String getUsername() {
         return username;
@@ -61,6 +62,12 @@ public class User extends AbstractEntityUUID {
 	}
 	public void setEmail(String email) {
 		this.email = email;
+	}
+	public Integer getColorIndex() {
+		return colorIndex;
+	}
+	public void setColorIndex(Integer colorIndex) {
+		this.colorIndex = colorIndex;
 	}
 
 }

@@ -52,6 +52,7 @@ public class ChatView extends VerticalLayout implements BeforeEnterObserver, Aft
 		// configuring an `ImageProvider` to `avatarGroup`.
 		UserInfo userInfo = new UserInfo(currentUser.getId().toString(), currentUser.getName());
 		userInfo.setImage(currentUser.getProfilePictureUrl());
+		userInfo.setColorIndex(currentUser.getColorIndex());
 
 		avatarGroup = new CollaborationAvatarGroup(userInfo, null);
 		avatarGroup.getStyle().set("visibility", "visible");
