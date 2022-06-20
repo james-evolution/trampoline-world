@@ -10,6 +10,7 @@ import com.trampolineworld.views.chat.ChatView;
 import com.trampolineworld.views.contact.ContactView;
 import com.trampolineworld.views.debug.DebugView;
 import com.trampolineworld.views.export.ExportView;
+import com.trampolineworld.views.manageusers.ManageUsersView;
 import com.trampolineworld.views.trampolineorders.TrampolineOrdersView;
 import com.trampolineworld.views.trampolineordersreadonly.TrampolineOrdersReadOnlyView;
 import com.trampolineworld.views.userguide.UserGuideView;
@@ -180,6 +181,7 @@ public class MainLayout extends AppLayout {
 				new MenuItemInfo("Export PDF / CSV", "las la-file-pdf", ExportView.class), //
 				new MenuItemInfo("", "", ChatView.class),
 				new MenuItemInfo("Account", "lar la-user", AccountView.class), //
+				new MenuItemInfo("Manage Users", "las la-users", ManageUsersView.class), //
 				new MenuItemInfo("User Guide", "las la-info-circle", UserGuideView.class), //
 				new MenuItemInfo("Contact", "las la-at", ContactView.class), //
 				new MenuItemInfo("Debug", "las la-bug", DebugView.class), //

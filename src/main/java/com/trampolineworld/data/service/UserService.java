@@ -1,6 +1,9 @@
 package com.trampolineworld.data.service;
 
+import com.trampolineworld.data.entity.TrampolineOrder;
 import com.trampolineworld.data.entity.User;
+
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,5 +40,18 @@ public class UserService {
     public int count() {
         return (int) repository.count();
     }
+    
+    public List<User> findAll(String filterText) {
+    	if (filterText == null || filterText.isEmpty()) {
+    		return repository.findAll();
+    	}
+    	else {
+    		return repository.search(filterText);
+    	}
+    }
+    
+    public List<User> findAllNoFilter() {
+ 		return repository.findAll();
+     }       
 
 }

@@ -1,5 +1,6 @@
 package com.trampolineworld;
 
+import com.trampolineworld.utilities.DiscordWebhook;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -8,8 +9,18 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+
+import javax.mail.Authenticator;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -22,7 +33,11 @@ import org.springframework.mail.javamail.JavaMailSender;
 import com.trampolineworld.license.LicenseStorageImplementation;
 import com.vaadin.collaborationengine.CollaborationEngine;
 import com.vaadin.collaborationengine.CollaborationEngineConfiguration;
+import com.vaadin.collaborationengine.LicenseEventHandler;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.server.PWA;
@@ -52,7 +67,8 @@ import com.vaadin.flow.theme.lumo.Lumo;
 public class Application extends SpringBootServletInitializer implements AppShellConfigurator {
 	
     @Autowired
-    private JavaMailSender emailSender;
+    private static JavaMailSender emailSender;
+    private final static String webhookURL = "https://ptb.discord.com/api/webhooks/988366724682379294/g20NbSzfeL_QrZhZVWt-2rJh4I6MmSU_FtkPNv-9qeYq1MHbs5TKsv1g2NkMq8TLYT9o";
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
@@ -63,6 +79,20 @@ public class Application extends SpringBootServletInitializer implements AppShel
         CollaborationEngineConfiguration configuration = new CollaborationEngineConfiguration(
                 licenseEvent -> {
                     // See <<ce.production.license-events>>
+                    switch (licenseEvent.getType()) {
+                    case GRACE_PERIOD_STARTED:
+                    case LICENSE_EXPIRES_SOON:
+                    	sendDiscordWebhookMessage(licenseEvent.getMessage());
+                        break;
+                    case GRACE_PERIOD_ENDED:
+                    case LICENSE_EXPIRED:
+                    	sendDiscordWebhookMessage(licenseEvent.getMessage());
+                        break;
+                    }
+                    sendDiscordWebhookMessage("Vaadin Collaboration Engine license needs to be updated");
+                    sendDiscordWebhookMessage(licenseEvent.getMessage());
+                    sendEmail("admin@evolutioncoding.net","Vaadin Collaboration Engine license needs to be updated",
+                            licenseEvent.getMessage());                	
                 });
         
 
@@ -85,30 +115,18 @@ public class Application extends SpringBootServletInitializer implements AppShel
 	        executeShellScript(new String[]{"cd target ; jar -xf trampolineworld-1.0-SNAPSHOT.jar /META-INF/resources/ce-license.json >> output.txt"});
 	        executeShellScript(new String[]{"ls"});
 
-         A separate method for attempting to execute shell commands:
+			EDIT: The working solution is below. Use echo in cohesion with a redirection operator to redirect echo output (the license json information) to a new license file.
          */
 
         executeShellScript(new String[]{"echo '{\"content\":{\"key\":\"8b91663f-e7bc-45b2-9e01-0ea1ac1474ce\",\"owner\":\"Vaadin Core License\",\"quota\":20,\"endDate\":\"2100-01-01\"},\"checksum\":\"Q1sl676t10ofL0x23/TTwXrHK6Sc1VRujTetRpEBF4I=\"}' > ce-license.json"});
-//        extractLicenseFromJar();
-        
-        /*
-         * CONFIGURING THE LICENSE PATH ON HEROKU:
-         * Two paths have been successful so far:
-         * 
-         * String licensePath = "target";
-         * String licensePath = "/app/META-INF/resources/"; 
-         */
         String licensePath = "/app"; // This works.
 		configuration.setDataDir(licensePath);
-//		
-//        LicenseStorageImplementation licenseStorageImplementation = new LicenseStorageImplementation();
-//		configuration.setLicenseStorage(licenseStorageImplementation);
 		
 		return configuration;
     }
     
     /*
-     * Robert's method for executing shell scripts (modified)
+     * Robert's & Jeremy's method for executing shell scripts
      */
     public void executeShellScript(final String[] command) {
     	
@@ -198,7 +216,7 @@ public class Application extends SpringBootServletInitializer implements AppShel
 	/*
 	 * Method for sending e-mails.
 	 */
-    public void sendEmail(String recipient, String subject, String text) {
+    public static void sendEmail(String recipient, String subject, String text) {
   	        SimpleMailMessage message = new SimpleMailMessage(); 
   	        message.setFrom("james.evolution.1996@gmail.com");
   	        message.setTo(recipient); 
@@ -206,4 +224,22 @@ public class Application extends SpringBootServletInitializer implements AppShel
   	        message.setText(text);
   	        emailSender.send(message);
   	    }
+    
+    public static void sendDiscordWebhookMessage(String message) {
+    	DiscordWebhook webhook = new DiscordWebhook(webhookURL);
+    	webhook.setUsername("TW License Event Handler");
+    	webhook.setContent("<@&988212618059726870> " + message);
+    	webhook.setTts(true);
+
+		try {
+			webhook.execute();
+			Notification.show("Message sent successfully!", 4000, Position.TOP_CENTER)
+			.addThemeVariants(NotificationVariant.LUMO_SUCCESS);				
+		} catch (IOException e1) {
+			e1.printStackTrace();
+			Notification.show("Message failed to send!", 4000, Position.TOP_CENTER)
+			.addThemeVariants(NotificationVariant.LUMO_ERROR);				
+		}
+    	
+    }
 }

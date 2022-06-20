@@ -1,23 +1,18 @@
-package com.trampolineworld.views.trampolineordersreadonly;
+package com.trampolineworld.views.manageusers;
 
-import com.trampolineworld.data.entity.TrampolineOrder;
+import com.trampolineworld.data.Role;
 import com.trampolineworld.data.entity.User;
-import com.trampolineworld.data.service.TrampolineOrderService;
 import com.trampolineworld.data.service.UserRepository;
 import com.trampolineworld.data.service.UserService;
-import com.trampolineworld.security.AuthenticatedUser;
 import com.trampolineworld.views.MainLayout;
-import com.trampolineworld.views.viewsingleorder.ViewSingleOrder;
 import com.vaadin.collaborationengine.CollaborationAvatarGroup;
 import com.vaadin.collaborationengine.CollaborationBinder;
 import com.vaadin.collaborationengine.UserInfo;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -28,62 +23,63 @@ import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
-import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Result;
 import com.vaadin.flow.data.binder.ValidationException;
-import com.vaadin.flow.data.converter.StringToDoubleConverter;
-import com.vaadin.flow.data.converter.StringToIntegerConverter;
-import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.data.binder.ValueContext;
+import com.vaadin.flow.data.converter.Converter;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.VaadinServletRequest;
-import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
-import java.sql.Date;
-import java.time.LocalDate;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+
 import javax.annotation.security.RolesAllowed;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-@PageTitle("All Orders")
-@Route(value = "trampoline_orders_read/:trampolineOrderID?/:action?(edit)", layout = MainLayout.class)
-@RolesAllowed({"USER"})
+@PageTitle("Manage Users")
+@Route(value = "users/:userID?/:action?(edit)", layout = MainLayout.class)
+@RolesAllowed({ "ADMIN" })
 @Uses(Icon.class)
 @CssImport(themeFor = "vaadin-grid", value = "./themes/trampolineworld/views/grid-theme.css")
 @CssImport(value = "./themes/trampolineworld/views/dialog.css", themeFor = "vaadin-dialog-overlay")
-public class TrampolineOrdersReadOnlyView extends Div implements BeforeEnterObserver {
+public class ManageUsersView extends Div implements BeforeEnterObserver {
 
-	public static String username = "";
-
-	private final String TRAMPOLINEORDER_ID = "trampolineOrderID";
-	private final String TRAMPOLINEORDER_EDIT_ROUTE_TEMPLATE = "trampoline_orders_read/%s/edit";
-	private final String TRAMPOLINEORDER_VIEW_ROUTE_TEMPLATE = "view_order/%s";
-	private Long targetId;
-	private Grid<TrampolineOrder> grid = new Grid<>(TrampolineOrder.class, false);
+	private final String USER_ID = "userID";
+	private final String USER_EDIT_ROUTE_TEMPLATE = "users/%s/edit";
+	private final String USER_VIEW_ROUTE_TEMPLATE = "view_user/%s";
+	private UUID targetId;
+	private Grid<User> grid = new Grid<>(User.class, false);
 	CollaborationAvatarGroup avatarGroup;
 	H2 editTitle;
 	private TextField filterTextField = new TextField();
-	private Checkbox complete;
-	private TextField firstName, lastName, phoneNumber, email, subtotal, total;
-	private TextArea orderDescription, measurements;
-	private DatePicker date;
+	private TextField username, email, profilePictureUrl;
+	private PasswordField hashedPassword;
+	
+	CheckboxGroup<Role> roles;
+	Select<Integer> colorIndex;
 
-	private GridContextMenu<TrampolineOrder> menu;
+	private GridContextMenu<User> menu;
 	private Div editorLayoutDiv;
 	private HorizontalLayout buttonHeaderContainer = new HorizontalLayout();
 
@@ -91,23 +87,22 @@ public class TrampolineOrdersReadOnlyView extends Div implements BeforeEnterObse
 
 	private Button cancel = new Button("Cancel");
 	private Button save = new Button("Save");
-	private Button newOrderButton = new Button("New Order");
+	private Button newUserButton = new Button("New User");
 	private Button hideSidebarButton = new Button("Hide");
-	
-	private CollaborationBinder<TrampolineOrder> binder;
-	private TrampolineOrder trampolineOrder;
-	private final TrampolineOrderService trampolineOrderService;
+
+	private CollaborationBinder<User> binder;
+	private User user;
 	private final UserService userService;
 	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
 
 	@Autowired
-	public TrampolineOrdersReadOnlyView(TrampolineOrderService trampolineOrderService, UserService userService, UserRepository userRepository) {
-		this.trampolineOrderService = trampolineOrderService;
+	public ManageUsersView(UserService userService,
+			UserRepository userRepository, PasswordEncoder passwordEncoder) {
 		this.userService = userService;
 		this.userRepository = userRepository;
+		this.passwordEncoder = passwordEncoder;
 		addClassNames("trampoline-orders-view");
-
-//    	Notification.show("Welcome, " + username, 4000, Position.TOP_CENTER).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
 		String currentUsername = VaadinRequest.getCurrent().getUserPrincipal().getName();
 		User currentUser = userRepository.findByUsername(currentUsername);
@@ -121,7 +116,7 @@ public class TrampolineOrdersReadOnlyView extends Div implements BeforeEnterObse
 		UserInfo userInfo = new UserInfo(currentUser.getId().toString(), currentUser.getName());
 		userInfo.setImage(currentUser.getProfilePictureUrl());
 		userInfo.setColorIndex(currentUser.getColorIndex());
-		
+
 		// Create split-view UI
 		SplitLayout splitLayout = new SplitLayout();
 
@@ -140,36 +135,51 @@ public class TrampolineOrdersReadOnlyView extends Div implements BeforeEnterObse
 		add(buttonHeaderContainer);
 		add(splitLayout);
 
+		
+		/*
+		 * DISABLING THIS FOR NOW.
+		 * 
+		 * Two reasons:
+		 * 
+		 * 1. User accounts have very little information in them, so a detailed view option isn't necessary right now.
+		 * 2. Deleting users in general is a bad idea because another will almost inevitably be created.
+		 * 
+		 * This is an issue because we don't want to hit or surpass the 20 user / month CollaborationEngine limit.
+		 * It's better to repurpose existing user accounts (changing username / password) than it is to generate a new id
+		 * that add to the 20 / month quota.
+		 * 
+		 * Context menu may return later for things such as viewing an audit log of a particular user's actions in the system.
+		 */
 		// Create context menu.
-		createContextMenu(trampolineOrderService); // View & Delete buttons.
+//		createContextMenu(userService); // View & Delete buttons.
 
 		// Configure the grid.
-		configureGrid(trampolineOrderService, splitLayout);
+		configureGrid(userService, splitLayout);
 
 		// Configure & add delete confirmation dialog.
-		configureDeleteDialog(trampolineOrderService);
+		configureDeleteDialog(userService);
 		add(confirmDeleteDialog);
 
 		// Configure the form.
 		configureForm(userInfo);
-		configureFormButtons(trampolineOrderService);
+		configureFormButtons(userService);
 	}
 
-	private void configureDeleteDialog(TrampolineOrderService trampolineOrderService) {
-		confirmDeleteDialog.setHeaderTitle("Delete Order");
+	private void configureDeleteDialog(UserService userService) {
+		confirmDeleteDialog.setHeaderTitle("Delete User");
 		confirmDeleteDialog.setDraggable(true);
 		confirmDeleteDialog.addClassName("deleteDialog");
 
 		VerticalLayout dialogLayout = createDialogLayout();
 		confirmDeleteDialog.add(dialogLayout);
 
-		Button dialogDeleteOrderButton = createDialogDeleteOrderButton(confirmDeleteDialog, trampolineOrderService);
+		Button dialogDeleteUserButton = createDialogDeleteUserButton(confirmDeleteDialog, userService);
 		Button cancelButton = new Button("Cancel", e -> confirmDeleteDialog.close());
-		confirmDeleteDialog.getFooter().add(dialogDeleteOrderButton);
+		confirmDeleteDialog.getFooter().add(dialogDeleteUserButton);
 		confirmDeleteDialog.getFooter().add(cancelButton);
 	}
 
-	private void configureFormButtons(TrampolineOrderService trampolineOrderService) {
+	private void configureFormButtons(UserService userService) {
 		// When the cancel button is clicked, clear the form and refresh the grid.
 		cancel.addClickListener(e -> {
 			clearForm();
@@ -182,19 +192,19 @@ public class TrampolineOrdersReadOnlyView extends Div implements BeforeEnterObse
 		// When the save button is clicked, save the new order.
 		save.addClickListener(e -> {
 			try {
-				if (this.trampolineOrder == null) {
-					this.trampolineOrder = new TrampolineOrder();
+				if (this.user == null) {
+					this.user = new User();
 				}
-				binder.writeBean(this.trampolineOrder);
+				binder.writeBean(this.user);
 
-				trampolineOrderService.update(this.trampolineOrder);
+				userService.update(this.user);
 				clearForm();
 				updateGrid();
 				editorLayoutDiv.setVisible(false);
 				hideSidebarButton.setVisible(false);
 				Notification.show("Order details stored.", 4000, Position.TOP_CENTER)
 						.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-				UI.getCurrent().navigate(TrampolineOrdersReadOnlyView.class);
+				UI.getCurrent().navigate(ManageUsersView.class);
 			} catch (ValidationException validationException) {
 				Notification.show("Invalid form input.", 4000, Position.TOP_CENTER)
 						.addThemeVariants(NotificationVariant.LUMO_ERROR);
@@ -203,48 +213,64 @@ public class TrampolineOrdersReadOnlyView extends Div implements BeforeEnterObse
 	}
 
 	private void configureForm(UserInfo userInfo) {
-		binder = new CollaborationBinder<>(TrampolineOrder.class, userInfo);
-		// Bind fields. This is where you'd define e.g. validation rules
-		binder.forField(subtotal, String.class).asRequired("Subtotal field cannot be empty.")
-				.withConverter(new StringToDoubleConverter("Only numbers are allowed")).bind("subtotal");
-		binder.forField(total, String.class).asRequired("Total field cannot be empty.")
-				.withConverter(new StringToDoubleConverter("Only numbers are allowed")).bind("total");
-		binder.forField(date, LocalDate.class).asRequired("Date field cannot be empty.").bind("date");
+		binder = new CollaborationBinder<>(User.class, userInfo);
+		binder.forField(roles, Set.class, Role.class).bind("roles");
+		binder.forField(username, String.class).bind("username");
+		binder.forField(username, String.class).bind("name");
+		binder.forField(hashedPassword, String.class).withConverter(new HashedPasswordConverter(userInfo)).bind("hashedPassword");
 		binder.bindInstanceFields(this);
 	}
+	
+	private class HashedPasswordConverter implements Converter<String, String> {
+		
+		User user;
+		
+		HashedPasswordConverter(UserInfo userInfo) {
+			user = userRepository.findByUsername(userInfo.getName());
+		}
 
-	private void configureGrid(TrampolineOrderService trampolineOrderService, SplitLayout splitLayout) {
-		grid.setColumnReorderingAllowed(true);
-		grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
+		@Override
+		public Result<String> convertToModel(String value, ValueContext context) {
+			
+			// If no password was entered into the form, keep the existing one.
+			if (value.isEmpty() || value == null) {
+				return Result.ok(user.getHashedPassword());
+			}
+			// Else, encrypt the new password.
+			else {
+				try {
+					return Result.ok(passwordEncoder.encode(value));
+				} catch (Exception e) {
+					return Result.error("Password encryption failed.");
+				}
+			}
+		}
+
+		@Override
+		public String convertToPresentation(String value, ValueContext context) {
+			// If no password was entered into the form, keep the existing one.
+			if (value.isEmpty() || value == null) {
+				return user.getHashedPassword();
+			}
+			// Else, encrypt the new password.
+			else {
+				return passwordEncoder.encode(value);
+			}
+		}
+		
+	}
+
+	private void configureGrid(UserService userService, SplitLayout splitLayout) {
 		grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
 //		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 		
 		// Add columns to the grid.
-		grid.addColumn("complete").setAutoWidth(true).setResizable(true);
-		grid.addColumn("firstName").setAutoWidth(true).setResizable(true);
-		grid.addColumn("lastName").setAutoWidth(true).setResizable(true);
-		grid.addColumn("phoneNumber").setAutoWidth(true).setResizable(true);
+		grid.addColumn("username").setAutoWidth(true).setResizable(true);
 		grid.addColumn("email").setAutoWidth(true).setResizable(true);
-		grid.addColumn("orderDescription").setWidth("300px").setResizable(true);
-		grid.addColumn("measurements").setWidth("300px").setResizable(true);
-		grid.addColumn("subtotal").setAutoWidth(true).setResizable(true);
-		grid.addColumn("total").setAutoWidth(true).setResizable(true);
-		grid.addColumn("date").setAutoWidth(true).setResizable(true);
+		grid.addColumn(createStatusComponentRenderer()).setHeader("Roles").setAutoWidth(true).setResizable(true);
+		grid.addColumn("profilePictureUrl").setWidth("300px").setResizable(true);
+		grid.addColumn("colorIndex").setAutoWidth(true).setResizable(true);
 		updateGrid();
-
-//        grid.setItems(query -> trampolineOrderService.list(
-//                PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
-//                .stream());
-
-
-		// Class name generator.
-		grid.setClassNameGenerator(order -> {
-			if (order.isComplete()) {
-				return "complete";
-			} else {
-				return "incomplete";
-			}
-		});
 
 		// When a row is selected or deselected, populate form.
 		grid.asSingleSelect().addValueChangeListener(event -> {
@@ -252,32 +278,76 @@ public class TrampolineOrdersReadOnlyView extends Div implements BeforeEnterObse
 				editorLayoutDiv.setVisible(true);
 				hideSidebarButton.setVisible(true);
 				splitLayout.setSplitterPosition(0);
-				UI.getCurrent().navigate(String.format(TRAMPOLINEORDER_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+				UI.getCurrent().navigate(String.format(USER_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
 			} else {
 				editorLayoutDiv.setVisible(false);
 				clearForm();
-				UI.getCurrent().navigate(TrampolineOrdersReadOnlyView.class);
+				UI.getCurrent().navigate(ManageUsersView.class);
 			}
 		});
 	}
 
 	private void updateGrid() {
-		grid.setItems(trampolineOrderService.findAll(filterTextField.getValue()));
+		grid.setItems(userService.findAll(filterTextField.getValue()));
+	}
+	
+	private static Icon createIcon(String roleName) {
+		Icon icon = VaadinIcon.USER.create();
+
+		if (roleName == "ADMIN") {
+			icon = VaadinIcon.USER_STAR.create();
+		} else if (roleName == "TECH") {
+			icon = VaadinIcon.DESKTOP.create();
+		} else if (roleName == "USER") {
+			icon = VaadinIcon.USER.create();
+		}
+		icon.getStyle().set("padding", "var(--lumo-space-xs");
+
+		return icon;
+	}
+	
+	private static final SerializableBiConsumer<Span, User> statusComponentUpdater = (span, user) -> {
+		
+		Set<Role> roles = user.getRoles();
+		
+		for (Role r : roles) {
+			String roleName = r.toString();
+			Span badge = new Span(createIcon(roleName), new Span(roleName));
+			badge.getElement().getStyle().set("margin", "3px");
+
+			if (roleName == "ADMIN") {
+				badge.getElement().getThemeList().add("badge success");
+			} else if (roleName == "TECH") {
+				badge.getElement().getThemeList().add("badge");
+			} else if (roleName == "USER") {
+				badge.getElement().getThemeList().add("badge contrast");
+			}
+			span.add(badge);
+		}
+		
+	};
+
+	private static ComponentRenderer<Span, User> createStatusComponentRenderer() {
+	    return new ComponentRenderer<>(Span::new, statusComponentUpdater);
 	}
 
-	private void createContextMenu(TrampolineOrderService trampolineOrderService) {
+	private void createContextMenu(UserService userService) {
 		// Add the context menu to the grid.
 		menu = grid.addContextMenu();
 
 		// Listen for the event in which the context menu is opened, then save the id of
-		// the TrampolineOrder that was right clicked on.
+		// the user that was right clicked on.
 		menu.addGridContextMenuOpenedListener(event -> {
 			targetId = event.getItem().get().getId();
 		});
-		// Add menu items to the grid, send user to the 'ViewSingleOrder' page with the
-		// TrampolineOrder id as an argument.
-		menu.addItem("View", event -> {
-			UI.getCurrent().navigate(String.format(TRAMPOLINEORDER_VIEW_ROUTE_TEMPLATE, targetId.toString()));
+		// Add menu items to the grid.
+		menu.addItem("Delete", event -> {
+			try {
+				confirmDeleteDialog.open();
+			} catch (Exception e) {
+				Notification.show("An error has occurred, please contact the developer.", 4000, Position.TOP_CENTER)
+						.addThemeVariants(NotificationVariant.LUMO_ERROR);
+			}
 		});
 	}
 
@@ -286,10 +356,10 @@ public class TrampolineOrdersReadOnlyView extends Div implements BeforeEnterObse
 		buttonHeaderContainer.setSpacing(false);
 		buttonHeaderContainer.setAlignItems(Alignment.BASELINE);
 
-		newOrderButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		newOrderButton.getElement().getStyle().set("margin-left", "6px");
-		newOrderButton.getElement().getStyle().set("margin-right", "6px");
-		newOrderButton.addClickListener(e -> {
+		newUserButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		newUserButton.getElement().getStyle().set("margin-left", "6px");
+		newUserButton.getElement().getStyle().set("margin-right", "6px");
+		newUserButton.addClickListener(e -> {
 			clearForm();
 			updateGrid();
 			editorLayoutDiv.setVisible(true);
@@ -315,25 +385,25 @@ public class TrampolineOrdersReadOnlyView extends Div implements BeforeEnterObse
 																	// user to finish typing.
 		filterTextField.addValueChangeListener(e -> updateGrid());
 
-		buttonHeaderContainer.add(filterTextField, newOrderButton, hideSidebarButton);
+		buttonHeaderContainer.add(filterTextField, newUserButton, hideSidebarButton);
 	}
 
 	@Override
 	public void beforeEnter(BeforeEnterEvent event) {
-		Optional<Long> trampolineOrderId = event.getRouteParameters().get(TRAMPOLINEORDER_ID).map(Long::valueOf);
-		if (trampolineOrderId.isPresent()) {
-			Optional<TrampolineOrder> trampolineOrderFromBackend = trampolineOrderService.get(trampolineOrderId.get());
-			if (trampolineOrderFromBackend.isPresent()) {
-				populateForm(trampolineOrderFromBackend.get());
+		Optional<UUID> userID = event.getRouteParameters().get(USER_ID).map(UUID::fromString);
+		if (userID.isPresent()) {
+			Optional<User> userFromBackend = userService.get(userID.get());
+			if (userFromBackend.isPresent()) {
+				populateForm(userFromBackend.get());
 			} else {
 				Notification
-						.show(String.format("The requested trampolineOrder was not found, ID = %d",
-								trampolineOrderId.get()), 4000, Position.TOP_CENTER)
+						.show(String.format("The requested user was not found, ID = %d",
+								userID.get()), 4000, Position.TOP_CENTER)
 						.addThemeVariants(NotificationVariant.LUMO_ERROR);
 				// When a row is selected but the data is no longer available, update the grid
 				// component.
 				updateGrid();
-				event.forwardTo(TrampolineOrdersReadOnlyView.class);
+				event.forwardTo(ManageUsersView.class);
 			}
 		}
 	}
@@ -350,10 +420,10 @@ public class TrampolineOrdersReadOnlyView extends Div implements BeforeEnterObse
 		return dialogLayout;
 	}
 
-	private Button createDialogDeleteOrderButton(Dialog dialog, TrampolineOrderService trampolineOrderService) {
+	private Button createDialogDeleteUserButton(Dialog dialog, UserService userService) {
 		Button dialogDeleteButton = new Button("Delete", e -> {
 			try {
-				trampolineOrderService.delete(targetId);
+				userService.delete(targetId);
 				Notification.show("Order deleted.", 4000, Position.TOP_CENTER)
 						.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 			} catch (Exception exception) {
@@ -377,20 +447,34 @@ public class TrampolineOrdersReadOnlyView extends Div implements BeforeEnterObse
 		Div editorDiv = new Div();
 		editorDiv.setClassName("editor");
 		editorLayoutDiv.add(editorDiv);
+		
+//		grid.addColumn("username").setAutoWidth(true).setResizable(true);
+//		grid.addColumn("email").setAutoWidth(true).setResizable(true);
+//		grid.addColumn("roles").setAutoWidth(true).setResizable(true);
+//		grid.addColumn("profilePictureUrl").setWidth("300px").setResizable(true);
+//		grid.addColumn("colorIndex").setAutoWidth(true).setResizable(true);
 
 		FormLayout formLayout = new FormLayout();
-		firstName = new TextField("First Name");
-		lastName = new TextField("Last Name");
-		phoneNumber = new TextField("Phone Number");
+		username = new TextField("Username");
 		email = new TextField("Email");
-		orderDescription = new TextArea("Order Description");
-		measurements = new TextArea("Measurements");
-		subtotal = new TextField("Subtotal");
-		total = new TextField("Total");
-		date = new DatePicker("Date");
-		complete = new Checkbox("Complete");
-		Component[] fields = new Component[] { firstName, lastName, phoneNumber, email, orderDescription, measurements,
-				subtotal, total, date, complete };
+		
+		roles = new CheckboxGroup<>();
+		roles.setLabel("Roles");
+		roles.setItems(Role.ADMIN, Role.USER, Role.TECH);
+
+		colorIndex = new Select<>();
+		colorIndex.setLabel("Color Index");
+		colorIndex.setItems(0, 1, 2, 3, 4, 5, 6, 7);
+		colorIndex.setHelperText("0: None, 1: Pink, 2: Purple, 3: Green, 4: Orange, 5: Magenta, 6: Cyan, 7: Yellow");
+		colorIndex.setHelperText("[0=None] [1=Pink] [2=Purple] [3=Green] [4=Orange] [5=Magenta] [6=Cyan] [7=Yellow]");
+//		roles.setValue(Role.USER);
+		
+		hashedPassword = new PasswordField();
+		hashedPassword.setLabel("Password");
+		hashedPassword.setHelperText("All passwords are encrypted into hashes after submission.");
+		
+		profilePictureUrl = new TextField("Profile Picture URL");
+		Component[] fields = new Component[] { username, email, roles, hashedPassword, profilePictureUrl, colorIndex };
 
 		formLayout.add(fields);
 		editorDiv.add(avatarGroup, editTitle, formLayout);
@@ -425,18 +509,19 @@ public class TrampolineOrdersReadOnlyView extends Div implements BeforeEnterObse
 		populateForm(null);
 	}
 
-	private void populateForm(TrampolineOrder value) {
-		this.trampolineOrder = value;
+	private void populateForm(User value) {
+		this.user = value;
 		String topic = null;
-		if (this.trampolineOrder != null && this.trampolineOrder.getId() != null) {
-			topic = "trampolineOrder/" + this.trampolineOrder.getId();
+		
+		if (this.user != null && this.user.getId() != null) {
+			topic = "user/" + this.user.getId();
 //            avatarGroup.getStyle().set("visibility", "visible");
-			editTitle.setText("Edit Order");
+			editTitle.setText("Edit User");
 		} else {
 //            avatarGroup.getStyle().set("visibility", "hidden");
-			editTitle.setText("New Order");
+			editTitle.setText("New User");
 		}
-		binder.setTopic(topic, () -> this.trampolineOrder);
+		binder.setTopic(topic, () -> this.user);
 		avatarGroup.setTopic(topic);
 	}
 }

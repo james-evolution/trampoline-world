@@ -127,7 +127,7 @@ public class ContactView extends HorizontalLayout {
 			webhook.setUsername(currentUsername);
 			webhook.setContent("<@&988212618059726870> " + webhookMessage);
 			webhook.setAvatarUrl(avatarURL);
-			webhook.setTts(false); // Text to speech.
+			webhook.setTts(true); // Text to speech.
 			
 //			webhook.addEmbed(discordEmbed);
 			try {
@@ -218,7 +218,7 @@ public class ContactView extends HorizontalLayout {
 		contactParagraph = new Paragraph(
 				"Feel free to reach out to the developer through email or Discord. If you know his personal number, you may reach him there as well.");
 
-		emailHeader.setText("Email the Developer");
+		emailHeader.setText("Send an Email");
 
 		emailSubject.setPlaceholder("Subject");
 		emailSubject.setWidth("100%");

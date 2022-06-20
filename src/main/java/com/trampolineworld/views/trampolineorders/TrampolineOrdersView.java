@@ -28,6 +28,7 @@ import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
@@ -40,7 +41,9 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.converter.StringToDoubleConverter;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -210,7 +213,14 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 	}
 
 	private void configureGrid(TrampolineOrderService trampolineOrderService, SplitLayout splitLayout) {
+		grid.setColumnReorderingAllowed(true);
+		grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
+		grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
+		grid.addThemeVariants(GridVariant.LUMO_COMPACT);
+//		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+		
 		// Add columns to the grid.
+//		grid.addColumn(createStatusComponentRenderer()).setAutoWidth(true).setResizable(true);
 		grid.addColumn("complete").setAutoWidth(true).setResizable(true);
 		grid.addColumn("firstName").setAutoWidth(true).setResizable(true);
 		grid.addColumn("lastName").setAutoWidth(true).setResizable(true);
@@ -227,7 +237,6 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 //                PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
 //                .stream());
 
-		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
 		// Class name generator.
 		grid.setClassNameGenerator(order -> {
@@ -255,6 +264,24 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 
 	private void updateGrid() {
 		grid.setItems(trampolineOrderService.findAll(filterTextField.getValue()));
+	}
+	
+	private static final SerializableBiConsumer<Span, TrampolineOrder> statusComponentUpdater = (span, order) -> {
+	    boolean complete = order.isComplete();
+	    String theme = String
+	            .format("badge %s", complete ? "success" : "error");
+	    span.getElement().setAttribute("theme", theme);
+	    
+	    if (order.isComplete()) {
+	    	span.setText("Complete");
+	    }
+	    else {
+	    	span.setText("Incomplete");
+	    }
+	};
+
+	private static ComponentRenderer<Span, TrampolineOrder> createStatusComponentRenderer() {
+	    return new ComponentRenderer<>(Span::new, statusComponentUpdater);
 	}
 
 	private void createContextMenu(TrampolineOrderService trampolineOrderService) {
