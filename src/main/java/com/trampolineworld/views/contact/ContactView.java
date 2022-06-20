@@ -1,5 +1,7 @@
 package com.trampolineworld.views.contact;
 
+import com.trampolineworld.utilities.DiscordWebhook;
+import com.trampolineworld.utilities.DiscordWebhook.EmbedObject;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -25,6 +27,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.VaadinRequest;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -112,11 +115,21 @@ public class ContactView extends HorizontalLayout {
 			 * To ping James Z#0136: <@178357031302987777>
 			 * To ping the Developer role: <@&988212618059726870>
 			 */
+			// Configure Discord embed.
+//			EmbedObject discordEmbed = new EmbedObject();
+//			discordEmbed.setTitle("Message from TW");
+//			discordEmbed.setDescription("<@&988212618059726870> " + webhookMessage);
+//			discordEmbed.setColor(Color.CYAN);
+//			discordEmbed.setAuthor(currentUsername, "https://trampolineworld.herokuapp.com/chat", avatarURL);
+//			discordEmbed.setFooter(currentUsername, avatarURL);
+			
 			// Configure webhook message information.
 			webhook.setUsername(currentUsername);
 			webhook.setContent("<@&988212618059726870> " + webhookMessage);
 			webhook.setAvatarUrl(avatarURL);
 			webhook.setTts(false); // Text to speech.
+			
+//			webhook.addEmbed(discordEmbed);
 			try {
 				webhook.execute();
 				Notification.show("Message sent successfully!", 4000, Position.TOP_CENTER)
@@ -153,6 +166,7 @@ public class ContactView extends HorizontalLayout {
 	}
 
 	private void configureWebhookElements() {
+		
 		webhookHeader.setText("Send a Discord Message");
 		webhookHeader.getElement().getStyle().set("margin-top", "16px !important");
 		webhookHeader.setWidth("100%");
