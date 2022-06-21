@@ -164,6 +164,7 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 		configureHeaders();
 		configureParagraphs();
 		configureLabels();
+//		setHelpers(); // This ended up looking pretty ugly. lol.
 
 		// Populate rows.
 		rowAccountTitle.add(avatar, headerAccount);
@@ -296,6 +297,16 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 						.addThemeVariants(NotificationVariant.LUMO_ERROR);
 			}
 		});
+	}
+
+	private void setHelpers() {
+		// TODO Auto-generated method stub
+		inputProfileUrl.setHelperText("File uploads are not yet supported for profile pictures. You can, however, pass in an image URL. Right click on an image from the net and select 'Copy Image Address' and then paste it here. The url path must end in .jpg or .png");
+		inputNewEmail.setHelperText("An email is not required, but if you ever forget your password, this is where your reset link & code will be sent.");
+		inputNewUsername.setHelperText("Your username is the one you log in with. This is not to be confused with the display name, which is simply for aesthetics.");
+		inputNewDisplayName.setHelperText("Your display name is essentially your nickname. It's what will be displayed to other users in the system. It's a good idea to have a different display name than username, that way people don't know what username to type if they attempt to log into your account.");
+		inputCurrentPassword.setHelperText("");
+		inputNewPassword.setHelperText("");
 	}
 
 	private void configureAvatarPreviews(String currentUsername, String avatarImageUrl) {

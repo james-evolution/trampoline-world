@@ -357,17 +357,22 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 		editorLayoutDiv.add(editorDiv);
 
 		username = new TextField("Username");
+		username.setHelperText("Your username is the one you log in with. This is not to be confused with the display name, which is simply for aesthetics.");
+		
 		displayName = new TextField("Display Name");
+		displayName.setHelperText("Your display name is essentially your nickname. It's what will be displayed to other users in the system. It's a good idea to have a different display name than username, that way people don't know what username to type if they attempt to log into your account.");
+		
 		email = new TextField("Email");
+		email.setHelperText("An email is not required, but if you ever forget your password, this is where your reset link & code will be sent.");
 
 		roles = new CheckboxGroup<>();
 		roles.setLabel("Roles");
 		roles.setItems(Role.ADMIN, Role.TECH, Role.USER);
+		roles.setHelperText("Admins have all permissions but cannot see the debug page. Techs can see the debug page. Users can only access the orders page and the chat. They cannot delete orders, but they can add, edit, and view them.");
 
 		colorIndex = new Select<>();
 		colorIndex.setLabel("Color Index");
 		colorIndex.setItems(0, 1, 2, 3, 4, 5, 6, 7);
-		colorIndex.setHelperText("0: None, 1: Pink, 2: Purple, 3: Green, 4: Orange, 5: Magenta, 6: Cyan, 7: Yellow");
 		colorIndex.setHelperText("[0=None] [1=Pink] [2=Purple] [3=Green] [4=Orange] [5=Magenta] [6=Cyan] [7=Yellow]");
 
 		hashedPassword = new PasswordField();
@@ -381,6 +386,8 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 //		});
 
 		profilePictureUrl = new TextField("Profile Picture URL");
+		profilePictureUrl.setHelperText("File uploads are not yet supported for profile pictures. You can, however, pass in an image URL. Right click on an image from the net and select 'Copy Image Address' and then paste it here. The url path must end in .jpg or .png");
+		
 		Component[] fields = new Component[] { username, displayName, email, roles, hashedPassword, profilePictureUrl, colorIndex };
 
 		formLayout.add(fields);		editorDiv.add(editTitle, formLayout);
