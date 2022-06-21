@@ -1,15 +1,14 @@
 package com.trampolineworld.views.chat;
 
+import com.vaadin.collaborationengine.CustomMessageInput;
 import com.trampolineworld.data.entity.User;
 import com.trampolineworld.data.service.UserRepository;
 import com.trampolineworld.data.service.UserService;
 import com.trampolineworld.views.MainLayout;
 import com.vaadin.collaborationengine.CollaborationAvatarGroup;
-import com.vaadin.collaborationengine.CollaborationMessageInput;
 import com.vaadin.collaborationengine.CollaborationMessageList;
 import com.vaadin.collaborationengine.UserInfo;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
@@ -17,12 +16,10 @@ import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.Location;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinRequest;
 
-import java.util.UUID;
 import javax.annotation.security.RolesAllowed;
 
 @PageTitle("Chat Room")
@@ -34,6 +31,8 @@ public class ChatView extends VerticalLayout implements BeforeEnterObserver, Aft
 	private final UserRepository userRepository;
 	private String channelName;
 	CollaborationAvatarGroup avatarGroup;
+	
+	private static UserInfo loggedUserInfo;
 
 	public ChatView(UserService userService, UserRepository userRepository) {
 		this.userService = userService;
@@ -53,6 +52,10 @@ public class ChatView extends VerticalLayout implements BeforeEnterObserver, Aft
 		UserInfo userInfo = new UserInfo(currentUser.getId().toString(), currentUser.getDisplayName());
 		userInfo.setImage(currentUser.getProfilePictureUrl());
 		userInfo.setColorIndex(currentUser.getColorIndex());
+
+//		loggedUserInfo = new UserInfo(currentUser.getId().toString(), currentUser.getDisplayName());
+//		loggedUserInfo.setImage(currentUser.getProfilePictureUrl());
+//		loggedUserInfo.setColorIndex(currentUser.getColorIndex());
 
 		avatarGroup = new CollaborationAvatarGroup(userInfo, null);
 		avatarGroup.getStyle().set("visibility", "visible");
@@ -77,7 +80,12 @@ public class ChatView extends VerticalLayout implements BeforeEnterObserver, Aft
 		// submit new messages. To avoid having to set the same info into both
 		// the message list and message input, the input takes in the list as an
 		// constructor argument to get the information from there.
-		CollaborationMessageInput input = new CollaborationMessageInput(list);
+//		CollaborationMessageInput input = new CollaborationMessageInput(list);
+//		input.addClassNames("chat-view-message-input");
+//		input.setWidthFull();
+
+		// JAMES CUSTOM MESSAGE INPUT
+		CustomMessageInput input = new CustomMessageInput(list, userInfo);
 		input.addClassNames("chat-view-message-input");
 		input.setWidthFull();
 		
@@ -86,6 +94,7 @@ public class ChatView extends VerticalLayout implements BeforeEnterObserver, Aft
 		setSizeFull();
 		expand(list);
 
+		
 		// Change the topic id of the chat when a new tab is selected
 		tabs.addSelectedChangeListener(event -> {
 			channelName = event.getSelectedTab().getLabel();
@@ -109,5 +118,4 @@ public class ChatView extends VerticalLayout implements BeforeEnterObserver, Aft
 //			avatarGroup.setOwnAvatarVisible(false);
 //		}
 	}
-
 }

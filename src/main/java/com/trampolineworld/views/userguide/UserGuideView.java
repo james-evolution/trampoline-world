@@ -1,9 +1,12 @@
 package com.trampolineworld.views.userguide;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.details.Details;
+import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.IFrame;
 import com.vaadin.flow.component.html.Label;
@@ -49,6 +52,8 @@ public class UserGuideView extends HorizontalLayout {
 	private Paragraph videoCaption;
 	private UnorderedList featuresList;
 	private VerticalLayout layout = new VerticalLayout();
+	
+	private Accordion accordionBasicsGuide = new Accordion();
 
 	Tab documentationTab, desktopApplicationTab, mobileApplicationTab;
 	private H2 installationHeader = new H2();
@@ -81,6 +86,10 @@ public class UserGuideView extends HorizontalLayout {
 		createLabelElements();
 		createParagraphElements();
 
+//		Details details = new Details("Application Features", featuresList);
+//		details.setOpened(true);
+//		details.addThemeVariants(DetailsVariant.FILLED);
+
 		// Create layout & add components to it.
 		layout.add(tabs);
 		layout.add(header1);
@@ -88,6 +97,7 @@ public class UserGuideView extends HorizontalLayout {
 		layout.add(videoCaption);
 		layout.add(featuresLabel);
 		layout.add(featuresList);
+//		layout.add(details);
 		layout.add(header2);
 		layout.add(createLabel, createParagraph);
 		layout.add(editLabel, editParagraph);
@@ -95,6 +105,8 @@ public class UserGuideView extends HorizontalLayout {
 		layout.add(deleteLabel, deleteParagraph);
 		layout.add(fontSizeLabel, fontSizeParagraph);
 
+
+		
 		this.setClassName("userguide-layout");
 
 		// Add layout to the view.
@@ -214,7 +226,7 @@ public class UserGuideView extends HorizontalLayout {
 	private void loadDesktopComponentData() {
 		installationHeader.setText("Installing the Desktop Application");
 		installationDescription.setText(
-				"Installing this system as a standalone desktop application is quite an easy process! It should take under a minute.\n"
+				"Installing this system as a desktop application is quite an easy process! It should take under a minute.\n"
 						+ "\nOn Windows, please make sure you're using the Google Chrome browser if you decide to do this, as not all browsers offer this capability."
 						+ "\nOn Apple devices, you'll want to use Safari. It's possible that the icon may look like a plus sign instead of the one showcased in the video.\n");
 		desktopInstallationFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/t65jdhNLmm8");

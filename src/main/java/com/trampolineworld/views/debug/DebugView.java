@@ -57,8 +57,8 @@ public class DebugView extends VerticalLayout {
 		add(new Paragraph("This page is only viewable by users with the Tech role. By default, most admin accounts lack this role because this view won't be of use to them."
 				+ "\n\nAt the moment this is the only exclusive permission the Tech role has. The below text field allows you to enter in shell commands and execute them on"
 				+ "\nthe virtual linux container that this application is hosted on. It exists primarily for debugging purposes."
-				+ "\n\nIf you're just exploring and happened to come across this page and would like to give it a try, execute the following command (all lowercase): ls"
-				+ "\n\nThis will list all the fields in your immediate directory. For other commands, see: \n\nhttps://github.com/james-evolution/Bash-Cheat-Sheet"), shellHeaderContainer, consoleParagraph);
+				+ "\n\nIf you're just exploring and you happened to come across this page and would like to give it a try, execute the following command (all lowercase): ls"
+				+ "\n\nThis will list all the files in your immediate directory. For other commands, see: \n\nhttps://github.com/james-evolution/Bash-Cheat-Sheet"), shellHeaderContainer, consoleParagraph);
 		setSizeFull();
 	}
 

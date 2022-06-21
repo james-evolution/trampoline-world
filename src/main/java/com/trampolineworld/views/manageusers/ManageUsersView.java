@@ -379,11 +379,6 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 		hashedPassword.setLabel("Password");
 		hashedPassword.setHelperText("To leave the password unchanged or default (default password for new accounts is 'user'), leave this field blank. WARNING: Do not change the value of this field if you don't want to change a user's password. It will get encrypted.");
 		hashedPassword.setValueChangeMode(ValueChangeMode.LAZY);
-//		hashedPassword.addValueChangeListener(e -> {
-//			// If the password value changes, switch to password encoding rather than password preserving.
-//			isEditingUser = true;
-//			configureFormBindings(userInfo);
-//		});
 
 		profilePictureUrl = new TextField("Profile Picture URL");
 		profilePictureUrl.setHelperText("File uploads are not yet supported for profile pictures. You can, however, pass in an image URL. Right click on an image from the net and select 'Copy Image Address' and then paste it here. The url path must end in .jpg, .png, or .webp");
@@ -431,6 +426,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 			colorIndex.setValue(value.getColorIndex() == null ? 1 : value.getColorIndex());
 			profilePictureUrl.setValue(value.getProfilePictureUrl() == null ? "" : value.getProfilePictureUrl());
 		} else {
+			// Clear form data here.
 			editTitle.setText("New User");
 			isNewUser = true;
 			username.clear();
@@ -441,7 +437,6 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 			profilePictureUrl.clear();
 		}
 		
-		
 	}
 	
     public static void sendDiscordWebhookMessage(String message, String channel) {
@@ -449,10 +444,19 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
     	String webhookURL = "";
     	String webhookUsername = "";
     	
+    	// Debug messages, obviously.
     	if (channel == "debugging") {
     		webhookUsername = "TW Debugger";
     		webhookURL = "https://ptb.discord.com/api/webhooks/988568130093744218/xoLscoKMWCX3_7t63MESyA4FW3P_KSY6dlLB0hzYxbrqw6mTLlLsMXr7GlBbYd5rI3Ku";
     	}
+    	/*
+    	 * It's important to keep a record of generated UUIDs for system users.
+    	 * This is because the CollaborationEngine will limit us to 20 unique users per month in the system.
+    	 * This is a limitation of the free universal license. A commerical license to surpass that 20 user quota
+    	 * would cost a minimum of $100 / month.
+    	 * 
+    	 * Thus, it's ideal for us to store and re-use existing UUIDs rather than generating new ones indefinitely.
+    	 */
     	else if (channel == "uuids") {
     		webhookUsername = "TW UUID Logger";
     		webhookURL = "https://ptb.discord.com/api/webhooks/988570358691016784/MWE8EIOOh7-Eohofs0Dp6Wu6DiyEmr91hUcUXBMnyt6t0esLraN7XPTc-fKTNpfOjjvW";

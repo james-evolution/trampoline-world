@@ -205,6 +205,7 @@ public class LoginView extends LoginOverlay implements BeforeEnterObserver {
 			String newPassword = passwordEncoder.encode(inputNewPassword.getValue());
 			
 			try {
+				// Encrypt the new password & save to database.
 				userLostPassword.setHashedPassword(newPassword);
 				userService.update(userLostPassword);
 				// Notify of success.
