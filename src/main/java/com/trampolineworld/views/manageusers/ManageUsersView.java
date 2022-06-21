@@ -6,7 +6,6 @@ import com.trampolineworld.data.service.UserRepository;
 import com.trampolineworld.data.service.UserService;
 import com.trampolineworld.utilities.DiscordWebhook;
 import com.trampolineworld.views.MainLayout;
-import com.vaadin.collaborationengine.CollaborationAvatarGroup;
 import com.vaadin.collaborationengine.CollaborationBinder;
 import com.vaadin.collaborationengine.UserInfo;
 import com.vaadin.flow.component.Component;
@@ -211,8 +210,8 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 		// Add columns to the grid.
 		grid.addColumn("username").setAutoWidth(true).setResizable(true);
 		grid.addColumn("displayName").setAutoWidth(true).setResizable(true);
-		grid.addColumn("email").setAutoWidth(true).setResizable(true);
 		grid.addColumn(createStatusComponentRenderer()).setHeader("Roles").setAutoWidth(true).setResizable(true);
+		grid.addColumn("email").setAutoWidth(true).setResizable(true);
 		grid.addColumn("profilePictureUrl").setWidth("300px").setResizable(true);
 		grid.addColumn("colorIndex").setAutoWidth(true).setResizable(true);
 		updateGrid();
@@ -290,6 +289,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 		buttonHeaderContainer.setSpacing(false);
 		buttonHeaderContainer.setAlignItems(Alignment.BASELINE);
 
+		
 		newUserButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		newUserButton.getElement().getStyle().set("margin-left", "6px");
 		newUserButton.getElement().getStyle().set("margin-right", "6px");

@@ -202,6 +202,9 @@ public class MainLayout extends AppLayout {
 
 			ContextMenu userMenu = new ContextMenu(avatar);
 			userMenu.setOpenOnClick(true);
+			userMenu.addItem("Account", e -> {
+				UI.getCurrent().navigate(AccountView.class);
+			});
 			userMenu.addItem("Logout", e -> {
 				authenticatedUser.logout();
 			});
