@@ -386,7 +386,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 //		});
 
 		profilePictureUrl = new TextField("Profile Picture URL");
-		profilePictureUrl.setHelperText("File uploads are not yet supported for profile pictures. You can, however, pass in an image URL. Right click on an image from the net and select 'Copy Image Address' and then paste it here. The url path must end in .jpg or .png");
+		profilePictureUrl.setHelperText("File uploads are not yet supported for profile pictures. You can, however, pass in an image URL. Right click on an image from the net and select 'Copy Image Address' and then paste it here. The url path must end in .jpg, .png, or .webp");
 		
 		Component[] fields = new Component[] { username, displayName, email, roles, hashedPassword, profilePictureUrl, colorIndex };
 

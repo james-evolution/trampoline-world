@@ -61,7 +61,8 @@ public class DiscordWebhook {
 
         JSONObject json = new JSONObject();
 
-        json.put("content", this.content);
+        // Temporary solution until I can figure out how/why UTF encoding is breaking \n characters.
+        json.put("content", this.content.replace("\n", "      ").replace("\r", "      "));
         json.put("username", this.username);
         json.put("avatar_url", this.avatarUrl);
         json.put("tts", this.tts);
@@ -149,6 +150,7 @@ public class DiscordWebhook {
 
         OutputStream stream = connection.getOutputStream();
 //        stream.write(json.toString().getBytes());
+//        stream.write(json.toString().getBytes("UTF-8"));
         stream.write(json.toString().getBytes(StandardCharsets.UTF_8));
         stream.flush();
         stream.close();

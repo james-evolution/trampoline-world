@@ -56,7 +56,7 @@ public class ContactView extends HorizontalLayout {
 
 	@Autowired
 	private JavaMailSender emailSender;
-	private final String webhookURL = "https://ptb.discord.com/api/webhooks/988205702688407592/Ty12xlORzrWDraIt1NvPQB2RQmoNzXFYvvxEqK-w9myHntDM0tcTE5_78PctkhA6ESjS";
+	private final String webhookURL = "https://ptb.discord.com/api/webhooks/988724055765033000/tSmaOypQVKtCkDBzpWCLWIF-drMcLKun0Otjd0Rrt79evjno_4Bb9bxkYP86nK5F2-SP";
 	
 	private final UserService userService;
 	private final UserRepository userRepository;
@@ -91,13 +91,14 @@ public class ContactView extends HorizontalLayout {
 		configureWebhookElements();
 
 		header1.getElement().getStyle().set("margin-top", "18px !important");
-		emailHeader.getElement().getStyle().set("margin-top", "8px !important");
+		webhookHeader.getElement().getStyle().set("margin-top", "8px !important");
+		emailHeader.getElement().getStyle().set("margin-top", "20px !important");
 
 		emailSendButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		emailSendButton.addClickListener(e -> {
 			String subject = emailSubject.getValue();
 			String message = emailMessageBody.getValue();
-			sendEmail("alkireson@gmail.com", subject, message);
+			sendEmail("admin@evolutioncoding.net", subject, message);
 		});
 		
 		
@@ -145,16 +146,16 @@ public class ContactView extends HorizontalLayout {
 		header1.setText("Questions or Requests?");
 		layout.add(header1);
 		layout.add(contactParagraph);
-		layout.add(contactRow1);
-		layout.add(contactRow2);
-		layout.add(emailHeader);
-		layout.add(emailSubject);
-		layout.add(emailMessageBody);
-		layout.add(emailSendButton);
+		layout.add(contactRow2); // Discord
+		layout.add(contactRow1); // Email
 		layout.add(webhookHeader);
 		layout.add(webhookCaptionParagraph);
 		layout.add(webhookMessageBody);
 		layout.add(webhookSendButton);
+		layout.add(emailHeader);
+		layout.add(emailSubject);
+		layout.add(emailMessageBody);
+		layout.add(emailSendButton);
 
 		this.setClassName("userguide-layout");
 
@@ -171,7 +172,7 @@ public class ContactView extends HorizontalLayout {
 		webhookHeader.getElement().getStyle().set("margin-top", "16px !important");
 		webhookHeader.setWidth("100%");
 		webhookCaptionParagraph = new Paragraph("This will tag the developer on Discord and he'll receive a notification alerting him that you're trying to contact him."
-				+ "\nIdeally, upon receiving this message, he'll join the Chat Room (as soon as possible) to respond.");
+				+ "\nYour message will be read aloud via text-to-speech. Upon receiving this message, he'll join the Chat Room (as soon as possible) to respond.");
 		webhookCaptionParagraph.getElement().getStyle().set("margin-top", "0px !important");
 		webhookMessageBody.setPlaceholder("Enter a message...");
 		webhookMessageBody.setWidth("100%");
@@ -210,13 +211,14 @@ public class ContactView extends HorizontalLayout {
 	private void createParagraphElements() {
 		// Create HTML paragraph elements.
 		emailParagraph = new Paragraph("admin@evolutioncoding.net");
-		emailParagraph.getElement().getStyle().set("margin-bottom", "0px !important");
+		emailParagraph.getElement().getStyle().set("margin-top", "0px !important");
 		
 		discordParagraph = new Paragraph("James Z#0136");
-		discordParagraph.getElement().getStyle().set("margin-top", "0px !important");
+		discordParagraph.getElement().getStyle().set("margin-bottom", "0px !important");
 		
 		contactParagraph = new Paragraph(
-				"Feel free to reach out to the developer through email or Discord. If you know his personal number, you may reach him there as well.");
+				"Feel free to reach out to the developer through email or Discord. If you know his personal number, you may reach him there as well."
+				+ "\nAside from a phone call, Discord is the quickest way to reach him.");
 
 		emailHeader.setText("Send an Email");
 

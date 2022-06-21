@@ -134,7 +134,7 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 
 		// Get current user information.
 		currentUsername = VaadinRequest.getCurrent().getUserPrincipal().getName();
-		currentUser  = userRepository.findByUsername(currentUsername);
+		currentUser = userRepository.findByUsername(currentUsername);
 		String avatarImageUrl = currentUser.getProfilePictureUrl();
 		String currentHashedPassword = currentUser.getHashedPassword();
 		Set<Role> roles = currentUser.getRoles();
@@ -152,7 +152,7 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 		configureRows();
 
 		// Configure components.
-		headerAccount.setText(currentUsername);
+		headerAccount.setText(currentUsername + " (" + currentUser.getDisplayName() + ")");
 		headerAccount.getElement().getStyle().set("margin-top", "18px !important");
 		headerAccount.getElement().getStyle().set("margin-bottom", "0px !important");
 		inputProfileUrl.setPlaceholder("Enter an image URL...");
