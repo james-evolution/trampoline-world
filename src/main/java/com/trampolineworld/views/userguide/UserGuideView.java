@@ -156,20 +156,20 @@ public class UserGuideView extends HorizontalLayout {
 				"\nThe above video gives a comprehensive overview of this application's features, and will also teach you how to use it."
 						+ "\nIn addition to this being a website, this system is also both a desktop and mobile application (compatible with macOS, Windows, iPhones, and Androids)");
 
-		featuresList = new UnorderedList(new ListItem(
-				"Authentication & Authorization: Users must log in to access this application. Individual permissions depend upon account type."),
+		featuresList = new UnorderedList(
+				new ListItem("Authentication & Authorization: Users must log in to access this application. Individual permissions depend upon account type."),
 				new ListItem("CRUD Operations: Users can create, read, update, and delete orders."),
-				new ListItem(
-						"Searching, Sorting, & Filtering: These features are available on the grid in which all orders are displayed."),
+				new ListItem("Searching, Sorting, & Filtering: These features are available on the grid in which all orders are displayed."),
 				new ListItem("Data Exports: Order information can be exported as needed in either PDF or CSV format."),
-				new ListItem(
-						"Form Validation: The form used to create new orders and edit existing ones can validate input to meet any specified requirements."),
-				new ListItem(
-						"Persistent Data Storage: This application uses a MySQL database to store & retrieve order information."),
-				new ListItem(
-						"Live Chat: A still-in-development and optional feature is live-chat. This is showcased in the video."),
-				new ListItem(
-						"Open Source: The full source code used to develop this application is freely available to the owners of Trampoline World."));
+				new ListItem("Form Validation: The form used to create new orders and edit existing ones can validate input to meet any specified requirements."),
+				new ListItem("Live Chat: A still-in-development and optional feature is live-chat. This is showcased in the video."),
+				new ListItem("Persistent Data Storage: This application uses a MySQL database to store & retrieve order information."),
+				new ListItem("User Management: Admins can manage user accounts and modify their names, passwords, and permissions."),
+				new ListItem("Profile Customization: Admins can customize their own profile picture, color, display name, and email address."),
+				new ListItem("Password Resets: If a user forgets their password they can have a reset code sent to their email via the login page. Alternatively, administrators can change their password."),
+				new ListItem("Open Source: The full source code used to develop this application is freely available to the owners of Trampoline World."),
+				new ListItem("Questions & Requests: The contact page allows admins to instantly contact the developer if they have questions or want to make requests.")
+			);
 	}
 
 	private void createLabelElements() {
