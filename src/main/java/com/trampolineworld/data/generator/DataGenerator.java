@@ -11,6 +11,8 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Set;
+import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -34,8 +36,10 @@ public class DataGenerator {
             logger.info("... generating 2 User entities...");
             
             User user = new User();
-            user.setName("TW User");
+            user.setId(UUID.fromString("275626f5-d4a0-4ce7-b90f-f34e236b8c6f"));
+            user.setDisplayName("TW User");
             user.setUsername("TW User");
+            user.setColorIndex(1);
             user.setHashedPassword(passwordEncoder.encode("user"));
             user.setProfilePictureUrl(
                     "https://static.wixstatic.com/media/759627_2ad5404df0dc4455af631dbeaf83e8bf~mv2.png/v1/fill/w_347,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/Trampoline-2.png");
@@ -43,18 +47,21 @@ public class DataGenerator {
             userRepository.save(user);
 
             User tech = new User();
-            tech.setName("TW Tech");
+            tech.setId(UUID.fromString("52d1376a-b8d4-4d60-874e-b804d078f780"));
+            tech.setDisplayName("TW Tech");
             tech.setUsername("TW Tech");
+            tech.setColorIndex(6);
             tech.setHashedPassword(passwordEncoder.encode("stranger410"));
             tech.setProfilePictureUrl(
             		"https://static.wixstatic.com/media/759627_2ad5404df0dc4455af631dbeaf83e8bf~mv2.png/v1/fill/w_347,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/Trampoline-2.png");
-//            tech.setRoles(Collections.singleton(Role.TECH));
             tech.setRoles(Set.of(Role.TECH, Role.ADMIN));
             userRepository.save(tech);
        
             User admin = new User();
-            admin.setName("TW Admin");
+            admin.setId(UUID.fromString("e7f5d385-b7c6-49d6-9fc2-56b264fa2796"));
+            admin.setDisplayName("TW Admin");
             admin.setUsername("TW Admin");
+            admin.setColorIndex(3);
             admin.setHashedPassword(passwordEncoder.encode("ozzyandbear410"));
             admin.setProfilePictureUrl(
             		"https://static.wixstatic.com/media/759627_2ad5404df0dc4455af631dbeaf83e8bf~mv2.png/v1/fill/w_347,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/Trampoline-2.png");

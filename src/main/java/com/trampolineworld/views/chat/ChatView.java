@@ -50,7 +50,7 @@ public class ChatView extends VerticalLayout implements BeforeEnterObserver, Aft
 		// identifier, and the user's real name. You can also provide the users
 		// avatar by passing an url to the image as a third parameter, or by
 		// configuring an `ImageProvider` to `avatarGroup`.
-		UserInfo userInfo = new UserInfo(currentUser.getId().toString(), currentUser.getName());
+		UserInfo userInfo = new UserInfo(currentUser.getId().toString(), currentUser.getDisplayName());
 		userInfo.setImage(currentUser.getProfilePictureUrl());
 		userInfo.setColorIndex(currentUser.getColorIndex());
 

@@ -84,6 +84,7 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 	private H2 headerAccount = new H2();
 	private H2 headerProfilePicture = new H2("Profile Picture");
 	private H2 headerUsername = new H2("Change Username");
+	private H2 headerDisplayName = new H2("Change Display Name");
 	private H2 headerEmail = new H2("Change Email");
 	private H2 headerPassword = new H2("Change Password");
 
@@ -95,6 +96,7 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 	HorizontalLayout rowAccountEmail = new HorizontalLayout();
 	HorizontalLayout rowAccountRoles = new HorizontalLayout();
 	HorizontalLayout rowChangeUsername = new HorizontalLayout();
+	HorizontalLayout rowChangeDisplayName = new HorizontalLayout();
 	HorizontalLayout rowChangeEmail = new HorizontalLayout();
 	HorizontalLayout rowCurrentPassword = new HorizontalLayout();
 	HorizontalLayout rowNewPassword = new HorizontalLayout();
@@ -113,12 +115,14 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 	private TextField inputProfileUrl = new TextField();
 	private TextField inputNewEmail = new TextField();
 	private TextField inputNewUsername = new TextField();
+	private TextField inputNewDisplayName = new TextField();
 	private PasswordField inputCurrentPassword = new PasswordField();
 	private PasswordField inputNewPassword = new PasswordField();
 
 	private Button buttonSaveProfileUrl = new Button("Save");
 	private Button buttonSaveEmail = new Button("Save");
 	private Button buttonSaveUsername = new Button("Save");
+	private Button buttonSaveDisplayName = new Button("Save");
 	private Button buttonSavePassword = new Button("Save Password");
 
 	public AccountView(UserService userService, UserRepository userRepository, PasswordEncoder passwordEncoder) {
@@ -152,7 +156,7 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 		headerAccount.getElement().getStyle().set("margin-top", "18px !important");
 		headerAccount.getElement().getStyle().set("margin-bottom", "0px !important");
 		inputProfileUrl.setPlaceholder("Enter an image URL...");
-		paragraphAccountName.setText(currentUser.getName());
+		paragraphAccountName.setText(currentUser.getDisplayName());
 		paragraphEmail.setText(currentUser.getEmail());
 		paragraphRoles.setText(roles.toString());
 
@@ -168,6 +172,7 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 		rowAccountEmail.add(labelEmail, paragraphEmail);
 		rowChangeEmail.add(inputNewEmail, buttonSaveEmail);
 		rowChangeUsername.add(inputNewUsername, buttonSaveUsername);
+		rowChangeDisplayName.add(inputNewDisplayName, buttonSaveDisplayName);
 		rowCurrentPassword.add(labelCurrentPassword, inputCurrentPassword);
 		rowNewPassword.add(labelNewPassword, inputNewPassword);
 
@@ -182,6 +187,8 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 		layout.add(rowAvatarColors);
 		layout.add(headerUsername);
 		layout.add(rowChangeUsername);
+		layout.add(headerDisplayName);
+		layout.add(rowChangeDisplayName);
 		layout.add(headerEmail);
 		layout.add(rowChangeEmail);
 		layout.add(headerPassword);
@@ -204,12 +211,32 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 		});
 		
 		/*
+		 * buttonSaveDisplayName click listener
+		 */
+		buttonSaveDisplayName.addClickListener(e -> {
+			
+			String desiredName = inputNewDisplayName.getValue();
+			currentUser.setDisplayName(desiredName);
+			
+			try {
+				// Update the user object in the database.
+				userService.update(currentUser);
+				// Notify of success & route user to login page.
+				Notification.show("Account name changed. You have been logged out and will have to log in again.",
+						14000, Position.TOP_CENTER).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+				UI.getCurrent().navigate(LoginView.class);
+				// Notify user of error.
+			} catch (Exception exception) {
+				Notification.show("An error occurred.", 4000, Position.TOP_CENTER)
+				.addThemeVariants(NotificationVariant.LUMO_ERROR);
+			}
+		});
+		/*
 		 * buttonSaveUsername click listener
 		 */
 		buttonSaveUsername.addClickListener(e -> {
 
 			String desiredName = inputNewUsername.getValue();
-			currentUser.setName(desiredName);
 			currentUser.setUsername(desiredName);
 
 			try {
@@ -348,6 +375,7 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 		headerProfilePicture.getElement().getStyle().set("margin-top", "18px");
 		headerProfilePicture.getElement().getStyle().set("margin-bottom", "0px");
 		headerUsername.getElement().getStyle().set("margin-top", "18px");
+		headerDisplayName.getElement().getStyle().set("margin-top", "18px");
 		headerEmail.getElement().getStyle().set("margin-top", "18px");
 		headerPassword.getElement().getStyle().set("margin-top", "18px");
 	}
@@ -403,6 +431,7 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 	private void styleButtons() {
 		buttonSaveProfileUrl.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		buttonSaveUsername.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		buttonSaveDisplayName.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		buttonSaveEmail.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		buttonSavePassword.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 	}

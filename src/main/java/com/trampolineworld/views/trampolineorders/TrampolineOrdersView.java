@@ -117,7 +117,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 		// identifier, and the user's real name. You can also provide the users
 		// avatar by passing an url to the image as a third parameter, or by
 		// configuring an `ImageProvider` to `avatarGroup`.
-		UserInfo userInfo = new UserInfo(currentUser.getId().toString(), currentUser.getName());
+		UserInfo userInfo = new UserInfo(currentUser.getId().toString(), currentUser.getDisplayName());
 		userInfo.setImage(currentUser.getProfilePictureUrl());
 		userInfo.setColorIndex(currentUser.getColorIndex());
 
@@ -336,7 +336,8 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 			hideSidebarButton.setVisible(false);
 		});
 
-		filterTextField.setPlaceholder("Filter by name...");
+		filterTextField.setPlaceholder("Search...");
+		filterTextField.setHelperText("Filter by name, email, or number");
 		filterTextField.setClearButtonVisible(true);
 		filterTextField.setValueChangeMode(ValueChangeMode.LAZY); // Don't hit database on every keystroke. Wait for
 																	// user to finish typing.

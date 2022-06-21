@@ -13,7 +13,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 	@Query(
 	"select u from User u " + 
 	"where lower(u.username) like lower(concat('%', :filterText, '%')) "
-	+ "or lower(u.name) like lower(concat('%', :filterText, '%'))"
+	+ "or lower(u.displayName) like lower(concat('%', :filterText, '%'))"
 	+ "or lower(u.email) like lower(concat('%', :filterText, '%'))"
 	)
 	List<User> search(@Param("filterText") String filterText);

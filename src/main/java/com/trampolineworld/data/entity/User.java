@@ -16,7 +16,7 @@ import javax.persistence.Table;
 public class User extends AbstractEntityUUID {
 
     private String username;
-    private String name;
+    private String displayName;
     private String email;
     @JsonIgnore
     private String hashedPassword;
@@ -33,12 +33,12 @@ public class User extends AbstractEntityUUID {
     public void setUsername(String username) {
         this.username = username;
     }
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
+	public String getDisplayName() {
+		return displayName;
+	}
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}    
     public String getHashedPassword() {
         return hashedPassword;
     }
@@ -69,5 +69,4 @@ public class User extends AbstractEntityUUID {
 	public void setColorIndex(Integer colorIndex) {
 		this.colorIndex = colorIndex;
 	}
-
 }

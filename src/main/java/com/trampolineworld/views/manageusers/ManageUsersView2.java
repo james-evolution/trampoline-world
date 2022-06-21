@@ -23,6 +23,7 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -30,12 +31,12 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.Result;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.binder.ValueContext;
@@ -50,7 +51,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinRequest;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -61,12 +61,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @PageTitle("Manage Users")
-@Route(value = "users/:userID?/:action?(edit)", layout = MainLayout.class)
+@Route(value = "users2/:userID?/:action?(edit)", layout = MainLayout.class)
 @RolesAllowed({ "ADMIN" })
 @Uses(Icon.class)
 @CssImport(themeFor = "vaadin-grid", value = "./themes/trampolineworld/views/grid-theme.css")
 @CssImport(value = "./themes/trampolineworld/views/dialog.css", themeFor = "vaadin-dialog-overlay")
-public class ManageUsersView extends Div implements BeforeEnterObserver {
+public class ManageUsersView2 extends Div implements BeforeEnterObserver {
 
 	private final String USER_ID = "userID";
 	private final String USER_EDIT_ROUTE_TEMPLATE = "users/%s/edit";
@@ -75,9 +75,10 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 	
 	private UserInfo userInfo;
 	private User userToEdit;
-	private boolean isNewUser = false;
+	private boolean isEditingUser = false;
 
 	private Grid<User> grid = new Grid<>(User.class, false);
+	CollaborationAvatarGroup avatarGroup;
 	H2 editTitle;
 	private TextField filterTextField = new TextField();
 	private TextField username, displayName, email, profilePictureUrl;
@@ -106,11 +107,24 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 	private final PasswordEncoder passwordEncoder;
 
 	@Autowired
-	public ManageUsersView(UserService userService, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+	public ManageUsersView2(UserService userService, UserRepository userRepository, PasswordEncoder passwordEncoder) {
 		this.userService = userService;
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		addClassNames("trampoline-orders-view");
+		
+		// Get currently logged in user.
+		String currentUsername = VaadinRequest.getCurrent().getUserPrincipal().getName();
+		User currentUser = userRepository.findByUsername(currentUsername);
+
+		// Configure UserInfo object so we can display their avatar / color when viewing & editing data.
+		userInfo = new UserInfo(currentUser.getId().toString(), currentUser.getDisplayName());
+		userInfo.setImage(currentUser.getProfilePictureUrl());
+		userInfo.setColorIndex(currentUser.getColorIndex());
+
+		// Configure avatar group (users / pfps)
+		avatarGroup = new CollaborationAvatarGroup(userInfo, null);
+		avatarGroup.getStyle().set("visibility", "visible");
 
 		// Create split-view UI
 		SplitLayout splitLayout = new SplitLayout();
@@ -125,6 +139,29 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 		// Add buttonHeaderContainer and splitLayout to view.
 		add(buttonHeaderContainer);
 		add(splitLayout);
+
+		/*
+		 * DISABLING THIS FOR NOW.
+		 * 
+		 * Two reasons:
+		 * 
+		 * 1. User accounts have very little information in them, so a detailed view
+		 * option isn't necessary right now. 2. Deleting users in general is a bad idea
+		 * because another will almost inevitably be created.
+		 * 
+		 * This is an issue because we don't want to hit or surpass the 20 user / month
+		 * CollaborationEngine limit. It's better to repurpose existing user accounts
+		 * (changing username / password) than it is to generate a new id that add to
+		 * the 20 / month quota.
+		 * 
+		 * (Deleted the methods that make the Delete & View operations work - copies can
+		 * be found in TrampolineOrdersView.java)
+		 * 
+		 * Context menu may return later for things such as viewing an audit log of a
+		 * particular user's actions in the system.
+		 */
+		// Create context menu.
+//		createContextMenu(userService); // View & Delete buttons.
 
 		// Configure the grid.
 		configureGrid(userService, splitLayout);
@@ -150,60 +187,98 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 		// When the save button is clicked, save the new user.
 		save.addClickListener(e -> {
 			try {
-				// Pull data from form, update user object, update repository.
-				updateUserFromForm(userService);
-				// Clear form, update grid.
+				if (this.user == null) {
+					this.user = new User();
+				}
+				binder.writeBean(this.user);
+				userService.update(this.user);
 				clearForm();
 				updateGrid();
-				// Hide editor & hide 'hide' button.
 				editorLayoutDiv.setVisible(false);
 				hideSidebarButton.setVisible(false);
-				// Notify of success.
 				Notification.show("User details stored.", 4000, Position.TOP_CENTER)
 						.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 				UI.getCurrent().navigate(ManageUsersView.class);
-				// Notify of failure.
-			} catch (Exception exception) {
+			} catch (ValidationException validationException) {
 				Notification.show("Invalid form input.", 4000, Position.TOP_CENTER)
 						.addThemeVariants(NotificationVariant.LUMO_ERROR);
-				System.err.println(exception.toString());
 			}
 		});
 	}
 
-	private void updateUserFromForm(UserService userService) {
+	private void configureFormBindings(UserInfo userInfo) {
+		// This line passes in the currently logged in user to display their avatar in the editing header.
+		binder = new CollaborationBinder<>(User.class, userInfo);
 		
-		// Check if this is a new user, if it is, create a new user object & use the default encoded password.
-		if (isNewUser) {
-			User newUser = new User();
-			newUser.setUsername(username.getValue());
-			newUser.setDisplayName(displayName.getValue());
-			newUser.setEmail(email.getValue());
-			newUser.setRoles(roles.getValue());
-			newUser.setColorIndex(colorIndex.getValue() == null ? 1 : colorIndex.getValue());
-			newUser.setProfilePictureUrl(profilePictureUrl.getValue());
-			newUser.setHashedPassword(passwordEncoder.encode("user"));
-//			userService.update(newUser);
-			userRepository.save(newUser);
-			
-			User savedUser = userRepository.findByUsername(username.getValue());
-			sendDiscordWebhookMessage(newUser.getUsername() + ": " + savedUser.getId().toString(), "uuids");
+		// The rest of these bind our input fields to our data entity, User.
+		binder.forField(roles, Set.class, Role.class).bind("roles");
+		binder.forField(username, String.class).bind("username");
+		binder.forField(displayName, String.class).bind("displayName");
+		
+		// If editing an existing user, preserve their current password.
+		if (isEditingUser) {
+//			sendDiscordWebhookMessage("Preserving data for " + userToEdit.getUsername(), "debugging");
+			binder.forField(hashedPassword, String.class).withConverter(new HashedPasswordPreserver(userToEdit)).bind("hashedPassword");
 		}
+		// If creating a new user, encode their new password.
 		else {
-			this.user.setUsername(username.getValue());
-			this.user.setDisplayName(displayName.getValue());
-			this.user.setEmail(email.getValue());
-			this.user.setRoles(roles.getValue());
-			this.user.setColorIndex(colorIndex.getValue() == null ? 1 : colorIndex.getValue());
-			this.user.setProfilePictureUrl(profilePictureUrl.getValue());
-			// If password field is empty or null, do nothing. Leave it as is.
-			if (hashedPassword.getValue().isEmpty() || hashedPassword.getValue() == null) {}
-			// Else, encode the new password.
-			else { this.user.setHashedPassword(passwordEncoder.encode(hashedPassword.getValue()));}
-			userService.update(this.user);
+//			sendDiscordWebhookMessage("Encoding for new user.", "debugging");
+			binder.forField(hashedPassword, String.class).withConverter(new HashedPasswordConverter()).bind("hashedPassword");
 		}
+		binder.bindInstanceFields(this);
 	}
 	
+	/*
+	 * Preserve user's existing password when editing user objects.
+	 */
+	private class HashedPasswordPreserver implements Converter<String, String> {
+		User user;
+		HashedPasswordPreserver(User user) {
+			this.user = user;
+		}
+		@Override
+		public Result<String> convertToModel(String value, ValueContext context) {
+//			sendDiscordWebhookMessage("Retrieving hashed pwd for " + user.getUsername(), "debugging");
+			return Result.ok(user.getHashedPassword());
+		}
+		@Override
+		public String convertToPresentation(String value, ValueContext context) {
+			// If no password was entered into the form, keep the existing one.
+			return user.getHashedPassword();
+		}
+	}
+
+	private class HashedPasswordConverter implements Converter<String, String> {
+		
+		@Override
+		public Result<String> convertToModel(String value, ValueContext context) {
+
+			// If no password was entered into the form, encode the default password.
+			if (value.isEmpty() || value == null) {
+				return Result.ok(passwordEncoder.encode("user"));
+			}
+			// Else, encrypt the new password.
+			else {
+				try {
+					return Result.ok(passwordEncoder.encode(value));
+				} catch (Exception e) {
+					return Result.error("Password encryption failed.");
+				}
+			}
+		}
+
+		@Override
+		public String convertToPresentation(String value, ValueContext context) {
+			// If no password was entered into the form, keep the existing one.
+			if (value.isEmpty() || value == null) {
+				return user.getHashedPassword();
+			}
+			// Else, encrypt the new password.
+			else {
+				return passwordEncoder.encode(value);
+			}
+		}
+	}
 
 	private void configureGrid(UserService userService, SplitLayout splitLayout) {
 		grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
@@ -220,14 +295,22 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 		// When a row is selected or deselected, populate form.
 		grid.asSingleSelect().addValueChangeListener(event -> {
 			if (event.getValue() != null) {
-				// Set user to selected user.
+				// Set editing flag.
+				isEditingUser = true;
+				// Initialize userToEdit.
 				userToEdit = event.getValue();
+				// Rebind.
+				configureFormBindings(userInfo);
 				// Show layout & hide button.
 				editorLayoutDiv.setVisible(true);
 				hideSidebarButton.setVisible(true);
 				splitLayout.setSplitterPosition(0);
 				UI.getCurrent().navigate(String.format(USER_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
 			} else {
+				// Set editing flag.
+				isEditingUser = false;
+				// Rebind.
+				configureFormBindings(userInfo);
 				// Hide layout & clear form.
 				editorLayoutDiv.setVisible(false);
 				clearForm();
@@ -285,6 +368,26 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 		return new ComponentRenderer<>(Span::new, statusComponentUpdater);
 	}
 
+	private void createContextMenu(UserService userService) {
+		// Add the context menu to the grid.
+		menu = grid.addContextMenu();
+
+		// Listen for the event in which the context menu is opened, then save the id of
+		// the user that was right clicked on.
+		menu.addGridContextMenuOpenedListener(event -> {
+			targetId = event.getItem().get().getId();
+		});
+		// Add menu items to the grid.
+		menu.addItem("Delete", event -> {
+			try {
+				confirmDeleteDialog.open();
+			} catch (Exception e) {
+				Notification.show("An error has occurred, please contact the developer.", 4000, Position.TOP_CENTER)
+						.addThemeVariants(NotificationVariant.LUMO_ERROR);
+			}
+		});
+	}
+
 	private void createButtonHeader(SplitLayout splitLayout) {
 		// Configure button header container.
 		buttonHeaderContainer.setSpacing(false);
@@ -294,6 +397,10 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 		newUserButton.getElement().getStyle().set("margin-left", "6px");
 		newUserButton.getElement().getStyle().set("margin-right", "6px");
 		newUserButton.addClickListener(e -> {
+			// Set editing flag.
+			isEditingUser = false;
+			// Rebind.
+			configureFormBindings(userInfo);
 			// Clear form contents & update grid data.
 			clearForm();
 			updateGrid();
@@ -362,7 +469,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 
 		roles = new CheckboxGroup<>();
 		roles.setLabel("Roles");
-		roles.setItems(Role.ADMIN, Role.TECH, Role.USER);
+		roles.setItems(Role.ADMIN, Role.USER, Role.TECH);
 
 		colorIndex = new Select<>();
 		colorIndex.setLabel("Color Index");
@@ -372,18 +479,18 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 
 		hashedPassword = new PasswordField();
 		hashedPassword.setLabel("Password");
-		hashedPassword.setHelperText("To leave the password unchanged or default (default password for new accounts is 'user'), leave this field blank. WARNING: Do not change the value of this field if you don't want to change a user's password. It will get encrypted.");
+		hashedPassword.setHelperText("All passwords are encrypted into hashes after submission.");
 		hashedPassword.setValueChangeMode(ValueChangeMode.LAZY);
-//		hashedPassword.addValueChangeListener(e -> {
-//			// If the password value changes, switch to password encoding rather than password preserving.
-//			isEditingUser = true;
-//			configureFormBindings(userInfo);
-//		});
+		hashedPassword.addValueChangeListener(e -> {
+			// If the password value changes, switch to password encoding rather than password preserving.
+			isEditingUser = true;
+			configureFormBindings(userInfo);
+		});
 
 		profilePictureUrl = new TextField("Profile Picture URL");
 		Component[] fields = new Component[] { username, displayName, email, roles, hashedPassword, profilePictureUrl, colorIndex };
 
-		formLayout.add(fields);		editorDiv.add(editTitle, formLayout);
+		formLayout.add(fields);		editorDiv.add(avatarGroup, editTitle, formLayout);
 		createButtonLayout(editorLayoutDiv);
 		splitLayout.addToSecondary(editorLayoutDiv);
 	}
@@ -414,27 +521,14 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 
 		if (this.user != null && this.user.getId() != null) {
 			topic = "user/" + this.user.getId();
+//            avatarGroup.getStyle().set("visibility", "visible");
 			editTitle.setText("Edit User");
-			isNewUser = false;
-			// Populate form data here.
-			username.setValue(value.getUsername() == null ? "" : value.getUsername());
-			displayName.setValue(value.getDisplayName() == null ? "" : value.getDisplayName());
-			email.setValue(value.getEmail() == null ? "" : value.getEmail());
-			roles.setValue(value.getRoles());
-			colorIndex.setValue(value.getColorIndex() == null ? 1 : value.getColorIndex());
-			profilePictureUrl.setValue(value.getProfilePictureUrl() == null ? "" : value.getProfilePictureUrl());
 		} else {
+//            avatarGroup.getStyle().set("visibility", "hidden");
 			editTitle.setText("New User");
-			isNewUser = true;
-			username.clear();
-			displayName.clear();
-			email.clear();
-			roles.clear();
-			colorIndex.clear();
-			profilePictureUrl.clear();
 		}
-		
-		
+		binder.setTopic(topic, () -> this.user);
+		avatarGroup.setTopic(topic);
 	}
 	
     public static void sendDiscordWebhookMessage(String message, String channel) {

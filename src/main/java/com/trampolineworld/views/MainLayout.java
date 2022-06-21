@@ -197,7 +197,7 @@ public class MainLayout extends AppLayout {
 		if (maybeUser.isPresent()) {
 			User user = maybeUser.get();
 
-			Avatar avatar = new Avatar(user.getName(), user.getProfilePictureUrl());
+			Avatar avatar = new Avatar(user.getDisplayName(), user.getProfilePictureUrl());
 			avatar.addClassNames("me-xs");
 
 			ContextMenu userMenu = new ContextMenu(avatar);
@@ -206,7 +206,7 @@ public class MainLayout extends AppLayout {
 				authenticatedUser.logout();
 			});
 
-			Span name = new Span(user.getName());
+			Span name = new Span(user.getDisplayName());
 			name.addClassNames("font-medium", "text-s", "text-secondary");
 
 			layout.add(avatar, name);
