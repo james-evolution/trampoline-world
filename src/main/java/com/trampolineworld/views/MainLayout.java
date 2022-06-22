@@ -6,13 +6,13 @@ import com.trampolineworld.data.service.UserRepository;
 import com.trampolineworld.data.service.UserService;
 import com.trampolineworld.security.AuthenticatedUser;
 import com.trampolineworld.views.account.AccountView;
+import com.trampolineworld.views.auditlog.AuditLogView;
 import com.trampolineworld.views.chat.ChatView;
 import com.trampolineworld.views.contact.ContactView;
 import com.trampolineworld.views.debug.DebugView;
 import com.trampolineworld.views.export.ExportView;
 import com.trampolineworld.views.manageusers.ManageUsersView;
 import com.trampolineworld.views.trampolineorders.TrampolineOrdersView;
-import com.trampolineworld.views.trampolineordersreadonly.TrampolineOrdersReadOnlyView;
 import com.trampolineworld.views.userguide.UserGuideView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -123,17 +123,7 @@ public class MainLayout extends AppLayout {
 		appName.addClassNames("app-name");
 
 		appName.addClickListener(e -> {
-			// Get user.
-			String currentUsername = VaadinRequest.getCurrent().getUserPrincipal().getName();
-			User currentUser = userRepository.findByUsername(currentUsername);
-			// Get roles.
-			Set<Role> roles = currentUser.getRoles();
-			// Forward user to the proper page based upon role.
-			if (roles.contains(Role.USER) && !roles.contains(Role.ADMIN)) {
-				UI.getCurrent().navigate(TrampolineOrdersReadOnlyView.class);
-			} else if (roles.contains(Role.ADMIN)) {
-				UI.getCurrent().navigate(TrampolineOrdersView.class);
-			}
+			UI.getCurrent().navigate(TrampolineOrdersView.class);
 		});
 
 		com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(appName,
@@ -176,15 +166,16 @@ public class MainLayout extends AppLayout {
 	 	*/
 		return new MenuItemInfo[] { //
 				new MenuItemInfo("Trampoline Orders", "las la-clipboard-check", TrampolineOrdersView.class), //
-				new MenuItemInfo("Trampoline Orders", "las la-clipboard-check", TrampolineOrdersReadOnlyView.class), //
 				new MenuItemInfo("Chat Room", "la la-comments", ChatView.class), //
 				new MenuItemInfo("Export PDF / CSV", "las la-file-pdf", ExportView.class), //
 				new MenuItemInfo("", "", ChatView.class),
 				new MenuItemInfo("Account", "lar la-user", AccountView.class), //
 				new MenuItemInfo("Manage Users", "las la-users", ManageUsersView.class), //
+				new MenuItemInfo("Audit Log", "las la-database", AuditLogView.class), //
+				new MenuItemInfo("", "", ChatView.class),
 				new MenuItemInfo("User Guide", "las la-info-circle", UserGuideView.class), //
-				new MenuItemInfo("Contact", "las la-at", ContactView.class), //
 				new MenuItemInfo("Debug", "las la-bug", DebugView.class), //
+				new MenuItemInfo("Contact", "las la-at", ContactView.class), //
 		};
 	}
 	

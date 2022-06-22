@@ -68,7 +68,7 @@ import com.trampolineworld.views.login.LoginView;
 
 @Route(value = "account", layout = MainLayout.class)
 @PageTitle("Account")
-@RolesAllowed("ADMIN")
+@RolesAllowed({"ADMIN", "TECH", "USER"})
 public class AccountView extends HorizontalLayout implements BeforeEnterObserver {
 
 	private final UserService userService;

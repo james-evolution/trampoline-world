@@ -1,7 +1,9 @@
 package com.trampolineworld.views.manageusers;
 
 import com.trampolineworld.data.Role;
+import com.trampolineworld.data.entity.LogEntry;
 import com.trampolineworld.data.entity.User;
+import com.trampolineworld.data.service.LogEntryRepository;
 import com.trampolineworld.data.service.UserRepository;
 import com.trampolineworld.data.service.UserService;
 import com.trampolineworld.utilities.DiscordWebhook;
@@ -49,6 +51,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinRequest;
 
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -66,6 +70,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @CssImport(themeFor = "vaadin-grid", value = "./themes/trampolineworld/views/grid-theme.css")
 @CssImport(value = "./themes/trampolineworld/views/dialog.css", themeFor = "vaadin-dialog-overlay")
 public class ManageUsersView extends Div implements BeforeEnterObserver {
+	
+	private String currentActionCategory;
+	private String currentActionDetails;
 
 	private final String USER_ID = "userID";
 	private final String USER_EDIT_ROUTE_TEMPLATE = "users/%s/edit";
@@ -100,16 +107,24 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 
 	private CollaborationBinder<User> binder;
 	private User user;
+	private final LogEntryRepository logEntryRepository;
 	private final UserService userService;
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
+	
+	private User currentUser;
+	private User createdUser;
 
 	@Autowired
-	public ManageUsersView(UserService userService, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+	public ManageUsersView(LogEntryRepository logEntryRepository, UserService userService, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+		this.logEntryRepository = logEntryRepository;
 		this.userService = userService;
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		addClassNames("trampoline-orders-view");
+		
+		String currentUsername = VaadinRequest.getCurrent().getUserPrincipal().getName();
+		currentUser = userRepository.findByUsername(currentUsername);
 
 		// Create split-view UI
 		SplitLayout splitLayout = new SplitLayout();
@@ -151,6 +166,21 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 			try {
 				// Pull data from form, update user object, update repository.
 				updateUserFromForm(userService);
+				
+				// Log action.
+				if (currentActionCategory == "Created User") {
+					LogEntry logEntry = new LogEntry(logEntryRepository, currentUser.getId(), currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
+							createdUser.getId(), currentActionCategory,
+							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails + " " + createdUser.getId().toString(),
+							new Timestamp(new Date().getTime()));					
+				}
+				else if (currentActionCategory == "Edited User") {
+					LogEntry logEntry = new LogEntry(logEntryRepository, currentUser.getId(), currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
+							this.user.getId(), currentActionCategory,
+							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails + " " + this.user.getId().toString(),
+							new Timestamp(new Date().getTime()));
+				}
+				
 				// Clear form, update grid.
 				clearForm();
 				updateGrid();
@@ -185,8 +215,11 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 //			userService.update(newUser);
 			userRepository.save(newUser);
 			
-			User savedUser = userRepository.findByUsername(username.getValue());
-			sendDiscordWebhookMessage(newUser.getUsername() + ": " + savedUser.getId().toString(), "uuids");
+			createdUser = userRepository.findByUsername(username.getValue());
+			
+			currentActionCategory = "Created User";
+			currentActionDetails = " created account for " + createdUser.getUsername() + " (" + createdUser.getDisplayName() + ")";
+			sendDiscordWebhookMessage(newUser.getUsername() + ": " + createdUser.getId().toString(), "uuids");
 		}
 		else {
 			this.user.setUsername(username.getValue());
@@ -199,6 +232,9 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 			if (hashedPassword.getValue().isEmpty() || hashedPassword.getValue() == null) {}
 			// Else, encode the new password.
 			else { this.user.setHashedPassword(passwordEncoder.encode(hashedPassword.getValue()));}
+
+			currentActionCategory = "Edited User";
+			currentActionDetails = " edited account for " + this.user.getUsername() + " (" + this.user.getDisplayName() + ")";
 			userService.update(this.user);
 		}
 	}
@@ -208,6 +244,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 		grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
 
 		// Add columns to the grid.
+		grid.addColumn("id").setAutoWidth(true).setResizable(true).setHeader("User ID");
 		grid.addColumn("username").setAutoWidth(true).setResizable(true);
 		grid.addColumn("displayName").setAutoWidth(true).setResizable(true);
 		grid.addColumn(createStatusComponentRenderer()).setHeader("Roles").setAutoWidth(true).setResizable(true);
@@ -468,12 +505,8 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 
 		try {
 			webhook.execute();
-			Notification.show("Message sent successfully!", 4000, Position.TOP_CENTER)
-			.addThemeVariants(NotificationVariant.LUMO_SUCCESS);				
 		} catch (IOException e1) {
-			e1.printStackTrace();
-			Notification.show("Message failed to send!", 4000, Position.TOP_CENTER)
-			.addThemeVariants(NotificationVariant.LUMO_ERROR);				
+			System.out.println(e1.toString());
 		}
     }
 }

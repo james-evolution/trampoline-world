@@ -177,6 +177,7 @@ public class UserGuideView extends HorizontalLayout {
 				new ListItem("Live Chat: A still-in-development and optional feature is live-chat. This is showcased in the video."),
 				new ListItem("Persistent Data Storage: This application uses a MySQL database to store & retrieve order information."),
 				new ListItem("User Management: Admins can manage user accounts and modify their names, passwords, and permissions."),
+				new ListItem("Audit Log: All user actions are logged in the system. Administrators can see who made what changes at what time."),
 				new ListItem("Profile Customization: Admins can customize their own profile picture, color, display name, and email address."),
 				new ListItem("Password Resets: If a user forgets their password they can have a reset code sent to their email via the login page. Alternatively, administrators can change their password."),
 				new ListItem("Open Source: The full source code used to develop this application is freely available to the owners of Trampoline World."),

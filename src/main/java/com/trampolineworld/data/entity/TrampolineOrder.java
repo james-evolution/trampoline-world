@@ -8,7 +8,7 @@ import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 
 @Entity
-public class TrampolineOrder extends AbstractEntity{
+public class TrampolineOrder extends AbstractEntity {
 
     private boolean complete;
     private String firstName;

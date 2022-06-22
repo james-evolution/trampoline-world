@@ -1,7 +1,12 @@
 package com.trampolineworld.views.trampolineorders;
 
+import com.trampolineworld.data.Role;
+import com.trampolineworld.data.entity.LogEntry;
 import com.trampolineworld.data.entity.TrampolineOrder;
 import com.trampolineworld.data.entity.User;
+import com.trampolineworld.data.service.LogEntryRepository;
+import com.trampolineworld.data.service.LogEntryService;
+import com.trampolineworld.data.service.TrampolineOrderRepository;
 import com.trampolineworld.data.service.TrampolineOrderService;
 import com.trampolineworld.data.service.UserRepository;
 import com.trampolineworld.data.service.UserService;
@@ -25,6 +30,7 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
+import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
@@ -51,8 +57,14 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.VaadinRequest;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.annotation.security.RolesAllowed;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,11 +72,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 @PageTitle("All Orders")
 @Route(value = "trampoline_orders/:trampolineOrderID?/:action?(edit)", layout = MainLayout.class)
 @RouteAlias(value = "", layout = MainLayout.class)
-@RolesAllowed({ "ADMIN" })
+@RolesAllowed({ "ADMIN", "TECH", "USER"})
 @Uses(Icon.class)
 @CssImport(themeFor = "vaadin-grid", value = "./themes/trampolineworld/views/grid-theme.css")
 @CssImport(value = "./themes/trampolineworld/views/dialog.css", themeFor = "vaadin-dialog-overlay")
 public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
+
+	private User currentUser;
+	private String currentActionCategory;
+	private String currentActionDetails;
 
 	public static String username = "";
 
@@ -95,21 +111,26 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 	private CollaborationBinder<TrampolineOrder> binder;
 	private TrampolineOrder trampolineOrder;
 	private final TrampolineOrderService trampolineOrderService;
+	private final TrampolineOrderRepository trampolineOrderRepository;
 	private final UserService userService;
 	private final UserRepository userRepository;
+	private final LogEntryRepository logEntryRepository;
 
 	@Autowired
-	public TrampolineOrdersView(TrampolineOrderService trampolineOrderService, UserService userService,
-			UserRepository userRepository) {
+	public TrampolineOrdersView(TrampolineOrderService trampolineOrderService,
+			TrampolineOrderRepository trampolineOrderRepository, UserService userService, UserRepository userRepository,
+			LogEntryRepository logEntryRepository) {
 		this.trampolineOrderService = trampolineOrderService;
+		this.trampolineOrderRepository = trampolineOrderRepository;
 		this.userService = userService;
 		this.userRepository = userRepository;
+		this.logEntryRepository = logEntryRepository;
 		addClassNames("trampoline-orders-view");
 
 //    	Notification.show("Welcome, " + username, 4000, Position.TOP_CENTER).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
 		String currentUsername = VaadinRequest.getCurrent().getUserPrincipal().getName();
-		User currentUser = userRepository.findByUsername(currentUsername);
+		currentUser = userRepository.findByUsername(currentUsername);
 
 		// UserInfo is used by Collaboration Engine and is used to share details
 		// of users to each other to able collaboration. Replace this with
@@ -185,8 +206,30 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 					this.trampolineOrder = new TrampolineOrder();
 				}
 				binder.writeBean(this.trampolineOrder);
-
 				trampolineOrderService.update(this.trampolineOrder);
+
+				String customerName = this.trampolineOrder.getFirstName() + " " + this.trampolineOrder.getLastName();
+
+				// Log order edited action.
+				if (currentActionCategory == "Edited Order") {
+					LogEntry logEntry = new LogEntry(logEntryRepository, currentUser.getId(), currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
+							this.trampolineOrder.getId(), customerName, currentActionCategory,
+							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails + this.trampolineOrder.getId().toString(),
+							new Timestamp(new Date().getTime()));
+				} else if (currentActionCategory == "Created Order") {
+//					// Get all trampoline orders from the database.
+//					List<TrampolineOrder> allOrders = trampolineOrderRepository.findAll();
+//					// Sort by id.
+//					Collections.sort(allOrders, new SortById());
+//					// This is one method of getting the last order's id.
+//					allOrders.get(0).getId();
+					// Log new order created action.
+					LogEntry logEntry = new LogEntry(logEntryRepository, currentUser.getId(), currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
+							this.trampolineOrder.getId(), customerName, currentActionCategory,
+							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails + this.trampolineOrder.getId().toString(),
+							new Timestamp(new Date().getTime()));
+				}
+
 				clearForm();
 				updateGrid();
 				editorLayoutDiv.setVisible(false);
@@ -199,6 +242,13 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 						.addThemeVariants(NotificationVariant.LUMO_ERROR);
 			}
 		});
+	}
+
+	private class SortById implements Comparator<TrampolineOrder> {
+		// Used for sorting in descending order of ID
+		public int compare(TrampolineOrder a, TrampolineOrder b) {
+			return (int) (b.getId() - a.getId());
+		}
 	}
 
 	private void configureForm(UserInfo userInfo) {
@@ -218,9 +268,10 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 		grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
 		grid.addThemeVariants(GridVariant.LUMO_COMPACT);
 //		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-		
+
 		// Add columns to the grid.
 //		grid.addColumn(createStatusComponentRenderer()).setAutoWidth(true).setResizable(true);
+		grid.addColumn("id").setAutoWidth(true).setResizable(true);
 		grid.addColumn("complete").setAutoWidth(true).setResizable(true);
 		grid.addColumn("firstName").setAutoWidth(true).setResizable(true);
 		grid.addColumn("lastName").setAutoWidth(true).setResizable(true);
@@ -236,7 +287,6 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 //        grid.setItems(query -> trampolineOrderService.list(
 //                PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
 //                .stream());
-
 
 		// Class name generator.
 		grid.setClassNameGenerator(order -> {
@@ -265,23 +315,21 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 	private void updateGrid() {
 		grid.setItems(trampolineOrderService.findAll(filterTextField.getValue()));
 	}
-	
+
 	private static final SerializableBiConsumer<Span, TrampolineOrder> statusComponentUpdater = (span, order) -> {
-	    boolean complete = order.isComplete();
-	    String theme = String
-	            .format("badge %s", complete ? "success" : "error");
-	    span.getElement().setAttribute("theme", theme);
-	    
-	    if (order.isComplete()) {
-	    	span.setText("Complete");
-	    }
-	    else {
-	    	span.setText("Incomplete");
-	    }
+		boolean complete = order.isComplete();
+		String theme = String.format("badge %s", complete ? "success" : "error");
+		span.getElement().setAttribute("theme", theme);
+
+		if (order.isComplete()) {
+			span.setText("Complete");
+		} else {
+			span.setText("Incomplete");
+		}
 	};
 
 	private static ComponentRenderer<Span, TrampolineOrder> createStatusComponentRenderer() {
-	    return new ComponentRenderer<>(Span::new, statusComponentUpdater);
+		return new ComponentRenderer<>(Span::new, statusComponentUpdater);
 	}
 
 	private void createContextMenu(TrampolineOrderService trampolineOrderService) {
@@ -292,6 +340,12 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 		// the TrampolineOrder that was right clicked on.
 		menu.addGridContextMenuOpenedListener(event -> {
 			targetId = event.getItem().get().getId();
+			Set<Role> roles = currentUser.getRoles();
+			// If user is not an admin or a tech, hide the 'delete' option.
+			if (!(roles.contains(Role.ADMIN) || roles.contains(Role.TECH))) {
+				List<GridMenuItem<TrampolineOrder>> menuItems = menu.getItems();
+				menuItems.get(1).setVisible(false);
+			}
 		});
 		// Add menu items to the grid, send user to the 'ViewSingleOrder' page with the
 		// TrampolineOrder id as an argument.
@@ -328,7 +382,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 		hideSidebarButton.getElement().getStyle().set("margin-left", "0px !important");
 		hideSidebarButton.getElement().getStyle().set("margin-right", "6px");
 		hideSidebarButton.setVisible(false);
-		
+
 		hideSidebarButton.addClickListener(e -> {
 			clearForm();
 			updateGrid();
@@ -381,9 +435,23 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 	private Button createDialogDeleteOrderButton(Dialog dialog, TrampolineOrderService trampolineOrderService) {
 		Button dialogDeleteButton = new Button("Delete", e -> {
 			try {
+				Optional<TrampolineOrder> orderToDelete = trampolineOrderRepository.findById(targetId);
+				
+				// Get customer name.
+				String customerName = orderToDelete.get().getFirstName() + " " + orderToDelete.get().getLastName();
+				// Delete order from database.
 				trampolineOrderService.delete(targetId);
+				// Log action.
+				currentActionCategory = "Deleted Order";
+				currentActionDetails = " deleted order #" + targetId.toString();
+				LogEntry logEntry = new LogEntry(logEntryRepository, currentUser.getId(), currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
+						targetId, customerName, currentActionCategory,
+						currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails,
+						new Timestamp(new Date().getTime()));				
+				// Notify of deletion success.
 				Notification.show("Order deleted.", 4000, Position.TOP_CENTER)
 						.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+				// Notify of deletion failure.
 			} catch (Exception exception) {
 				Notification.show("Operation failed.", 4000, Position.TOP_CENTER)
 						.addThemeVariants(NotificationVariant.LUMO_ERROR);
@@ -460,9 +528,13 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 			topic = "trampolineOrder/" + this.trampolineOrder.getId();
 //            avatarGroup.getStyle().set("visibility", "visible");
 			editTitle.setText("Edit Order");
+			currentActionCategory = "Edited Order";
+			currentActionDetails = " edited order #";
 		} else {
 //            avatarGroup.getStyle().set("visibility", "hidden");
 			editTitle.setText("New Order");
+			currentActionCategory = "Created Order";
+			currentActionDetails = " created order #";
 		}
 		binder.setTopic(topic, () -> this.trampolineOrder);
 		avatarGroup.setTopic(topic);

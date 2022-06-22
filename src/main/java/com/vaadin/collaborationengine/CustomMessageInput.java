@@ -109,16 +109,12 @@ public class CustomMessageInput extends Composite<MessageInput>
     	webhook.setUsername(username);
     	webhook.setAvatarUrl(avatarURL);
     	webhook.setContent(message);
-    	webhook.setTts(true);
+    	webhook.setTts(false);
 
 		try {
 			webhook.execute();
-			Notification.show("Message sent successfully!", 4000, Position.TOP_CENTER)
-			.addThemeVariants(NotificationVariant.LUMO_SUCCESS);				
 		} catch (IOException e1) {
-			e1.printStackTrace();
-			Notification.show("Message failed to send!", 4000, Position.TOP_CENTER)
-			.addThemeVariants(NotificationVariant.LUMO_ERROR);				
+			System.out.println(e1.toString());
 		}
     }     
 }

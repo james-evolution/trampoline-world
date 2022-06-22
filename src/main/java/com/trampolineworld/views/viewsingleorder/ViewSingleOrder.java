@@ -38,7 +38,6 @@ import com.trampolineworld.data.service.UserRepository;
 import com.trampolineworld.data.service.UserService;
 import com.trampolineworld.views.*;
 import com.trampolineworld.views.trampolineorders.TrampolineOrdersView;
-import com.trampolineworld.views.trampolineordersreadonly.TrampolineOrdersReadOnlyView;
 
 @Route(value = "view_order/:trampolineOrderID", layout = MainLayout.class)
 @PageTitle("View Details")
@@ -78,16 +77,7 @@ public class ViewSingleOrder extends HorizontalLayout implements BeforeEnterObse
 		// Configure button appearance and click listener.
 		goBackButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		goBackButton.addClickListener(e -> {
-			String currentUsername = VaadinRequest.getCurrent().getUserPrincipal().getName();
-			User currentUser = userRepository.findByUsername(currentUsername);
-			Set<Role> roles = currentUser.getRoles();
-			// Check roles. If just a basic user and not an admin, forward to the page that
-			// doesn't allow order deletion.
-			if (roles.contains(Role.USER) && !roles.contains(Role.ADMIN)) {
-				UI.getCurrent().navigate(TrampolineOrdersReadOnlyView.class);
-			} else if (roles.contains(Role.ADMIN)) {
-				UI.getCurrent().navigate(TrampolineOrdersView.class); // Send user back to the Trampoline Orders page.
-			}
+			UI.getCurrent().navigate(TrampolineOrdersView.class); // Send user back to the Trampoline Orders page.
 		});
 
 		createLabels();

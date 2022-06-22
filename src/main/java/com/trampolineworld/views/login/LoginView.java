@@ -15,7 +15,6 @@ import com.trampolineworld.data.service.UserRepository;
 import com.trampolineworld.data.service.UserService;
 import com.trampolineworld.views.debug.DebugView;
 import com.trampolineworld.views.trampolineorders.TrampolineOrdersView;
-import com.trampolineworld.views.trampolineordersreadonly.TrampolineOrdersReadOnlyView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -83,13 +82,9 @@ public class LoginView extends LoginOverlay implements BeforeEnterObserver {
 			String currentUsername = event.getUsername();
 			User currentUser = userRepository.findByUsername(currentUsername);
 			Set<Role> roles = currentUser.getRoles();
-			// Check roles. If just a basic user and not an admin, forward to the page that
-			// doesn't allow order deletion.
-			if (roles.contains(Role.USER) && !roles.contains(Role.ADMIN)) {
-				UI.getCurrent().navigate(TrampolineOrdersReadOnlyView.class);
-			} else if (roles.contains(Role.TECH)) {
-				UI.getCurrent().navigate(DebugView.class);
-			}
+//			if (roles.contains(Role.TECH)) {
+//				UI.getCurrent().navigate(DebugView.class);
+//			}
 		});
 	}
 
