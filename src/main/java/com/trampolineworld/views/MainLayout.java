@@ -28,6 +28,7 @@ import com.vaadin.flow.component.html.Footer;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Header;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Nav;
 import com.vaadin.flow.component.html.Span;
@@ -143,9 +144,14 @@ public class MainLayout extends AppLayout {
 		list.addClassNames("navigation-list");
 		nav.add(list);
 
+		int count = 1;
 		for (MenuItemInfo menuItem : createMenuItems()) {
+			count ++;
 			if (accessChecker.hasAccess(menuItem.getView())) {
 				list.add(menuItem);
+				if (count == 4 || count == 9) {
+					list.add(new Hr());
+				}
 			}
 
 		}
@@ -154,27 +160,16 @@ public class MainLayout extends AppLayout {
 
 	private MenuItemInfo[] createMenuItems() {
 
-		/*
-		 * Other icons:
-				"la la-clipboard-list"
-				"la la-clipboard-list"
-				"las la-scroll"
-				"las la-users"
-				"lar la-save"
-				"las la-code"
-				"lar la-user"
-				"las la-cog"
-	 	*/
 		return new MenuItemInfo[] { //
 				new MenuItemInfo("Trampoline Orders", "las la-clipboard-check", TrampolineOrdersView.class), //
 				new MenuItemInfo("Chat Room", "la la-comments", ChatView.class), //
 				new MenuItemInfo("Export PDF / CSV", "las la-file-pdf", ExportView.class), //
-				new MenuItemInfo("", "", ChatView.class),
+//				new MenuItemInfo("", "", ChatView.class),
 				new MenuItemInfo("Account", "lar la-user", AccountView.class), //
 				new MenuItemInfo("Manage Users", "las la-users", ManageUsersView.class), //
 				new MenuItemInfo("Audit Log", "las la-database", AuditLogView.class), //
-				new MenuItemInfo("Archives", "las la-database", ArchivesView.class), //
-				new MenuItemInfo("", "", ChatView.class),
+				new MenuItemInfo("Archives", "las la-server", ArchivesView.class), //
+//				new MenuItemInfo("", "", ChatView.class),
 				new MenuItemInfo("User Guide", "las la-info-circle", UserGuideView.class), //
 				new MenuItemInfo("Debug", "las la-bug", DebugView.class), //
 				new MenuItemInfo("Contact", "las la-at", ContactView.class), //

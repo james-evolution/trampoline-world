@@ -3,6 +3,8 @@ package com.trampolineworld.data.service;
 import com.trampolineworld.data.entity.TrampolineOrder;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +52,13 @@ public class TrampolineOrderService {
 		return (int) repository.count();
 	}
 	
+	private class SortByDate implements Comparator<TrampolineOrder> {
+		// Sort by the most recent date.
+		public int compare(TrampolineOrder a, TrampolineOrder b) {
+			return (int) (b.getDate().compareTo(a.getDate()));
+		}
+	}
+	
 	public List<TrampolineOrder> findAllArchived(String filterText) {
 		if (filterText == null || filterText.isEmpty()) {
 			List<TrampolineOrder> allOrders = repository.findAll();
@@ -61,6 +70,7 @@ public class TrampolineOrderService {
 					deletedOrders.add(order);
 				}
 			}
+			Collections.sort(deletedOrders, new SortByDate());
 			return deletedOrders;
 		} else {
 			List<TrampolineOrder> allFilteredOrders = repository.search(filterText);
@@ -71,6 +81,7 @@ public class TrampolineOrderService {
 					allFilteredDeletedOrders.add(order);
 				}
 			}
+			Collections.sort(allFilteredDeletedOrders, new SortByDate());
 			return allFilteredDeletedOrders;
 		}
 	}
@@ -86,6 +97,7 @@ public class TrampolineOrderService {
 				allDeletedOrders.add(order);
 			}
 		}
+		Collections.sort(allDeletedOrders, new SortByDate());
 		return allDeletedOrders;
 	}
 
@@ -105,6 +117,7 @@ public class TrampolineOrderService {
 			for (TrampolineOrder orderToDelete : allOrdersToDelete) {
 				allOrders.remove(orderToDelete);
 			}
+			Collections.sort(allOrders, new SortByDate());
 			return allOrders;
 		} else {
 			List<TrampolineOrder> allFilteredOrders = repository.search(filterText);
@@ -122,6 +135,7 @@ public class TrampolineOrderService {
 				allFilteredOrders.remove(orderToDelete);
 			}
 
+			Collections.sort(allFilteredOrders, new SortByDate());
 			return allFilteredOrders;
 		}
 	}
@@ -142,6 +156,7 @@ public class TrampolineOrderService {
 		for (TrampolineOrder orderToDelete : allOrdersToDelete) {
 			allOrders.remove(orderToDelete);
 		}
+		Collections.sort(allOrders, new SortByDate());
 		return allOrders;
 	}
 }

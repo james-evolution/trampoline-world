@@ -15,6 +15,8 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -41,6 +43,7 @@ import com.vaadin.flow.data.binder.Result;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.binder.ValueContext;
 import com.vaadin.flow.data.converter.Converter;
+import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableBiConsumer;
@@ -68,20 +71,22 @@ public class AuditLogView extends Div implements BeforeEnterObserver {
 	private HorizontalLayout buttonHeaderContainer = new HorizontalLayout();
 	private LogEntryService logEntryService;
 
+	private Grid.Column<LogEntry> columnUserId, columnUsername, columnActionCategory, 
+	columnActionDetails, columnCustomerName, columnTargetOrderId, columnTargetUserId, columnTimestamp;
 
 	@Autowired
 	public AuditLogView(LogEntryService logEntryService) {
 		this.logEntryService = logEntryService;
 		addClassNames("trampoline-orders-view");
 
-		// Create button header bar.
-		createButtonHeader(); // Requires splitLayout argument to define button functions.
-
-		// Add buttonHeaderContainer and splitLayout to view.
-		add(buttonHeaderContainer);
-
 		// Configure the grid.
 		configureGrid(logEntryService);
+
+		// Create button header bar.
+		createButtonHeader(); // Requires splitLayout argument to define button functions.
+		
+		// Add buttonHeaderContainer and splitLayout to view.
+		add(buttonHeaderContainer);
 		
 		add(grid);
 	}
@@ -93,15 +98,21 @@ public class AuditLogView extends Div implements BeforeEnterObserver {
 //		grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
 		// Add columns to the grid.
-		grid.addColumn("userId").setAutoWidth(true).setResizable(true).setHeader("User ID");
-		grid.addColumn("username").setAutoWidth(true).setResizable(true);
-		grid.addColumn(createStatusComponentRenderer()).setHeader("Action Category").setAutoWidth(true).setResizable(true);
-		grid.addColumn("actionDetails").setAutoWidth(true).setResizable(true);
-		grid.addColumn("customerName").setAutoWidth(true).setResizable(true);
-		grid.addColumn("targetOrderId").setAutoWidth(true).setResizable(true);
-		grid.addColumn("targetUserId").setAutoWidth(true).setResizable(true);
-//		grid.addColumn("actionCategory").setAutoWidth(true).setResizable(true);
-		grid.addColumn("timestamp").setAutoWidth(true).setResizable(true);
+		columnUserId =  grid.addColumn("userId").setAutoWidth(true).setResizable(true).setHeader("User ID");
+		columnUsername = grid.addColumn("username").setAutoWidth(true).setResizable(true);
+		columnActionCategory = grid.addColumn(createStatusComponentRenderer()).setHeader("Action Category").setAutoWidth(true).setResizable(true);
+		columnActionDetails = grid.addColumn("actionDetails").setAutoWidth(true).setResizable(true);
+		columnCustomerName = grid.addColumn("customerName").setAutoWidth(true).setResizable(true);
+		columnTargetOrderId = grid.addColumn("targetOrderId").setAutoWidth(true).setResizable(true);
+		columnTargetUserId = grid.addColumn("targetUserId").setAutoWidth(true).setResizable(true);
+		columnTimestamp = grid.addColumn("timestamp").setAutoWidth(true).setResizable(true);
+		
+		// Make certain columns invisible by default.
+		columnUserId.setVisible(false);
+		columnUsername.setVisible(false);
+		columnCustomerName.setVisible(false);
+		columnTargetOrderId.setVisible(false);
+		columnTargetUserId.setVisible(false);
 		
 		updateGrid();
 	}
@@ -126,12 +137,14 @@ public class AuditLogView extends Div implements BeforeEnterObserver {
 			badge.getElement().getThemeList().add("badge pill");
 		} else if (actionCategory.equals("Deleted Order")) {
 			badge.getElement().getThemeList().add("badge error pill");
-			
 		} else if (actionCategory.equals("Created User")) {
 			badge.getElement().getThemeList().add("badge success pill");
 		} else if (actionCategory.equals("Edited User")) {
 			badge.getElement().getThemeList().add("badge pill");
+		} else if (actionCategory.equals("Restored Order") || actionCategory.equals("Restored Orders")) {
+			badge.getElement().getThemeList().add("badge success pill");
 		}
+		
 
 		span.add(badge);
 	};
@@ -152,9 +165,40 @@ public class AuditLogView extends Div implements BeforeEnterObserver {
 		filterTextField.setValueChangeMode(ValueChangeMode.LAZY); // Don't hit database on every keystroke. Wait for
 																	// user to finish typing.
 		filterTextField.addValueChangeListener(e -> updateGrid());
+		
+        Button menuButton = new Button("Show/Hide Columns");
+        menuButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+        menuButton.getStyle().set("margin-right", "6px");
+        menuButton.getElement().setAttribute("title", "There are additional column options, click me to reveal them!");
+        
+        ColumnToggleContextMenu columnToggleContextMenu = new ColumnToggleContextMenu(
+                menuButton);
+        columnToggleContextMenu.addColumnToggleItem("User ID", columnUserId);
+        columnToggleContextMenu.addColumnToggleItem("Username", columnUsername);
+        columnToggleContextMenu.addColumnToggleItem("Action Category", columnActionCategory);
+        columnToggleContextMenu.addColumnToggleItem("Action Details", columnActionDetails);
+        columnToggleContextMenu.addColumnToggleItem("Customer Name", columnCustomerName);
+        columnToggleContextMenu.addColumnToggleItem("Target Order ID", columnTargetOrderId);
+        columnToggleContextMenu.addColumnToggleItem("Target User ID", columnTargetUserId);
+        columnToggleContextMenu.addColumnToggleItem("Timestamp", columnTimestamp);
 
-		buttonHeaderContainer.add(filterTextField);
+		buttonHeaderContainer.add(menuButton, filterTextField);
 	}
+	
+    private static class ColumnToggleContextMenu extends ContextMenu {
+        public ColumnToggleContextMenu(Component target) {
+            super(target);
+            setOpenOnClick(true);
+        }
+
+        void addColumnToggleItem(String label, Grid.Column<LogEntry> column) {
+            MenuItem menuItem = this.addItem(label, e -> {
+                column.setVisible(e.getSource().isChecked());
+            });
+            menuItem.setCheckable(true);
+            menuItem.setChecked(column.isVisible());
+        }
+    }
 
 	@Override
 	public void beforeEnter(BeforeEnterEvent event) {

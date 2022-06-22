@@ -22,6 +22,8 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.Uses;
@@ -116,6 +118,10 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 	private final UserService userService;
 	private final UserRepository userRepository;
 	private final LogEntryRepository logEntryRepository;
+	
+	private Grid.Column<TrampolineOrder> columnId, columnComplete, columnFirstName, columnLastName,
+	columnPhoneNumber, columnEmail, columnOrderDescription, columnMeasurements, columnSubtotal,
+	columnTotal, columnDate;
 
 	@Autowired
 	public TrampolineOrdersView(TrampolineOrderService trampolineOrderService,
@@ -154,6 +160,9 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 		createGridLayout(splitLayout);
 		createEditorLayout(splitLayout);
 
+		// Configure the grid.
+		configureGrid(trampolineOrderService, splitLayout);
+
 		// Create button header bar.
 		createButtonHeader(splitLayout); // Requires splitLayout argument to define button functions.
 
@@ -164,8 +173,6 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 		// Create context menu.
 		createContextMenu(trampolineOrderService); // View & Delete buttons.
 
-		// Configure the grid.
-		configureGrid(trampolineOrderService, splitLayout);
 
 		// Configure & add delete confirmation dialog.
 		configureDeleteDialog(trampolineOrderService);
@@ -210,13 +217,19 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 				trampolineOrderService.update(this.trampolineOrder);
 
 				String customerName = this.trampolineOrder.getFirstName() + " " + this.trampolineOrder.getLastName();
-
+				
 				// Log order edited action.
 				if (currentActionCategory == "Edited Order") {
-					LogEntry logEntry = new LogEntry(logEntryRepository, currentUser.getId(), currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
-							this.trampolineOrder.getId(), customerName, currentActionCategory,
-							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails + this.trampolineOrder.getId().toString(),
-							new Timestamp(new Date().getTime()));
+					LogEntry logEntry = new LogEntry(
+							logEntryRepository, 
+							currentUser.getId(), 
+							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
+							this.trampolineOrder.getId().toString(), 
+							customerName, 
+							currentActionCategory,
+							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails + this.trampolineOrder.getId().toString() + " for " + customerName,
+							new Timestamp(new Date().getTime())
+						);
 				} else if (currentActionCategory == "Created Order") {
 //					// Get all trampoline orders from the database.
 //					List<TrampolineOrder> allOrders = trampolineOrderRepository.findAll();
@@ -225,9 +238,14 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 //					// This is one method of getting the last order's id.
 //					allOrders.get(0).getId();
 					// Log new order created action.
-					LogEntry logEntry = new LogEntry(logEntryRepository, currentUser.getId(), currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
-							this.trampolineOrder.getId(), customerName, currentActionCategory,
-							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails + this.trampolineOrder.getId().toString(),
+					LogEntry logEntry = new LogEntry(
+							logEntryRepository, 
+							currentUser.getId(), 
+							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
+							this.trampolineOrder.getId().toString(), 
+							customerName, 
+							currentActionCategory,
+							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails + this.trampolineOrder.getId().toString() + " for " + customerName,
 							new Timestamp(new Date().getTime()));
 				}
 
@@ -350,17 +368,18 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 
 		// Add columns to the grid.
 //		grid.addColumn(createStatusComponentRenderer()).setAutoWidth(true).setResizable(true);
-		grid.addColumn("id").setAutoWidth(true).setResizable(true);
-		grid.addColumn("complete").setAutoWidth(true).setResizable(true);
-		grid.addColumn("firstName").setAutoWidth(true).setResizable(true);
-		grid.addColumn("lastName").setAutoWidth(true).setResizable(true);
-		grid.addColumn("phoneNumber").setAutoWidth(true).setResizable(true).setHeader(createHeaderPhoneNumber());
-		grid.addColumn("email").setAutoWidth(true).setResizable(true).setHeader(createHeaderEmail());
-		grid.addColumn("orderDescription").setWidth("300px").setResizable(true).setHeader(createHeaderDescription());
-		grid.addColumn("measurements").setWidth("300px").setResizable(true).setHeader(createHeaderMeasurements());
-		grid.addColumn("subtotal").setAutoWidth(true).setResizable(true).setHeader(createHeaderSubtotal());
-		grid.addColumn("total").setAutoWidth(true).setResizable(true).setHeader(createHeaderTotal());
-		grid.addColumn("date").setAutoWidth(true).setResizable(true).setHeader(createHeaderDate());
+		columnId = grid.addColumn("id").setAutoWidth(true).setResizable(true);
+		columnComplete = grid.addColumn("complete").setAutoWidth(true).setResizable(true);
+		columnFirstName = grid.addColumn("firstName").setAutoWidth(true).setResizable(true);
+		columnLastName = grid.addColumn("lastName").setAutoWidth(true).setResizable(true);
+		columnPhoneNumber = grid.addColumn("phoneNumber").setAutoWidth(true).setResizable(true).setHeader(createHeaderPhoneNumber());
+		columnEmail = grid.addColumn("email").setAutoWidth(true).setResizable(true).setHeader(createHeaderEmail());
+		columnOrderDescription = grid.addColumn("orderDescription").setWidth("300px").setResizable(true).setHeader(createHeaderDescription());
+		columnMeasurements = grid.addColumn("measurements").setWidth("300px").setResizable(true).setHeader(createHeaderMeasurements());
+		columnSubtotal = grid.addColumn("subtotal").setAutoWidth(true).setResizable(true).setHeader(createHeaderSubtotal());
+		columnTotal = grid.addColumn("total").setAutoWidth(true).setResizable(true).setHeader(createHeaderTotal());
+		columnDate = grid.addColumn("date").setAutoWidth(true).setResizable(true).setHeader(createHeaderDate());
+		
 		updateGrid();
 
 //        grid.setItems(query -> trampolineOrderService.list(
@@ -473,11 +492,43 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 		filterTextField.setHelperText("Filter by name, email, or number");
 		filterTextField.setClearButtonVisible(true);
 		filterTextField.setValueChangeMode(ValueChangeMode.LAZY); // Don't hit database on every keystroke. Wait for
-																	// user to finish typing.
 		filterTextField.addValueChangeListener(e -> updateGrid());
 
-		buttonHeaderContainer.add(filterTextField, newOrderButton, hideSidebarButton);
+        Button menuButton = new Button("Show/Hide Columns");
+        menuButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+        menuButton.getStyle().set("margin-right", "6px");
+        menuButton.getElement().setAttribute("title", "There are additional column options, click me to reveal them!");
+        
+        ColumnToggleContextMenu columnToggleContextMenu = new ColumnToggleContextMenu(
+                menuButton);
+        columnToggleContextMenu.addColumnToggleItem("ID", columnId);
+        columnToggleContextMenu.addColumnToggleItem("Complete", columnComplete);
+        columnToggleContextMenu.addColumnToggleItem("First Name", columnFirstName);
+        columnToggleContextMenu.addColumnToggleItem("Last Name", columnLastName);
+        columnToggleContextMenu.addColumnToggleItem("Phone Number", columnPhoneNumber);
+        columnToggleContextMenu.addColumnToggleItem("Email", columnEmail);
+        columnToggleContextMenu.addColumnToggleItem("Order Description", columnOrderDescription);
+        columnToggleContextMenu.addColumnToggleItem("Measurements", columnMeasurements);
+        columnToggleContextMenu.addColumnToggleItem("Subtotal", columnSubtotal);
+        columnToggleContextMenu.addColumnToggleItem("Total", columnTotal);
+        columnToggleContextMenu.addColumnToggleItem("Date", columnDate);	
+		buttonHeaderContainer.add(menuButton, filterTextField, newOrderButton, hideSidebarButton);
 	}
+	
+    private static class ColumnToggleContextMenu extends ContextMenu {
+        public ColumnToggleContextMenu(Component target) {
+            super(target);
+            setOpenOnClick(true);
+        }
+
+        void addColumnToggleItem(String label, Grid.Column<TrampolineOrder> column) {
+            MenuItem menuItem = this.addItem(label, e -> {
+                column.setVisible(e.getSource().isChecked());
+            });
+            menuItem.setCheckable(true);
+            menuItem.setChecked(column.isVisible());
+        }
+    }
 
 	@Override
 	public void beforeEnter(BeforeEnterEvent event) {
@@ -528,9 +579,14 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 				
 				// Log action.
 				currentActionCategory = "Deleted Order";
-				currentActionDetails = " deleted order #" + targetId.toString();
-				LogEntry logEntry = new LogEntry(logEntryRepository, currentUser.getId(), currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
-						targetId, customerName, currentActionCategory,
+				currentActionDetails = " deleted order #" + targetId.toString() + " for " + customerName;
+				LogEntry logEntry = new LogEntry(
+						logEntryRepository, 
+						currentUser.getId(), 
+						currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
+						targetId.toString(), 
+						customerName, 
+						currentActionCategory,
 						currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails,
 						new Timestamp(new Date().getTime()));				
 				// Notify of deletion success.

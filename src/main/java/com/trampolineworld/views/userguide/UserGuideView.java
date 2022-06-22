@@ -8,6 +8,7 @@ import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.IFrame;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.ListItem;
@@ -95,17 +96,17 @@ public class UserGuideView extends HorizontalLayout {
 		layout.add(header1);
 		layout.add(videoFrame);
 		layout.add(videoCaption);
+		layout.add(new Hr());
 		layout.add(featuresLabel);
 		layout.add(featuresList);
 //		layout.add(details);
+		layout.add(new Hr());
 		layout.add(header2);
 		layout.add(createLabel, createParagraph);
 		layout.add(editLabel, editParagraph);
 		layout.add(viewLabel, viewParagraph);
 		layout.add(deleteLabel, deleteParagraph);
 		layout.add(fontSizeLabel, fontSizeParagraph);
-
-
 		
 		this.setClassName("userguide-layout");
 
@@ -171,15 +172,18 @@ public class UserGuideView extends HorizontalLayout {
 		featuresList = new UnorderedList(
 				new ListItem("Authentication & Authorization: Users must log in to access this application. Individual permissions depend upon account type."),
 				new ListItem("CRUD Operations: Users can create, read, update, and delete orders."),
-				new ListItem("Searching, Sorting, & Filtering: These features are available on the grid in which all orders are displayed."),
+				new ListItem("Searching, Sorting, & Filtering: All pages with grid views have these features enabled. Admins can search through orders, system users, and system logs."),
+				new ListItem("Column Reordering, Resizing, & Filtering: Users can drag columns to reorder and resize them. Additionally, they can hide/show specific columns with the Show/Hide button. (By default, on some pages, some columns are not shown, to minimize the odds of displaying unnecessary data.)"),
 				new ListItem("Data Exports: Order information can be exported as needed in either PDF or CSV format."),
 				new ListItem("Form Validation: The form used to create new orders and edit existing ones can validate input to meet any specified requirements."),
 				new ListItem("Live Chat: A still-in-development and optional feature is live-chat. This is showcased in the video."),
 				new ListItem("Persistent Data Storage: This application uses a MySQL database to store & retrieve order information."),
+				new ListItem("Archives: When an order gets deleted from the system, it isn't actually deleted from the database. Instead, it is simply flagged so that it does not appear on the orders page. Admins can view deleted orders in the archives, where they can restore them if they desire."),
 				new ListItem("User Management: Admins can manage user accounts and modify their names, passwords, and permissions."),
 				new ListItem("Audit Log: All user actions are logged in the system. Administrators can see who made what changes at what time."),
 				new ListItem("Profile Customization: Admins can customize their own profile picture, color, display name, and email address."),
 				new ListItem("Password Resets: If a user forgets their password they can have a reset code sent to their email via the login page. Alternatively, administrators can change their password."),
+				new ListItem("Tooltips & Helper Text: Some columns on the user management page show helpful hints/information if you hover over them with your cursor. Many input fields also have helper text beneath them as guidelines."),
 				new ListItem("Open Source: The full source code used to develop this application is freely available to the owners of Trampoline World."),
 				new ListItem("Questions & Requests: The contact page allows admins to instantly contact the developer if they have questions or want to make requests.")
 			);
@@ -209,8 +213,10 @@ public class UserGuideView extends HorizontalLayout {
 		layout.add(header1);
 		layout.add(videoFrame);
 		layout.add(videoCaption);
+		layout.add(new Hr());
 		layout.add(featuresLabel);
 		layout.add(featuresList);
+		layout.add(new Hr());
 		layout.add(header2);
 		layout.add(createLabel, createParagraph);
 		layout.add(editLabel, editParagraph);

@@ -10,6 +10,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.History;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -77,7 +78,9 @@ public class ViewSingleOrder extends HorizontalLayout implements BeforeEnterObse
 		// Configure button appearance and click listener.
 		goBackButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		goBackButton.addClickListener(e -> {
-			UI.getCurrent().navigate(TrampolineOrdersView.class); // Send user back to the Trampoline Orders page.
+			History history = UI.getCurrent().getPage().getHistory();
+			history.back();
+//			UI.getCurrent().navigate(TrampolineOrdersView.class); // Send user back to the Trampoline Orders page.
 		});
 
 		createLabels();

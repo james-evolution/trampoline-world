@@ -15,6 +15,8 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -70,7 +72,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @CssImport(themeFor = "vaadin-grid", value = "./themes/trampolineworld/views/grid-theme.css")
 @CssImport(value = "./themes/trampolineworld/views/dialog.css", themeFor = "vaadin-dialog-overlay")
 public class ManageUsersView extends Div implements BeforeEnterObserver {
-	
+
 	private String currentActionCategory;
 	private String currentActionDetails;
 
@@ -78,7 +80,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 	private final String USER_EDIT_ROUTE_TEMPLATE = "users/%s/edit";
 	private final String USER_VIEW_ROUTE_TEMPLATE = "view_user/%s";
 	private UUID targetId;
-	
+
 	private UserInfo userInfo;
 	private User userToEdit;
 	private boolean isNewUser = false;
@@ -111,18 +113,22 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 	private final UserService userService;
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
-	
+
 	private User currentUser;
 	private User createdUser;
 
+	private Grid.Column<User> columnId, columnUsername, columnDisplayName, columnRoles, columnEmail,
+			columnProfilePictureUrl, columnColorIndex;
+
 	@Autowired
-	public ManageUsersView(LogEntryRepository logEntryRepository, UserService userService, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+	public ManageUsersView(LogEntryRepository logEntryRepository, UserService userService,
+			UserRepository userRepository, PasswordEncoder passwordEncoder) {
 		this.logEntryRepository = logEntryRepository;
 		this.userService = userService;
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		addClassNames("trampoline-orders-view");
-		
+
 		String currentUsername = VaadinRequest.getCurrent().getUserPrincipal().getName();
 		currentUser = userRepository.findByUsername(currentUsername);
 
@@ -133,6 +139,9 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 		createGridLayout(splitLayout);
 		createEditorLayout(splitLayout);
 
+		// Configure the grid.
+		configureGrid(userService, splitLayout);
+
 		// Create button header bar.
 		createButtonHeader(splitLayout); // Requires splitLayout argument to define button functions.
 
@@ -140,13 +149,10 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 		add(buttonHeaderContainer);
 		add(splitLayout);
 
-		// Configure the grid.
-		configureGrid(userService, splitLayout);
-
 		// Default user is new.
 		userToEdit = new User();
 		userToEdit.setHashedPassword(passwordEncoder.encode("user"));
-		
+
 		// Configure the form.
 //		configureFormBindings(userInfo);
 		configureFormButtons(userService);
@@ -166,21 +172,22 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 			try {
 				// Pull data from form, update user object, update repository.
 				updateUserFromForm(userService);
-				
+
 				// Log action.
 				if (currentActionCategory == "Created User") {
-					LogEntry logEntry = new LogEntry(logEntryRepository, currentUser.getId(), currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
-							createdUser.getId(), currentActionCategory,
-							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails + " " + createdUser.getId().toString(),
-							new Timestamp(new Date().getTime()));					
-				}
-				else if (currentActionCategory == "Edited User") {
-					LogEntry logEntry = new LogEntry(logEntryRepository, currentUser.getId(), currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
-							this.user.getId(), currentActionCategory,
-							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails + " " + this.user.getId().toString(),
+					LogEntry logEntry = new LogEntry(logEntryRepository, currentUser.getId(),
+							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")", createdUser.getId(),
+							currentActionCategory, currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")"
+									+ currentActionDetails + " " + createdUser.getId().toString(),
+							new Timestamp(new Date().getTime()));
+				} else if (currentActionCategory == "Edited User") {
+					LogEntry logEntry = new LogEntry(logEntryRepository, currentUser.getId(),
+							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")", this.user.getId(),
+							currentActionCategory, currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")"
+									+ currentActionDetails + " " + this.user.getId().toString(),
 							new Timestamp(new Date().getTime()));
 				}
-				
+
 				// Clear form, update grid.
 				clearForm();
 				updateGrid();
@@ -201,8 +208,9 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 	}
 
 	private void updateUserFromForm(UserService userService) {
-		
-		// Check if this is a new user, if it is, create a new user object & use the default encoded password.
+
+		// Check if this is a new user, if it is, create a new user object & use the
+		// default encoded password.
 		if (isNewUser) {
 			User newUser = new User();
 			newUser.setUsername(username.getValue());
@@ -214,14 +222,14 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 			newUser.setHashedPassword(passwordEncoder.encode("user"));
 //			userService.update(newUser);
 			userRepository.save(newUser);
-			
+
 			createdUser = userRepository.findByUsername(username.getValue());
-			
+
 			currentActionCategory = "Created User";
-			currentActionDetails = " created account for " + createdUser.getUsername() + " (" + createdUser.getDisplayName() + ")";
+			currentActionDetails = " created account for " + createdUser.getUsername() + " ("
+					+ createdUser.getDisplayName() + ")";
 			sendDiscordWebhookMessage(newUser.getUsername() + ": " + createdUser.getId().toString(), "uuids");
-		}
-		else {
+		} else {
 			this.user.setUsername(username.getValue());
 			this.user.setDisplayName(displayName.getValue());
 			this.user.setEmail(email.getValue());
@@ -229,82 +237,88 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 			this.user.setColorIndex(colorIndex.getValue() == null ? 1 : colorIndex.getValue());
 			this.user.setProfilePictureUrl(profilePictureUrl.getValue());
 			// If password field is empty or null, do nothing. Leave it as is.
-			if (hashedPassword.getValue().isEmpty() || hashedPassword.getValue() == null) {}
+			if (hashedPassword.getValue().isEmpty() || hashedPassword.getValue() == null) {
+			}
 			// Else, encode the new password.
-			else { this.user.setHashedPassword(passwordEncoder.encode(hashedPassword.getValue()));}
+			else {
+				this.user.setHashedPassword(passwordEncoder.encode(hashedPassword.getValue()));
+			}
 
 			currentActionCategory = "Edited User";
-			currentActionDetails = " edited account for " + this.user.getUsername() + " (" + this.user.getDisplayName() + ")";
+			currentActionDetails = " edited account for " + this.user.getUsername() + " (" + this.user.getDisplayName()
+					+ ")";
 			userService.update(this.user);
 		}
 	}
-	
+
 	private static Component createHeaderRoles() {
 		Span span = new Span("Roles");
 		Icon icon = VaadinIcon.USER_STAR.create();
-		icon.getElement()
-		.setAttribute("title", "Please ensure the URL ends in .jpg, .png, or .webp");
-		icon.getStyle().set("height", "var(--lumo-font-size-m)")
-		.set("color", "var(--lumo-contrast-70pct)");
+		icon.getStyle().set("height", "var(--lumo-font-size-m)").set("color", "var(--lumo-contrast-70pct)");
 		icon.getStyle().set("margin-right", "4px");
 		HorizontalLayout layout = new HorizontalLayout(icon, span);
+		layout.getElement().setAttribute("title", "Admins have all permissions but cannot see the Debug page. Techs can see the debug page. \nUsers can only see the orders page and the chat, they cannot delete orders.");
 		layout.setAlignItems(Alignment.AUTO);
 		layout.setSpacing(false);
 		return layout;
 	}
+
 	private static Component createHeaderEmail() {
 		Span span = new Span("Email");
 		Icon icon = VaadinIcon.ENVELOPE.create();
-		icon.getElement()
-		.setAttribute("title", "Please ensure the URL ends in .jpg, .png, or .webp");
-		icon.getStyle().set("height", "var(--lumo-font-size-m)")
-		.set("color", "var(--lumo-contrast-70pct)");
+		icon.getStyle().set("height", "var(--lumo-font-size-m)").set("color", "var(--lumo-contrast-70pct)");
 		icon.getStyle().set("margin-right", "4px");
 		HorizontalLayout layout = new HorizontalLayout(icon, span);
+		layout.getElement().setAttribute("title", "Determines where a user's reset code will be sent if they forget their password.");
 		layout.setAlignItems(Alignment.AUTO);
 		layout.setSpacing(false);
 		return layout;
 	}
+
 	private static Component createHeaderProfileUrl() {
 		Span span = new Span("Profile Picture URL");
 		Icon icon = VaadinIcon.LINK.create();
-		icon.getElement()
-		.setAttribute("title", "Please ensure the URL ends in .jpg, .png, or .webp");
-		icon.getStyle().set("height", "var(--lumo-font-size-m)")
-		.set("color", "var(--lumo-contrast-70pct)");
+		icon.getStyle().set("height", "var(--lumo-font-size-m)").set("color", "var(--lumo-contrast-70pct)");
 		icon.getStyle().set("margin-right", "4px");
 		HorizontalLayout layout = new HorizontalLayout(icon, span);
+		layout.getElement().setAttribute("title", "Please ensure the URL ends in .jpg, .png, or .webp");
 		layout.setAlignItems(Alignment.AUTO);
 		layout.setSpacing(false);
 		return layout;
 	}
+
 	private static Component createHeaderColorIndex() {
-	    Span span = new Span("Color Index");
-	    Icon icon = VaadinIcon.PALETTE.create();
-	    icon.getElement()
-	            .setAttribute("title", "A user's color index determines what color frames their profile picture and the fields they're editing.");
-	    icon.getStyle().set("height", "var(--lumo-font-size-m)")
-	            .set("color", "var(--lumo-contrast-70pct)");
-	    icon.getStyle().set("margin-right", "4px");
-	    HorizontalLayout layout = new HorizontalLayout(icon, span);
-	    layout.setAlignItems(Alignment.AUTO);
-	    layout.setSpacing(false);
-	    return layout;
+		Span span = new Span("Color Index");
+		Icon icon = VaadinIcon.PALETTE.create();
+		icon.getStyle().set("height", "var(--lumo-font-size-m)").set("color", "var(--lumo-contrast-70pct)");
+		icon.getStyle().set("margin-right", "4px");
+		HorizontalLayout layout = new HorizontalLayout(icon, span);
+		layout.getElement().setAttribute("title", "Determines what color frames a user's profile picture and the fields they're editing.");
+		layout.setAlignItems(Alignment.AUTO);
+		layout.setSpacing(false);
+		return layout;
 	}
 
 	private void configureGrid(UserService userService, SplitLayout splitLayout) {
 		grid.setColumnReorderingAllowed(true);
 		grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
 		grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
-		
+
 		// Add columns to the grid.
-		grid.addColumn("id").setAutoWidth(true).setResizable(true).setHeader("User ID");
-		grid.addColumn("username").setAutoWidth(true).setResizable(true);
-		grid.addColumn("displayName").setAutoWidth(true).setResizable(true);
-		grid.addColumn(createStatusComponentRenderer()).setAutoWidth(true).setResizable(true).setHeader(createHeaderRoles());
-		grid.addColumn("email").setAutoWidth(true).setResizable(true).setHeader(createHeaderEmail());
-		grid.addColumn("profilePictureUrl").setWidth("300px").setResizable(true).setHeader(createHeaderProfileUrl());
-		grid.addColumn("colorIndex").setAutoWidth(true).setResizable(true).setHeader(createHeaderColorIndex());
+		columnId = grid.addColumn("id").setAutoWidth(true).setResizable(true).setHeader("User ID");
+		columnUsername = grid.addColumn("username").setAutoWidth(true).setResizable(true);
+		columnDisplayName = grid.addColumn("displayName").setAutoWidth(true).setResizable(true);
+		columnRoles = grid.addColumn(createStatusComponentRenderer()).setAutoWidth(true).setResizable(true)
+				.setHeader(createHeaderRoles());
+		columnEmail = grid.addColumn("email").setAutoWidth(true).setResizable(true).setHeader(createHeaderEmail());
+		columnProfilePictureUrl = grid.addColumn("profilePictureUrl").setWidth("300px").setResizable(true)
+				.setHeader(createHeaderProfileUrl());
+		columnColorIndex = grid.addColumn("colorIndex").setAutoWidth(true).setResizable(true)
+				.setHeader(createHeaderColorIndex());
+
+		columnId.setVisible(false);
+		columnUsername.setVisible(false);
+
 		updateGrid();
 
 		// When a row is selected or deselected, populate form.
@@ -328,7 +342,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 
 	private void updateGrid() {
 		grid.setItems(userService.findAll(filterTextField.getValue()));
-		
+
 		// Log UUIDs so we can keep track of them for the CE license.
 		List<User> users = userService.findAllNoFilter();
 		for (User u : users) {
@@ -380,7 +394,6 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 		buttonHeaderContainer.setSpacing(false);
 		buttonHeaderContainer.setAlignItems(Alignment.BASELINE);
 
-		
 		newUserButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		newUserButton.getElement().getStyle().set("margin-left", "6px");
 		newUserButton.getElement().getStyle().set("margin-right", "6px");
@@ -411,10 +424,39 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 		filterTextField.setHelperText("Filter by name or email");
 		filterTextField.setClearButtonVisible(true);
 		filterTextField.setValueChangeMode(ValueChangeMode.LAZY); // Don't hit database on every keystroke. Wait for
-																	// user to finish typing.
 		filterTextField.addValueChangeListener(e -> updateGrid());
 
-		buttonHeaderContainer.add(filterTextField, newUserButton, hideSidebarButton);
+		Button menuButton = new Button("Show/Hide Columns");
+		menuButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+		menuButton.getStyle().set("margin-right", "6px");
+		menuButton.getElement().setAttribute("title", "There are additional column options, click me to reveal them!");
+
+		ColumnToggleContextMenu columnToggleContextMenu = new ColumnToggleContextMenu(menuButton);
+		columnToggleContextMenu.addColumnToggleItem("ID", columnId);
+		columnToggleContextMenu.addColumnToggleItem("Username", columnUsername);
+		columnToggleContextMenu.addColumnToggleItem("Display Name", columnDisplayName);
+		columnToggleContextMenu.addColumnToggleItem("Roles", columnRoles);
+		columnToggleContextMenu.addColumnToggleItem("Email", columnEmail);
+		columnToggleContextMenu.addColumnToggleItem("Profile Picture Url", columnProfilePictureUrl);
+		columnToggleContextMenu.addColumnToggleItem("Color Index", columnColorIndex);
+
+		buttonHeaderContainer.add(menuButton, filterTextField, newUserButton, hideSidebarButton);
+//		buttonHeaderContainer.setAlignItems(Alignment.BASELINE);
+	}
+
+	private static class ColumnToggleContextMenu extends ContextMenu {
+		public ColumnToggleContextMenu(Component target) {
+			super(target);
+			setOpenOnClick(true);
+		}
+
+		void addColumnToggleItem(String label, Grid.Column<User> column) {
+			MenuItem menuItem = this.addItem(label, e -> {
+				column.setVisible(e.getSource().isChecked());
+			});
+			menuItem.setCheckable(true);
+			menuItem.setChecked(column.isVisible());
+		}
 	}
 
 	@Override
@@ -448,18 +490,22 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 		editorLayoutDiv.add(editorDiv);
 
 		username = new TextField("Username");
-		username.setHelperText("Your username is the one you log in with. This is not to be confused with the display name, which is simply for aesthetics.");
-		
+		username.setHelperText(
+				"Your username is the one you log in with. This is not to be confused with the display name, which is simply for aesthetics.");
+
 		displayName = new TextField("Display Name");
-		displayName.setHelperText("Your display name is essentially your nickname. It's what will be displayed to other users in the system. It's a good idea to have a different display name than username, that way people don't know what username to type if they attempt to log into your account.");
-		
+		displayName.setHelperText(
+				"Your display name is essentially your nickname. It's what will be displayed to other users in the system. It's a good idea to have a different display name than username, that way people don't know what username to type if they attempt to log into your account.");
+
 		email = new TextField("Email");
-		email.setHelperText("An email is not required, but if you ever forget your password, this is where your reset link & code will be sent.");
+		email.setHelperText(
+				"An email is not required, but if you ever forget your password, this is where your reset link & code will be sent.");
 
 		roles = new CheckboxGroup<>();
 		roles.setLabel("Roles");
 		roles.setItems(Role.ADMIN, Role.TECH, Role.USER);
-		roles.setHelperText("Admins have all permissions but cannot see the debug page. Techs can see the debug page. Users can only access the orders page and the chat. They cannot delete orders, but they can add, edit, and view them.");
+		roles.setHelperText(
+				"Admins have all permissions but cannot see the debug page. Techs can see the debug page. Users can only access the orders page and the chat. They cannot delete orders, but they can add, edit, and view them.");
 
 		colorIndex = new Select<>();
 		colorIndex.setLabel("Color Index");
@@ -468,15 +514,19 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 
 		hashedPassword = new PasswordField();
 		hashedPassword.setLabel("Password");
-		hashedPassword.setHelperText("To leave the password unchanged or default (default password for new accounts is 'user'), leave this field blank. WARNING: Do not change the value of this field if you don't want to change a user's password. It will get encrypted.");
+		hashedPassword.setHelperText(
+				"To leave the password unchanged or default (default password for new accounts is 'user'), leave this field blank. WARNING: Do not change the value of this field if you don't want to change a user's password. It will get encrypted.");
 		hashedPassword.setValueChangeMode(ValueChangeMode.LAZY);
 
 		profilePictureUrl = new TextField("Profile Picture URL");
-		profilePictureUrl.setHelperText("File uploads are not yet supported for profile pictures. You can, however, pass in an image URL. Right click on an image from the net and select 'Copy Image Address' and then paste it here. The url path must end in .jpg, .png, or .webp");
-		
-		Component[] fields = new Component[] { username, displayName, email, roles, hashedPassword, profilePictureUrl, colorIndex };
+		profilePictureUrl.setHelperText(
+				"File uploads are not yet supported for profile pictures. You can, however, pass in an image URL. Right click on an image from the net and select 'Copy Image Address' and then paste it here. The url path must end in .jpg, .png, or .webp");
 
-		formLayout.add(fields);		editorDiv.add(editTitle, formLayout);
+		Component[] fields = new Component[] { username, displayName, email, roles, hashedPassword, profilePictureUrl,
+				colorIndex };
+
+		formLayout.add(fields);
+		editorDiv.add(editTitle, formLayout);
 		createButtonLayout(editorLayoutDiv);
 		splitLayout.addToSecondary(editorLayoutDiv);
 	}
@@ -527,40 +577,41 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 			colorIndex.clear();
 			profilePictureUrl.clear();
 		}
-		
+
 	}
-	
-    public static void sendDiscordWebhookMessage(String message, String channel) {
-    	
-    	String webhookURL = "";
-    	String webhookUsername = "";
-    	
-    	// Debug messages, obviously.
-    	if (channel == "debugging") {
-    		webhookUsername = "TW Debugger";
-    		webhookURL = "https://ptb.discord.com/api/webhooks/988568130093744218/xoLscoKMWCX3_7t63MESyA4FW3P_KSY6dlLB0hzYxbrqw6mTLlLsMXr7GlBbYd5rI3Ku";
-    	}
-    	/*
-    	 * It's important to keep a record of generated UUIDs for system users.
-    	 * This is because the CollaborationEngine will limit us to 20 unique users per month in the system.
-    	 * This is a limitation of the free universal license. A commerical license to surpass that 20 user quota
-    	 * would cost a minimum of $100 / month.
-    	 * 
-    	 * Thus, it's ideal for us to store and re-use existing UUIDs rather than generating new ones indefinitely.
-    	 */
-    	else if (channel == "uuids") {
-    		webhookUsername = "TW UUID Logger";
-    		webhookURL = "https://ptb.discord.com/api/webhooks/988570358691016784/MWE8EIOOh7-Eohofs0Dp6Wu6DiyEmr91hUcUXBMnyt6t0esLraN7XPTc-fKTNpfOjjvW";
-    	}
-    
-    	DiscordWebhook webhook = new DiscordWebhook(webhookURL);
-    	webhook.setContent("<@&988212618059726870> " + message);
-    	webhook.setTts(true);
+
+	public static void sendDiscordWebhookMessage(String message, String channel) {
+
+		String webhookURL = "";
+		String webhookUsername = "";
+
+		// Debug messages, obviously.
+		if (channel == "debugging") {
+			webhookUsername = "TW Debugger";
+			webhookURL = "https://ptb.discord.com/api/webhooks/988568130093744218/xoLscoKMWCX3_7t63MESyA4FW3P_KSY6dlLB0hzYxbrqw6mTLlLsMXr7GlBbYd5rI3Ku";
+		}
+		/*
+		 * It's important to keep a record of generated UUIDs for system users. This is
+		 * because the CollaborationEngine will limit us to 20 unique users per month in
+		 * the system. This is a limitation of the free universal license. A commerical
+		 * license to surpass that 20 user quota would cost a minimum of $100 / month.
+		 * 
+		 * Thus, it's ideal for us to store and re-use existing UUIDs rather than
+		 * generating new ones indefinitely.
+		 */
+		else if (channel == "uuids") {
+			webhookUsername = "TW UUID Logger";
+			webhookURL = "https://ptb.discord.com/api/webhooks/988570358691016784/MWE8EIOOh7-Eohofs0Dp6Wu6DiyEmr91hUcUXBMnyt6t0esLraN7XPTc-fKTNpfOjjvW";
+		}
+
+		DiscordWebhook webhook = new DiscordWebhook(webhookURL);
+		webhook.setContent("<@&988212618059726870> " + message);
+		webhook.setTts(true);
 
 		try {
 			webhook.execute();
 		} catch (IOException e1) {
 			System.out.println(e1.toString());
 		}
-    }
+	}
 }

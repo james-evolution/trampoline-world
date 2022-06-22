@@ -22,6 +22,8 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.Uses;
@@ -60,9 +62,11 @@ import com.vaadin.flow.server.VaadinRequest;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -81,6 +85,15 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 	private User currentUser;
 	private String currentActionCategory;
 	private String currentActionDetails;
+	
+	private Boolean restoringMultipleOrders = false;
+	// For logging multiple selections.
+	List<String> targetOrderIds = new ArrayList<String>();
+	List<String> customerNames = new ArrayList<String>();
+	
+	// For logging single selections.
+	private String targetOrderId;
+	private String customerName;
 
 	public static String username = "";
 
@@ -107,6 +120,7 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 	private Button save = new Button("Save");
 	private Button newOrderButton = new Button("New Order");
 	private Button hideSidebarButton = new Button("Hide");
+	private Button restoreOrdersButton = new Button("Restore Orders");
 
 	private CollaborationBinder<TrampolineOrder> binder;
 	private TrampolineOrder trampolineOrder;
@@ -115,6 +129,12 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 	private final UserService userService;
 	private final UserRepository userRepository;
 	private final LogEntryRepository logEntryRepository;
+	
+	private Set<TrampolineOrder> allSelectedOrders;
+	
+	private Grid.Column<TrampolineOrder> columnId, columnComplete, columnFirstName, columnLastName,
+	columnPhoneNumber, columnEmail, columnOrderDescription, columnMeasurements, columnSubtotal,
+	columnTotal, columnDate, columnDeleted;
 
 	@Autowired
 	public ArchivesView(TrampolineOrderService trampolineOrderService,
@@ -153,47 +173,28 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 		createGridLayout(splitLayout);
 		createEditorLayout(splitLayout);
 
-		// Create button header bar.
-		createButtonHeader(splitLayout); // Requires splitLayout argument to define button functions.
-
-		// Add buttonHeaderContainer and splitLayout to view.
-		add(buttonHeaderContainer);
-		add(splitLayout);
-
-		// Create context menu.
-		createContextMenu(trampolineOrderService); // View & Delete buttons.
-
 		// Configure the grid.
 		configureGrid(trampolineOrderService, splitLayout);
 
-		// Configure & add delete confirmation dialog.
-		configureDeleteDialog(trampolineOrderService);
-		add(confirmDeleteDialog);
+		// Create button header bar.
+		createButtonHeader(splitLayout); // Requires splitLayout argument to define button functions.
+		
+		// Add buttonHeaderContainer and splitLayout to view.
+		add(buttonHeaderContainer);
+		add(splitLayout);
+		
+		// Create context menu.
+		createContextMenu(trampolineOrderService); // View & Delete buttons.
 
 		// Configure the form.
 		configureForm(userInfo);
 		configureFormButtons(trampolineOrderService);
 	}
 
-	private void configureDeleteDialog(TrampolineOrderService trampolineOrderService) {
-		confirmDeleteDialog.setHeaderTitle("Delete Order");
-		confirmDeleteDialog.setDraggable(true);
-		confirmDeleteDialog.addClassName("deleteDialog");
-
-		VerticalLayout dialogLayout = createDialogLayout();
-		confirmDeleteDialog.add(dialogLayout);
-
-		Button dialogDeleteOrderButton = createDialogDeleteOrderButton(confirmDeleteDialog, trampolineOrderService);
-		Button cancelButton = new Button("Cancel", e -> confirmDeleteDialog.close());
-		confirmDeleteDialog.getFooter().add(dialogDeleteOrderButton);
-		confirmDeleteDialog.getFooter().add(cancelButton);
-	}
-
 	private void configureFormButtons(TrampolineOrderService trampolineOrderService) {
 		// When the cancel button is clicked, clear the form and refresh the grid.
 		cancel.addClickListener(e -> {
 			clearForm();
-//            refreshGrid();
 			updateGrid();
 			editorLayoutDiv.setVisible(false);
 			hideSidebarButton.setVisible(false);
@@ -213,13 +214,13 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 				// Log order edited action.
 				if (currentActionCategory == "Edited Order") {
 					LogEntry logEntry = new LogEntry(logEntryRepository, currentUser.getId(), currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
-							this.trampolineOrder.getId(), customerName, currentActionCategory,
+							this.trampolineOrder.getId().toString(), customerName, currentActionCategory,
 							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails + this.trampolineOrder.getId().toString(),
 							new Timestamp(new Date().getTime()));
 				} else if (currentActionCategory == "Created Order") {
 					// Log new order created action.
 					LogEntry logEntry = new LogEntry(logEntryRepository, currentUser.getId(), currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
-							this.trampolineOrder.getId(), customerName, currentActionCategory,
+							this.trampolineOrder.getId().toString(), customerName, currentActionCategory,
 							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails + this.trampolineOrder.getId().toString(),
 							new Timestamp(new Date().getTime()));
 				}
@@ -339,22 +340,25 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 		grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
 		grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
 		grid.addThemeVariants(GridVariant.LUMO_COMPACT);
-//		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+		grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
+		grid.setSelectionMode(Grid.SelectionMode.MULTI);
+		//		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
 		// Add columns to the grid.
 //		grid.addColumn(createStatusComponentRenderer()).setAutoWidth(true).setResizable(true);
-		grid.addColumn("id").setAutoWidth(true).setResizable(true);
-		grid.addColumn("complete").setAutoWidth(true).setResizable(true);
-		grid.addColumn("firstName").setAutoWidth(true).setResizable(true);
-		grid.addColumn("lastName").setAutoWidth(true).setResizable(true);
-		grid.addColumn("phoneNumber").setAutoWidth(true).setResizable(true).setHeader(createHeaderPhoneNumber());
-		grid.addColumn("email").setAutoWidth(true).setResizable(true).setHeader(createHeaderEmail());
-		grid.addColumn("orderDescription").setWidth("300px").setResizable(true).setHeader(createHeaderDescription());
-		grid.addColumn("measurements").setWidth("300px").setResizable(true).setHeader(createHeaderMeasurements());
-		grid.addColumn("subtotal").setAutoWidth(true).setResizable(true).setHeader(createHeaderSubtotal());
-		grid.addColumn("total").setAutoWidth(true).setResizable(true).setHeader(createHeaderTotal());
-		grid.addColumn("date").setAutoWidth(true).setResizable(true).setHeader(createHeaderDate());
-		grid.addColumn("deleted").setAutoWidth(true).setResizable(true);
+		columnId = grid.addColumn("id").setAutoWidth(true).setResizable(true);
+		columnDeleted = grid.addColumn("deleted").setAutoWidth(true).setResizable(true);
+		columnComplete = grid.addColumn("complete").setAutoWidth(true).setResizable(true);
+		columnFirstName = grid.addColumn("firstName").setAutoWidth(true).setResizable(true);
+		columnLastName = grid.addColumn("lastName").setAutoWidth(true).setResizable(true);
+		columnPhoneNumber = grid.addColumn("phoneNumber").setAutoWidth(true).setResizable(true).setHeader(createHeaderPhoneNumber());
+		columnEmail = grid.addColumn("email").setAutoWidth(true).setResizable(true).setHeader(createHeaderEmail());
+		columnOrderDescription = grid.addColumn("orderDescription").setWidth("300px").setResizable(true).setHeader(createHeaderDescription());
+		columnMeasurements = grid.addColumn("measurements").setWidth("300px").setResizable(true).setHeader(createHeaderMeasurements());
+		columnSubtotal = grid.addColumn("subtotal").setAutoWidth(true).setResizable(true).setHeader(createHeaderSubtotal());
+		columnTotal = grid.addColumn("total").setAutoWidth(true).setResizable(true).setHeader(createHeaderTotal());
+		columnDate = grid.addColumn("date").setAutoWidth(true).setResizable(true).setHeader(createHeaderDate());
+		
 		updateGrid();
 
 //        grid.setItems(query -> trampolineOrderService.list(
@@ -369,20 +373,33 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 				return "incomplete";
 			}
 		});
+		
+		
+	    grid.addSelectionListener(selection -> {
+			Notification.show("Listener triggered!", 4000, Position.TOP_CENTER)
+			.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+	    	// Initialize the 'allSelectedOrders' set with the selected items.
+	    	allSelectedOrders = selection.getAllSelectedItems();
+	    	// Show the restore orders button.
+	    	restoreOrdersButton.setVisible(true);
+	    });
+	    
 
 		// When a row is selected or deselected, populate form.
-		grid.asSingleSelect().addValueChangeListener(event -> {
-			if (event.getValue() != null) {
-				editorLayoutDiv.setVisible(true);
-				hideSidebarButton.setVisible(true);
-				splitLayout.setSplitterPosition(0);
-				UI.getCurrent().navigate(String.format(TRAMPOLINEORDER_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
-			} else {
-				editorLayoutDiv.setVisible(false);
-				clearForm();
-				UI.getCurrent().navigate(ArchivesView.class);
-			}
-		});
+//		grid.asSingleSelect().addValueChangeListener(event -> {
+//			if (event.getValue() != null) {
+//				editorLayoutDiv.setVisible(true);
+//				hideSidebarButton.setVisible(true);
+//				splitLayout.setSplitterPosition(0);
+//				UI.getCurrent().navigate(String.format(TRAMPOLINEORDER_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+//			} else {
+//				editorLayoutDiv.setVisible(false);
+//				clearForm();
+//				UI.getCurrent().navigate(ArchivesView.class);
+//			}
+//		});
+		
+		
 	}
 
 	private void updateGrid() {
@@ -425,31 +442,72 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 		menu.addItem("View", event -> {
 			UI.getCurrent().navigate(String.format(TRAMPOLINEORDER_VIEW_ROUTE_TEMPLATE, targetId.toString()));
 		});
-		menu.addItem("Delete", event -> {
-			try {
-				confirmDeleteDialog.open();
-			} catch (Exception e) {
-				Notification.show("An error has occurred, please contact the developer.", 4000, Position.TOP_CENTER)
-						.addThemeVariants(NotificationVariant.LUMO_ERROR);
-			}
-		});
 	}
+	
 
 	private void createButtonHeader(SplitLayout splitLayout) {
+		
 		// Configure button header container.
 		buttonHeaderContainer.setSpacing(false);
 		buttonHeaderContainer.setAlignItems(Alignment.BASELINE);
+		
+		restoreOrdersButton.getElement().getStyle().set("margin-left", "6px !important");
+		restoreOrdersButton.getElement().getStyle().set("margin-right", "6px");
+        restoreOrdersButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+        restoreOrdersButton.getElement().setAttribute("title", "Click me to remove all selected orders from the archive."
+        		+ "\nThis will restore them to the Trampoline Orders page as if they were never deleted to begin with!");
+		restoreOrdersButton.setVisible(false);
 
-		newOrderButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		newOrderButton.getElement().getStyle().set("margin-left", "6px");
-		newOrderButton.getElement().getStyle().set("margin-right", "6px");
-		newOrderButton.addClickListener(e -> {
-			clearForm();
+		restoreOrdersButton.addClickListener(e -> {
+			try {
+				// Loop through selected orders and set "deleted" flag to false.
+				for (TrampolineOrder order : allSelectedOrders) {
+					order.setDeleted(false);
+					// Save order changes to the database.
+					trampolineOrderRepository.save(order);
+				}
+				prepareLogMessage();
+				if (restoringMultipleOrders) {
+					// Log action.
+					LogEntry logEntry = new LogEntry(
+							logEntryRepository, 
+							currentUser.getId(), 
+							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
+							targetOrderIds.toString(),
+							customerNames.toString(),
+							currentActionCategory,
+							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails,
+							new Timestamp(new Date().getTime())
+							);				
+				}
+				else if (!restoringMultipleOrders) {
+					// Log action.
+					LogEntry logEntry = new LogEntry(
+							logEntryRepository, 
+							currentUser.getId(), 
+							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
+							targetOrderId,
+							customerName,
+							currentActionCategory,
+							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails,
+							new Timestamp(new Date().getTime())
+						);	
+				}
+				// Hide the restore orders button.
+				restoreOrdersButton.setVisible(false); // Hide self after the task is complete.
+				// Notify of success.
+				Notification.show("Orders restored!", 4000, Position.TOP_CENTER)
+				.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+				// Notify of failure.
+			} catch (Exception exception) {
+				// Hide the restore orders button.
+				restoreOrdersButton.setVisible(false); // Hide self after the task is complete.
+				Notification.show("Failed to restore orders.", 4000, Position.TOP_CENTER)
+				.addThemeVariants(NotificationVariant.LUMO_ERROR);
+			}
+			// Refresh the grid.
 			updateGrid();
-			editorLayoutDiv.setVisible(true);
-			hideSidebarButton.setVisible(true);
-			splitLayout.setSplitterPosition(0);
-		});
+		}); // End click listener for restore button.
 
 		hideSidebarButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 		hideSidebarButton.getElement().getStyle().set("margin-left", "0px !important");
@@ -467,11 +525,70 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 		filterTextField.setHelperText("Filter by name, email, or number");
 		filterTextField.setClearButtonVisible(true);
 		filterTextField.setValueChangeMode(ValueChangeMode.LAZY); // Don't hit database on every keystroke. Wait for
-																	// user to finish typing.
 		filterTextField.addValueChangeListener(e -> updateGrid());
 
-		buttonHeaderContainer.add(filterTextField, newOrderButton, hideSidebarButton);
+        Button menuButton = new Button("Show/Hide Columns");
+        menuButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+        menuButton.getStyle().set("margin-right", "6px");
+        menuButton.getElement().setAttribute("title", "There are additional column options, click me to reveal them!");
+        
+        ColumnToggleContextMenu columnToggleContextMenu = new ColumnToggleContextMenu(
+                menuButton);
+        columnToggleContextMenu.addColumnToggleItem("ID", columnId);
+        columnToggleContextMenu.addColumnToggleItem("Complete", columnComplete);
+        columnToggleContextMenu.addColumnToggleItem("First Name", columnFirstName);
+        columnToggleContextMenu.addColumnToggleItem("Last Name", columnLastName);
+        columnToggleContextMenu.addColumnToggleItem("Phone Number", columnPhoneNumber);
+        columnToggleContextMenu.addColumnToggleItem("Email", columnEmail);
+        columnToggleContextMenu.addColumnToggleItem("Order Description", columnOrderDescription);
+        columnToggleContextMenu.addColumnToggleItem("Measurements", columnMeasurements);
+        columnToggleContextMenu.addColumnToggleItem("Subtotal", columnSubtotal);
+        columnToggleContextMenu.addColumnToggleItem("Total", columnTotal);
+        columnToggleContextMenu.addColumnToggleItem("Date", columnDate);
+        columnToggleContextMenu.addColumnToggleItem("Deleted", columnDeleted);
+        
+		buttonHeaderContainer.add(menuButton, filterTextField, hideSidebarButton, restoreOrdersButton);
 	}
+
+	private void prepareLogMessage() {
+		// If selecting a single item
+		if (allSelectedOrders.size() == 1) {
+			for (TrampolineOrder order : allSelectedOrders) {
+				targetOrderId = order.getId().toString();
+				customerName = order.getFirstName() + " " + order.getLastName();
+				
+			}
+			restoringMultipleOrders = false;
+			currentActionCategory = "Restored Order";
+			currentActionDetails = " restored order #" + targetOrderId.toString() + " for " + customerName;
+		}
+		// If selecting multiple items
+		else if (allSelectedOrders.size() > 1) {
+			restoringMultipleOrders = true;
+			// Prepare strings for audit logging.
+			for (TrampolineOrder order : allSelectedOrders) {
+				targetOrderIds.add("#" + order.getId().toString());
+				customerNames.add(order.getFirstName() + " " + order.getLastName());
+			}
+			currentActionCategory = "Restored Orders";
+			currentActionDetails = " restored orders " + targetOrderIds.toString() + " for " + customerNames;
+		}
+	}
+	
+    private static class ColumnToggleContextMenu extends ContextMenu {
+        public ColumnToggleContextMenu(Component target) {
+            super(target);
+            setOpenOnClick(true);
+        }
+
+        void addColumnToggleItem(String label, Grid.Column<TrampolineOrder> column) {
+            MenuItem menuItem = this.addItem(label, e -> {
+                column.setVisible(e.getSource().isChecked());
+            });
+            menuItem.setCheckable(true);
+            menuItem.setChecked(column.isVisible());
+        }
+    }
 
 	@Override
 	public void beforeEnter(BeforeEnterEvent event) {
@@ -491,56 +608,6 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 				event.forwardTo(ArchivesView.class);
 			}
 		}
-	}
-
-	private static VerticalLayout createDialogLayout() {
-
-		Paragraph confirmationMessage = new Paragraph("Are you sure you want to delete this order?");
-		VerticalLayout dialogLayout = new VerticalLayout(confirmationMessage);
-		dialogLayout.setPadding(false);
-		dialogLayout.setSpacing(false);
-//        dialogLayout.setAlignItems(FlexComponent.Alignment.STRETCH);
-		dialogLayout.getStyle().set("width", "18rem").set("max-width", "100%");
-
-		return dialogLayout;
-	}
-
-	private Button createDialogDeleteOrderButton(Dialog dialog, TrampolineOrderService trampolineOrderService) {
-		Button dialogDeleteButton = new Button("Delete", e -> {
-			try {
-				Optional<TrampolineOrder> orderToDelete = trampolineOrderRepository.findById(targetId);
-				
-				// Get customer name.
-				String customerName = orderToDelete.get().getFirstName() + " " + orderToDelete.get().getLastName();
-				// Delete order from database.
-				/*
-				 * UPDATE: Instead of deleting from the database, we'll mark the order as deleted.
-				 * Orders marked as deleted will not show up in the grid.
-				 * However, they will remain archived in the database for record-keeping.
-				 */
-				trampolineOrderService.delete(targetId);
-				
-				// Log action.
-				currentActionCategory = "Deleted Order";
-				currentActionDetails = " deleted order #" + targetId.toString();
-				LogEntry logEntry = new LogEntry(logEntryRepository, currentUser.getId(), currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
-						targetId, customerName, currentActionCategory,
-						currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails,
-						new Timestamp(new Date().getTime()));				
-				// Notify of deletion success.
-				Notification.show("Order deleted.", 4000, Position.TOP_CENTER)
-						.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-				// Notify of deletion failure.
-			} catch (Exception exception) {
-				Notification.show("Operation failed.", 4000, Position.TOP_CENTER)
-						.addThemeVariants(NotificationVariant.LUMO_ERROR);
-			}
-			dialog.close();
-			updateGrid();
-		});
-		dialogDeleteButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_ERROR);
-
-		return dialogDeleteButton;
 	}
 
 	private void createEditorLayout(SplitLayout splitLayout) {

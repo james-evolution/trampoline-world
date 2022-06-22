@@ -24,7 +24,8 @@ public class LogEntry extends AbstractEntityUUID {
 	private String username;
     @Type(type = "uuid-char")
 	private UUID targetUserId;
-	private Long targetOrderId;
+    // Making this a string so we can store multiple order ids via collections toString()
+	private String targetOrderId;
 	private String customerName;
 	private String actionCategory;
 	private String actionDetails;
@@ -35,7 +36,7 @@ public class LogEntry extends AbstractEntityUUID {
 	}
 
 	// Order targets.
-	public LogEntry(LogEntryRepository logEntryRepository, UUID userId, String username, Long targetOrderId, String customerName, String actionCategory,
+	public LogEntry(LogEntryRepository logEntryRepository, UUID userId, String username, String targetOrderId, String customerName, String actionCategory,
 			String actionDetails, Timestamp timestamp) {
 		this.userId = userId;
 		this.username = username;
@@ -46,7 +47,7 @@ public class LogEntry extends AbstractEntityUUID {
 		this.timestamp = timestamp;
 		
 		logEntryRepository.save(this);
-		sendDiscordWebhookMessage(actionDetails + " for " + customerName);
+		sendDiscordWebhookMessage(actionDetails + " at " + timestamp.toString());
 	}
 	// User targets.
 	public LogEntry(LogEntryRepository logEntryRepository, UUID userId, String username, UUID targetUserId, String actionCategory,
@@ -59,7 +60,7 @@ public class LogEntry extends AbstractEntityUUID {
 		this.timestamp = timestamp;
 		
 		logEntryRepository.save(this);
-		sendDiscordWebhookMessage(actionDetails);
+		sendDiscordWebhookMessage(actionDetails + " at " + timestamp.toString());
 	}
 
 	public UUID getUserId() {
@@ -86,11 +87,11 @@ public class LogEntry extends AbstractEntityUUID {
 		this.targetUserId = targetUserId;
 	}
 
-	public Long getTargetOrderId() {
+	public String getTargetOrderId() {
 		return targetOrderId;
 	}
 
-	public void setTargetOrderId(Long targetOrderId) {
+	public void setTargetOrderId(String targetOrderId) {
 		this.targetOrderId = targetOrderId;
 	}
 
@@ -141,5 +142,4 @@ public class LogEntry extends AbstractEntityUUID {
 			System.out.println(e1.toString());
 		}
 	}
-
 }

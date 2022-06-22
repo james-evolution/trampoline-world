@@ -7,6 +7,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.IFrame;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.ListItem;
@@ -148,10 +149,12 @@ public class ContactView extends HorizontalLayout {
 		layout.add(contactParagraph);
 		layout.add(contactRow2); // Discord
 		layout.add(contactRow1); // Email
+		layout.add(new Hr());
 		layout.add(webhookHeader);
 		layout.add(webhookCaptionParagraph);
 		layout.add(webhookMessageBody);
 		layout.add(webhookSendButton);
+		layout.add(new Hr());
 		layout.add(emailHeader);
 		layout.add(emailSubject);
 		layout.add(emailMessageBody);
@@ -204,8 +207,6 @@ public class ContactView extends HorizontalLayout {
 		contactRow2 = new HorizontalLayout();
 		contactRow2.setAlignItems(Alignment.BASELINE);
 		contactRow2.add(discordLabel, discordParagraph);
-		
-
 	}
 
 	private void createParagraphElements() {
