@@ -239,18 +239,72 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 		}
 	}
 	
+	private static Component createHeaderRoles() {
+		Span span = new Span("Roles");
+		Icon icon = VaadinIcon.USER_STAR.create();
+		icon.getElement()
+		.setAttribute("title", "Please ensure the URL ends in .jpg, .png, or .webp");
+		icon.getStyle().set("height", "var(--lumo-font-size-m)")
+		.set("color", "var(--lumo-contrast-70pct)");
+		icon.getStyle().set("margin-right", "4px");
+		HorizontalLayout layout = new HorizontalLayout(icon, span);
+		layout.setAlignItems(Alignment.AUTO);
+		layout.setSpacing(false);
+		return layout;
+	}
+	private static Component createHeaderEmail() {
+		Span span = new Span("Email");
+		Icon icon = VaadinIcon.ENVELOPE.create();
+		icon.getElement()
+		.setAttribute("title", "Please ensure the URL ends in .jpg, .png, or .webp");
+		icon.getStyle().set("height", "var(--lumo-font-size-m)")
+		.set("color", "var(--lumo-contrast-70pct)");
+		icon.getStyle().set("margin-right", "4px");
+		HorizontalLayout layout = new HorizontalLayout(icon, span);
+		layout.setAlignItems(Alignment.AUTO);
+		layout.setSpacing(false);
+		return layout;
+	}
+	private static Component createHeaderProfileUrl() {
+		Span span = new Span("Profile Picture URL");
+		Icon icon = VaadinIcon.LINK.create();
+		icon.getElement()
+		.setAttribute("title", "Please ensure the URL ends in .jpg, .png, or .webp");
+		icon.getStyle().set("height", "var(--lumo-font-size-m)")
+		.set("color", "var(--lumo-contrast-70pct)");
+		icon.getStyle().set("margin-right", "4px");
+		HorizontalLayout layout = new HorizontalLayout(icon, span);
+		layout.setAlignItems(Alignment.AUTO);
+		layout.setSpacing(false);
+		return layout;
+	}
+	private static Component createHeaderColorIndex() {
+	    Span span = new Span("Color Index");
+	    Icon icon = VaadinIcon.PALETTE.create();
+	    icon.getElement()
+	            .setAttribute("title", "A user's color index determines what color frames their profile picture and the fields they're editing.");
+	    icon.getStyle().set("height", "var(--lumo-font-size-m)")
+	            .set("color", "var(--lumo-contrast-70pct)");
+	    icon.getStyle().set("margin-right", "4px");
+	    HorizontalLayout layout = new HorizontalLayout(icon, span);
+	    layout.setAlignItems(Alignment.AUTO);
+	    layout.setSpacing(false);
+	    return layout;
+	}
 
 	private void configureGrid(UserService userService, SplitLayout splitLayout) {
+		grid.setColumnReorderingAllowed(true);
+		grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
 		grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
-
+		
 		// Add columns to the grid.
 		grid.addColumn("id").setAutoWidth(true).setResizable(true).setHeader("User ID");
 		grid.addColumn("username").setAutoWidth(true).setResizable(true);
 		grid.addColumn("displayName").setAutoWidth(true).setResizable(true);
-		grid.addColumn(createStatusComponentRenderer()).setHeader("Roles").setAutoWidth(true).setResizable(true);
-		grid.addColumn("email").setAutoWidth(true).setResizable(true);
-		grid.addColumn("profilePictureUrl").setWidth("300px").setResizable(true);
-		grid.addColumn("colorIndex").setAutoWidth(true).setResizable(true);
+		grid.addColumn(createStatusComponentRenderer()).setAutoWidth(true).setResizable(true).setHeader(createHeaderRoles());
+		grid.addColumn("email").setAutoWidth(true).setResizable(true).setHeader(createHeaderEmail());
+		grid.addColumn("profilePictureUrl").setWidth("300px").setResizable(true).setHeader(createHeaderProfileUrl());
+		grid.addColumn("colorIndex").setAutoWidth(true).setResizable(true).setHeader(createHeaderColorIndex());
 		updateGrid();
 
 		// When a row is selected or deselected, populate form.

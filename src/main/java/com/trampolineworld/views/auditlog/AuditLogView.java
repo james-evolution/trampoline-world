@@ -87,6 +87,8 @@ public class AuditLogView extends Div implements BeforeEnterObserver {
 	}
 
 	private void configureGrid(LogEntryService logEntryService) {
+		grid.setColumnReorderingAllowed(true);
+		grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
 		grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
 //		grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 

@@ -6,6 +6,7 @@ import com.trampolineworld.data.service.UserRepository;
 import com.trampolineworld.data.service.UserService;
 import com.trampolineworld.security.AuthenticatedUser;
 import com.trampolineworld.views.account.AccountView;
+import com.trampolineworld.views.archives.ArchivesView;
 import com.trampolineworld.views.auditlog.AuditLogView;
 import com.trampolineworld.views.chat.ChatView;
 import com.trampolineworld.views.contact.ContactView;
@@ -172,6 +173,7 @@ public class MainLayout extends AppLayout {
 				new MenuItemInfo("Account", "lar la-user", AccountView.class), //
 				new MenuItemInfo("Manage Users", "las la-users", ManageUsersView.class), //
 				new MenuItemInfo("Audit Log", "las la-database", AuditLogView.class), //
+				new MenuItemInfo("Archives", "las la-database", ArchivesView.class), //
 				new MenuItemInfo("", "", ChatView.class),
 				new MenuItemInfo("User Guide", "las la-info-circle", UserGuideView.class), //
 				new MenuItemInfo("Debug", "las la-bug", DebugView.class), //

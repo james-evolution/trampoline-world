@@ -20,6 +20,7 @@ public class TrampolineOrder extends AbstractEntity {
     private double subtotal;
     private double total;
     private LocalDate date;
+    private boolean deleted;
 
     public boolean isComplete() {
         return complete;
@@ -81,5 +82,11 @@ public class TrampolineOrder extends AbstractEntity {
     public void setDate(LocalDate date) {
         this.date = date;
     }
+	public boolean isDeleted() {
+		return deleted;
+	}
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
+	}
 
 }

@@ -1,4 +1,4 @@
-package com.trampolineworld.views.trampolineorders;
+package com.trampolineworld.views.archives;
 
 import com.trampolineworld.data.Role;
 import com.trampolineworld.data.entity.LogEntry;
@@ -70,14 +70,13 @@ import java.util.Set;
 import javax.annotation.security.RolesAllowed;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@PageTitle("All Orders")
-@Route(value = "trampoline_orders/:trampolineOrderID?/:action?(edit)", layout = MainLayout.class)
-@RouteAlias(value = "", layout = MainLayout.class)
-@RolesAllowed({ "ADMIN", "TECH", "USER"})
+@PageTitle("Archived Orders")
+@Route(value = "archives/:trampolineOrderID?/:action?(edit)", layout = MainLayout.class)
+@RolesAllowed({ "ADMIN", "TECH"})
 @Uses(Icon.class)
 @CssImport(themeFor = "vaadin-grid", value = "./themes/trampolineworld/views/grid-theme.css")
 @CssImport(value = "./themes/trampolineworld/views/dialog.css", themeFor = "vaadin-dialog-overlay")
-public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
+public class ArchivesView extends Div implements BeforeEnterObserver {
 
 	private User currentUser;
 	private String currentActionCategory;
@@ -86,14 +85,14 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 	public static String username = "";
 
 	private final String TRAMPOLINEORDER_ID = "trampolineOrderID";
-	private final String TRAMPOLINEORDER_EDIT_ROUTE_TEMPLATE = "trampoline_orders/%s/edit";
+	private final String TRAMPOLINEORDER_EDIT_ROUTE_TEMPLATE = "archives/%s/edit";
 	private final String TRAMPOLINEORDER_VIEW_ROUTE_TEMPLATE = "view_order/%s";
 	private Long targetId;
 	private Grid<TrampolineOrder> grid = new Grid<>(TrampolineOrder.class, false);
 	CollaborationAvatarGroup avatarGroup;
 	H2 editTitle;
 	private TextField filterTextField = new TextField();
-	private Checkbox complete;
+	private Checkbox complete, delete;
 	private TextField firstName, lastName, phoneNumber, email, subtotal, total;
 	private TextArea orderDescription, measurements;
 	private DatePicker date;
@@ -118,7 +117,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 	private final LogEntryRepository logEntryRepository;
 
 	@Autowired
-	public TrampolineOrdersView(TrampolineOrderService trampolineOrderService,
+	public ArchivesView(TrampolineOrderService trampolineOrderService,
 			TrampolineOrderRepository trampolineOrderRepository, UserService userService, UserRepository userRepository,
 			LogEntryRepository logEntryRepository) {
 		this.trampolineOrderService = trampolineOrderService;
@@ -218,12 +217,6 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails + this.trampolineOrder.getId().toString(),
 							new Timestamp(new Date().getTime()));
 				} else if (currentActionCategory == "Created Order") {
-//					// Get all trampoline orders from the database.
-//					List<TrampolineOrder> allOrders = trampolineOrderRepository.findAll();
-//					// Sort by id.
-//					Collections.sort(allOrders, new SortById());
-//					// This is one method of getting the last order's id.
-//					allOrders.get(0).getId();
 					// Log new order created action.
 					LogEntry logEntry = new LogEntry(logEntryRepository, currentUser.getId(), currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
 							this.trampolineOrder.getId(), customerName, currentActionCategory,
@@ -237,7 +230,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 				hideSidebarButton.setVisible(false);
 				Notification.show("Order details stored.", 4000, Position.TOP_CENTER)
 						.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-				UI.getCurrent().navigate(TrampolineOrdersView.class);
+				UI.getCurrent().navigate(ArchivesView.class);
 			} catch (ValidationException validationException) {
 				Notification.show("Invalid form input.", 4000, Position.TOP_CENTER)
 						.addThemeVariants(NotificationVariant.LUMO_ERROR);
@@ -361,6 +354,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 		grid.addColumn("subtotal").setAutoWidth(true).setResizable(true).setHeader(createHeaderSubtotal());
 		grid.addColumn("total").setAutoWidth(true).setResizable(true).setHeader(createHeaderTotal());
 		grid.addColumn("date").setAutoWidth(true).setResizable(true).setHeader(createHeaderDate());
+		grid.addColumn("deleted").setAutoWidth(true).setResizable(true);
 		updateGrid();
 
 //        grid.setItems(query -> trampolineOrderService.list(
@@ -386,13 +380,13 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 			} else {
 				editorLayoutDiv.setVisible(false);
 				clearForm();
-				UI.getCurrent().navigate(TrampolineOrdersView.class);
+				UI.getCurrent().navigate(ArchivesView.class);
 			}
 		});
 	}
 
 	private void updateGrid() {
-		grid.setItems(trampolineOrderService.findAll(filterTextField.getValue()));
+		grid.setItems(trampolineOrderService.findAllArchived(filterTextField.getValue()));
 	}
 
 	private static final SerializableBiConsumer<Span, TrampolineOrder> statusComponentUpdater = (span, order) -> {
@@ -494,7 +488,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 				// When a row is selected but the data is no longer available, update the grid
 				// component.
 				updateGrid();
-				event.forwardTo(TrampolineOrdersView.class);
+				event.forwardTo(ArchivesView.class);
 			}
 		}
 	}
@@ -570,8 +564,9 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 		total = new TextField("Total");
 		date = new DatePicker("Date");
 		complete = new Checkbox("Complete");
+		delete = new Checkbox("Deleted");
 		Component[] fields = new Component[] { firstName, lastName, phoneNumber, email, orderDescription, measurements,
-				subtotal, total, date, complete };
+				subtotal, total, date, complete, delete};
 
 		formLayout.add(fields);
 		editorDiv.add(avatarGroup, editTitle, formLayout);
