@@ -12,16 +12,21 @@ https://youtu.be/134bgAV4l8k
 <ul>
 <li>Authentication & Authorization: Users must log in to access this application. Individual permissions depend upon account type.</li>
 <li>CRUD Operations: Users can create, read, update, and delete orders.</li>
-<li>Searching, Sorting, & Filtering: These features are available on the grid in which all orders are displayed.</li>
+<li>Searching, Sorting, & Filtering: All pages with grid views have these features enabled. Admins can search through orders, system users, and system logs in a variety of ways.</li>
+<li>Column Reordering, Resizing, & Filtering: Users can drag columns to reorder and resize them. Additionally, they can hide/show specific columns with the Show/Hide button. (On pages with an abundance of detailed information, some columns are not shown by default, but users can opt in to see them with the aforementioned button.)</li>
 <li>Data Exports: Order information can be exported as needed in either PDF or CSV format.</li>
 <li>Form Validation: The form used to create new orders and edit existing ones can validate input to meet any specified requirements.</li>
 <li>Live Chat: A still-in-development and optional feature is live-chat. This is showcased in the video.</li>
 <li>Persistent Data Storage: This application uses a MySQL database to store & retrieve order information.</li>
+<li>Archives: When an order gets deleted from the system, it isn't actually deleted from the database. Instead, it is simply flagged so that it does not appear on the orders page. Admins can view deleted orders in the archives, where they can restore them if they desire.</li>
 <li>User Management: Admins can manage user accounts and modify their names, passwords, and permissions.</li>
 <li>Audit Log: All user actions are logged in the system. Administrators can see who made what changes at what time.</li>
-<li>Profile Customization: Admins can customize their own profile picture, color, display name, and email address.</li>
-<li>Password Resets: If a user forgets their password they can have a reset code sent to their email via the login page. Alternatively, administrators can change their password.</li>
+<li>Date/Time Sorting: By default, all orders and logs are sorted by their date or timestamp, with the most recent entries showing at the top of the grid.</li>
+<li>Profile Customization: Users can customize their own profile picture, color, display name, email address, and password.</li>
+<li>Password Resets: If a user forgets their password they can have a reset code sent to their email via the login page. Alternatively, administrators can change their password by hand.</li>
+<li>Tooltips & Helper Text: Some columns on the user management page show helpful hints/information if you hover over them with your cursor. Many input fields also have helper text beneath them as guidelines.</li>
 <li>Open Source: The full source code used to develop this application is freely available to the owners of Trampoline World.</li>
+<li>Discord & Email Integration: This application is capable of sending emails, Discord messages, and logging information to either one, if desired.</li>
 <li>Questions & Requests: The contact page allows admins to instantly contact the developer if they have questions or want to make requests.</li>
 </ul>
 
@@ -43,13 +48,21 @@ At current, this application is hosted on Heroku. However, if redeployment is ev
 2. Open a terminal or command prompt from the project's root folder.
 3. Run `heroku login`
 4. Run `mvnw package -Pproduction && heroku deploy:jar target\trampolineworld-1.0-SNAPSHOT.jar -a trampolineworld && heroku open`
-5. Run `heroku ps:exec` to open a remote shell on the Heroku's linux server.
-6. Run ``jar -xf target/trampolineworld-1.0-SNAPSHOT.jar /META-INF/resources/ce-license.json`` to extract the ce-license.json file from the jar file and into the Heroku linux server at /app/META-INF/resources. This is essential for enabling Vaadin's Collabration Engine features. Order editing and live chat features will not work without this.
+
+Upon launching, Application.java automatically generates the ce-license.json file in the /app folder of the Linux container that Heroku runs this application on.
+This is for sake of enabling Vaadin's CollaborationEngine features. Although unnecessary, a useful bit of information is the atlernate method of placing the license file: Extracting it from the jar. To do so, one can:
+
+1. Run `heroku ps:exec` to open a remote shell on the Heroku's linux server.
+2. Run ``jar -xf target/trampolineworld-1.0-SNAPSHOT.jar /META-INF/resources/ce-license.json`` 
+
+Order editing and live chat features currently utilize the CollaborationEngine. While it is possible to recode the application to not use the CollaborationEngine for those capabilities, it isn't necessary with the license, so long as you limit yourself to 20 active user accounts per month. If this limit is surpassed, hypothetically order editing & live chat should still work, but without the collaborative features (user avatars / field highlighting). Still, best not to test the waters. This application will likely be updated soon with hard-coded features to prevent any possibility of surpassing this cap.
+
+Feel free to ask if you have any questions about this subject.
 
 ## Deploying to Production (General)
 
 This section is only relevant if you intend on deploying this application somewhere aside from Heroku.
-Bear in mind that you will need to create a /META-INF/resouces folder in the host's root folder and place your ce-license.json file there for Collabration Engine features to work.
+Bear in mind that you will need to place your ce-license.json file in the same directory that you deploy your application for Collabration Engine features to work. The exact directory path can be set via the setDataDir() method in the Application.java file.
 
 To create a production build, call `mvnw clean package -Pproduction` (Windows),
 or `./mvnw clean package -Pproduction` (Mac & Linux).
@@ -58,6 +71,12 @@ ready to be deployed. The file can be found in the `target` folder after the bui
 
 Once the JAR file is built, you can run it using
 `java -jar target/trampolineworld-1.0-SNAPSHOT.jar`
+
+## Collaboration Engine & The Universal License File
+
+The universal license file only authorizes 20 unique users per month to use the CollaborationEngine. At the beginning of each month, the counter is set back to zero. Each time a new user is created, a UUID (universally unique identifier) is generated for them. If they then interact with any CE features, such as order editing or live chat, their UUID is registered with the CollaborationEngine and counts towards the monthly 20 user quota. 
+
+For this reason, it's best not to delete & re-create new accounts as that will cause unnecessary inflation of the quota due to the repeated generation of new UUIDs. Instead, it's best to simply maintain the same 20 accounts and re-purpose them as people come and go. (This is why the User Management page does not allow account deletion. Existing UUIDs are valuable. They're also logged to Discord via webhook so that they can be re-used if ever they are somehow lost.)
 
 ## Project Structure
 
