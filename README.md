@@ -5,7 +5,24 @@ Built for someone very dear to my heart.
 A full-stack persistent web application that doubles as both a desktop and mobile application.
 <br>Compatible with macOS, Windows, iOS, and Android. This application is effectively a CRM intended for tracking trampoline orders.
 
-## Running the application locally
+## Application Features
+<ul>
+<li>Authentication & Authorization: Users must log in to access this application. Individual permissions depend upon account type.</li>
+<li>CRUD Operations: Users can create, read, update, and delete orders.</li>
+<li>Searching, Sorting, & Filtering: These features are available on the grid in which all orders are displayed.</li>
+<li>Data Exports: Order information can be exported as needed in either PDF or CSV format.</li>
+<li>Form Validation: The form used to create new orders and edit existing ones can validate input to meet any specified requirements.</li>
+<li>Live Chat: A still-in-development and optional feature is live-chat. This is showcased in the video.</li>
+<li>Persistent Data Storage: This application uses a MySQL database to store & retrieve order information.</li>
+<li>User Management: Admins can manage user accounts and modify their names, passwords, and permissions.</li>
+<li>Audit Log: All user actions are logged in the system. Administrators can see who made what changes at what time.</li>
+<li>Profile Customization: Admins can customize their own profile picture, color, display name, and email address.</li>
+<li>Password Resets: If a user forgets their password they can have a reset code sent to their email via the login page. Alternatively, administrators can change their password.</li>
+<li>Open Source: The full source code used to develop this application is freely available to the owners of Trampoline World.</li>
+<li>Questions & Requests: The contact page allows admins to instantly contact the developer if they have questions or want to make requests.</li>
+</ul>
+
+## Running the Application (Localhost)
 
 The project is a standard Maven project. To run it from the command line,
 type `mvnw` (Windows), or `./mvnw` (Mac & Linux), then open
@@ -39,7 +56,7 @@ ready to be deployed. The file can be found in the `target` folder after the bui
 Once the JAR file is built, you can run it using
 `java -jar target/trampolineworld-1.0-SNAPSHOT.jar`
 
-## Project structure
+## Project Structure
 
 - `MainLayout.java` in `src/main/java` contains the navigation setup (i.e., the
   side/top bar and the main menu). This setup uses
