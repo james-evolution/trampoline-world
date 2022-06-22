@@ -226,7 +226,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 			createdUser = userRepository.findByUsername(username.getValue());
 
 			currentActionCategory = "Created User";
-			currentActionDetails = " created account for " + createdUser.getUsername() + " ("
+			currentActionDetails = " created an account for " + createdUser.getUsername() + " ("
 					+ createdUser.getDisplayName() + ")";
 			sendDiscordWebhookMessage(newUser.getUsername() + ": " + createdUser.getId().toString(), "uuids");
 		} else {
@@ -245,8 +245,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 			}
 
 			currentActionCategory = "Edited User";
-			currentActionDetails = " edited account for " + this.user.getUsername() + " (" + this.user.getDisplayName()
-					+ ")";
+			currentActionDetails = " edited the account for " + this.user.getUsername() + " (" + this.user.getDisplayName() + ")";
 			userService.update(this.user);
 		}
 	}
