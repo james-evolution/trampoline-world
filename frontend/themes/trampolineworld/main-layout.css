@@ -1,3 +1,9 @@
+vaadin-scroller {
+	background-color: black !important;
+	opacity: 0.7 !important;
+}
+
+
 .menu-item-link:hover {
 	color: #23d5ab !important;
 }

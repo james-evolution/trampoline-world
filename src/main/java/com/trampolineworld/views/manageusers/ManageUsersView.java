@@ -6,6 +6,7 @@ import com.trampolineworld.data.entity.User;
 import com.trampolineworld.data.service.LogEntryRepository;
 import com.trampolineworld.data.service.UserRepository;
 import com.trampolineworld.data.service.UserService;
+import com.trampolineworld.data.service.WebhookRepository;
 import com.trampolineworld.utilities.DiscordWebhook;
 import com.trampolineworld.views.MainLayout;
 import com.vaadin.collaborationengine.CollaborationBinder;
@@ -110,10 +111,11 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 	private CollaborationBinder<User> binder;
 	private User user;
 	private final LogEntryRepository logEntryRepository;
+	private final WebhookRepository webhookRepository;
 	private final UserService userService;
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
-
+	
 	private User currentUser;
 	private User createdUser;
 
@@ -121,9 +123,10 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 			columnProfilePictureUrl, columnColorIndex;
 
 	@Autowired
-	public ManageUsersView(LogEntryRepository logEntryRepository, UserService userService,
+	public ManageUsersView(LogEntryRepository logEntryRepository, WebhookRepository webhookRepository, UserService userService,
 			UserRepository userRepository, PasswordEncoder passwordEncoder) {
 		this.logEntryRepository = logEntryRepository;
+		this.webhookRepository = webhookRepository;
 		this.userService = userService;
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
@@ -175,13 +178,13 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 
 				// Log action.
 				if (currentActionCategory == "Created User") {
-					LogEntry logEntry = new LogEntry(logEntryRepository, currentUser.getId(),
+					LogEntry logEntry = new LogEntry(logEntryRepository, webhookRepository, currentUser.getId(),
 							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")", createdUser.getId(),
 							currentActionCategory, currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")"
 									+ currentActionDetails + " " + createdUser.getId().toString(),
 							new Timestamp(new Date().getTime()));
 				} else if (currentActionCategory == "Edited User") {
-					LogEntry logEntry = new LogEntry(logEntryRepository, currentUser.getId(),
+					LogEntry logEntry = new LogEntry(logEntryRepository, webhookRepository, currentUser.getId(),
 							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")", this.user.getId(),
 							currentActionCategory, currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")"
 									+ currentActionDetails + " " + this.user.getId().toString(),
@@ -228,7 +231,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 			currentActionCategory = "Created User";
 			currentActionDetails = " created an account for " + createdUser.getUsername() + " ("
 					+ createdUser.getDisplayName() + ")";
-			sendDiscordWebhookMessage(newUser.getUsername() + ": " + createdUser.getId().toString(), "uuids");
+			sendDiscordWebhookMessage(webhookRepository, newUser.getUsername() + ": " + createdUser.getId().toString());
 		} else {
 			this.user.setUsername(username.getValue());
 			this.user.setDisplayName(displayName.getValue());
@@ -579,16 +582,22 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 
 	}
 
-	public static void sendDiscordWebhookMessage(String message, String channel) {
+	public static void sendDiscordWebhookMessage(WebhookRepository webhookRepository, String message) {
 
-		String webhookURL = "";
-		String webhookUsername = "";
-
-		// Debug messages, obviously.
-		if (channel == "debugging") {
-			webhookUsername = "TW Debugger";
-			webhookURL = "https://ptb.discord.com/api/webhooks/988568130093744218/xoLscoKMWCX3_7t63MESyA4FW3P_KSY6dlLB0hzYxbrqw6mTLlLsMXr7GlBbYd5rI3Ku";
+		String webhookURL = webhookRepository.findByWebhookName("Logs (UUIDs)").getWebhookUrl();
+		String webhookUsername = "TW UUID Logger";
+		
+		// Trim leading & trailing whitespaces.
+		webhookURL = webhookURL.trim();
+		// Check for null or empty URL, if so - return, don't attempt to send.
+		if (webhookURL.isEmpty() || webhookURL == null || webhookURL.equals("") || webhookURL == "") {
+			System.out.println("URL is empty.");
+			return;
 		}
+		// Log output.
+		System.out.println("Attempting to send webhook message.");
+		System.out.println(webhookURL);
+
 		/*
 		 * It's important to keep a record of generated UUIDs for system users. This is
 		 * because the CollaborationEngine will limit us to 20 unique users per month in
@@ -598,11 +607,6 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 		 * Thus, it's ideal for us to store and re-use existing UUIDs rather than
 		 * generating new ones indefinitely.
 		 */
-		else if (channel == "uuids") {
-			webhookUsername = "TW UUID Logger";
-			webhookURL = "https://ptb.discord.com/api/webhooks/988570358691016784/MWE8EIOOh7-Eohofs0Dp6Wu6DiyEmr91hUcUXBMnyt6t0esLraN7XPTc-fKTNpfOjjvW";
-		}
-
 		DiscordWebhook webhook = new DiscordWebhook(webhookURL);
 		webhook.setContent("<@&988212618059726870> " + message);
 		webhook.setTts(true);

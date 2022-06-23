@@ -76,8 +76,8 @@ public class AuditLogView extends Div implements BeforeEnterObserver {
 
 	@Autowired
 	public AuditLogView(LogEntryService logEntryService) {
-		this.logEntryService = logEntryService;
 		addClassNames("trampoline-orders-view");
+		this.logEntryService = logEntryService;
 
 		// Configure the grid.
 		configureGrid(logEntryService);

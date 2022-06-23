@@ -32,7 +32,7 @@ import java.util.function.Consumer;
 
 import javax.annotation.security.RolesAllowed;
 
-@PageTitle("Debug")
+@PageTitle("Debug Shell")
 @Route(value = "debug", layout = MainLayout.class)
 @RolesAllowed({ "TECH" })
 public class DebugView extends VerticalLayout {

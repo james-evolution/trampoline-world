@@ -11,6 +11,7 @@ import com.trampolineworld.views.auditlog.AuditLogView;
 import com.trampolineworld.views.chat.ChatView;
 import com.trampolineworld.views.contact.ContactView;
 import com.trampolineworld.views.debug.DebugView;
+import com.trampolineworld.views.discord.DiscordIntegrationView;
 import com.trampolineworld.views.export.ExportView;
 import com.trampolineworld.views.manageusers.ManageUsersView;
 import com.trampolineworld.views.trampolineorders.TrampolineOrdersView;
@@ -168,11 +169,12 @@ public class MainLayout extends AppLayout {
 				new MenuItemInfo("Account", "lar la-user", AccountView.class), //
 				new MenuItemInfo("Manage Users", "las la-users", ManageUsersView.class), //
 				new MenuItemInfo("Audit Log", "las la-database", AuditLogView.class), //
-				new MenuItemInfo("Archives", "las la-server", ArchivesView.class), //
+				new MenuItemInfo("Order Archives", "las la-server", ArchivesView.class), //
 //				new MenuItemInfo("", "", ChatView.class),
 				new MenuItemInfo("User Guide", "las la-info-circle", UserGuideView.class), //
-				new MenuItemInfo("Debug", "las la-bug", DebugView.class), //
-				new MenuItemInfo("Contact", "las la-at", ContactView.class), //
+				new MenuItemInfo("Debug Shell", "las la-bug", DebugView.class), //
+				new MenuItemInfo("Discord Integration", "lab la-discord", DiscordIntegrationView.class), //
+				new MenuItemInfo("Developer Contact", "las la-at", ContactView.class), //
 		};
 	}
 	

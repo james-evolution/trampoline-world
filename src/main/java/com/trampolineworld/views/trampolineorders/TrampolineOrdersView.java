@@ -10,6 +10,7 @@ import com.trampolineworld.data.service.TrampolineOrderRepository;
 import com.trampolineworld.data.service.TrampolineOrderService;
 import com.trampolineworld.data.service.UserRepository;
 import com.trampolineworld.data.service.UserService;
+import com.trampolineworld.data.service.WebhookRepository;
 import com.trampolineworld.security.AuthenticatedUser;
 import com.trampolineworld.views.MainLayout;
 import com.trampolineworld.views.viewsingleorder.ViewSingleOrder;
@@ -118,6 +119,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 	private final UserService userService;
 	private final UserRepository userRepository;
 	private final LogEntryRepository logEntryRepository;
+	private final WebhookRepository webhookRepository;
 	
 	private Grid.Column<TrampolineOrder> columnId, columnComplete, columnFirstName, columnLastName,
 	columnPhoneNumber, columnEmail, columnOrderDescription, columnMeasurements, columnSubtotal,
@@ -126,12 +128,13 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 	@Autowired
 	public TrampolineOrdersView(TrampolineOrderService trampolineOrderService,
 			TrampolineOrderRepository trampolineOrderRepository, UserService userService, UserRepository userRepository,
-			LogEntryRepository logEntryRepository) {
+			LogEntryRepository logEntryRepository, WebhookRepository webhookRepository) {
 		this.trampolineOrderService = trampolineOrderService;
 		this.trampolineOrderRepository = trampolineOrderRepository;
 		this.userService = userService;
 		this.userRepository = userRepository;
 		this.logEntryRepository = logEntryRepository;
+		this.webhookRepository = webhookRepository;
 		addClassNames("trampoline-orders-view");
 
 //    	Notification.show("Welcome, " + username, 4000, Position.TOP_CENTER).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
@@ -221,7 +224,8 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 				// Log order edited action.
 				if (currentActionCategory == "Edited Order") {
 					LogEntry logEntry = new LogEntry(
-							logEntryRepository, 
+							logEntryRepository,
+							webhookRepository,
 							currentUser.getId(), 
 							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
 							this.trampolineOrder.getId().toString(), 
@@ -240,6 +244,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 					// Log new order created action.
 					LogEntry logEntry = new LogEntry(
 							logEntryRepository, 
+							webhookRepository,
 							currentUser.getId(), 
 							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
 							this.trampolineOrder.getId().toString(), 
@@ -581,7 +586,8 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 				currentActionCategory = "Deleted Order";
 				currentActionDetails = " deleted order #" + targetId.toString() + " for " + customerName;
 				LogEntry logEntry = new LogEntry(
-						logEntryRepository, 
+						logEntryRepository,
+						webhookRepository,
 						currentUser.getId(), 
 						currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
 						targetId.toString(), 

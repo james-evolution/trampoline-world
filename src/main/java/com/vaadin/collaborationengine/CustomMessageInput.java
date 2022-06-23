@@ -1,5 +1,6 @@
 package com.vaadin.collaborationengine;
 
+import com.trampolineworld.data.service.WebhookRepository;
 import com.trampolineworld.utilities.DiscordWebhook;
 
 /*
@@ -55,7 +56,7 @@ public class CustomMessageInput extends Composite<MessageInput>
      *            the list which will display the submitted messages, not null
      * @param userInfo 
      */
-    public CustomMessageInput(CollaborationMessageList list, UserInfo userInfo) {
+    public CustomMessageInput(CollaborationMessageList list, UserInfo userInfo, WebhookRepository webhookRepository) {
         Objects.requireNonNull(list,
                 "A list instance to connect this component to is required");
         getContent().setEnabled(false);
@@ -63,7 +64,7 @@ public class CustomMessageInput extends Composite<MessageInput>
             getContent().setEnabled(true);
             Registration registration = getContent().addSubmitListener(event -> {
             	activationContext.appendMessage(event.getValue());
-            	sendDiscordWebhookMessage(userInfo.getName(), userInfo.getImage(), event.getValue());
+            	sendDiscordWebhookMessage(webhookRepository, userInfo.getName(), userInfo.getImage(), event.getValue());
             });
             return () -> {
                 registration.remove();
@@ -101,11 +102,23 @@ public class CustomMessageInput extends Composite<MessageInput>
         getContent().setI18n(i18n);
     }
     
-    public static void sendDiscordWebhookMessage(String username, String avatarURL, String message) {
+    public static void sendDiscordWebhookMessage(WebhookRepository webhookRepository, String username, String avatarURL, String message) {
     	
-    	String webhookURL = "https://ptb.discord.com/api/webhooks/988770668554375240/r-W13i9JLGQxmvV-6UzLiPVtTCzKBzG_jNUaJiwUtislZ4t_7MqflRb3uPTW1A93SjDL";
-    
-    	DiscordWebhook webhook = new DiscordWebhook(webhookURL);
+		String webhookURL = webhookRepository.findByWebhookName("Logs (Chat)").getWebhookUrl();
+		
+		// Trim leading & trailing whitespaces.
+		webhookURL = webhookURL.trim();
+		// Check for null or empty URL, if so - return, don't attempt to send.
+		if (webhookURL.isEmpty() || webhookURL == null || webhookURL.equals("") || webhookURL == "") {
+			System.out.println("URL is empty.");
+			return;
+		}
+		// Log output.
+		System.out.println("Attempting to send webhook message.");
+		System.out.println(webhookURL);    
+    	
+		// Create & send webhook.
+		DiscordWebhook webhook = new DiscordWebhook(webhookURL);
     	webhook.setUsername(username);
     	webhook.setAvatarUrl(avatarURL);
     	webhook.setContent(message);

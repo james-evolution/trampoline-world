@@ -10,6 +10,7 @@ import com.trampolineworld.data.service.TrampolineOrderRepository;
 import com.trampolineworld.data.service.TrampolineOrderService;
 import com.trampolineworld.data.service.UserRepository;
 import com.trampolineworld.data.service.UserService;
+import com.trampolineworld.data.service.WebhookRepository;
 import com.trampolineworld.security.AuthenticatedUser;
 import com.trampolineworld.views.MainLayout;
 import com.trampolineworld.views.viewsingleorder.ViewSingleOrder;
@@ -74,7 +75,7 @@ import java.util.Set;
 import javax.annotation.security.RolesAllowed;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@PageTitle("Archived Orders")
+@PageTitle("Order Archives")
 @Route(value = "archives/:trampolineOrderID?/:action?(edit)", layout = MainLayout.class)
 @RolesAllowed({ "ADMIN", "TECH"})
 @Uses(Icon.class)
@@ -129,6 +130,7 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 	private final UserService userService;
 	private final UserRepository userRepository;
 	private final LogEntryRepository logEntryRepository;
+	private final WebhookRepository webhookRepository;
 	
 	private Set<TrampolineOrder> allSelectedOrders;
 	
@@ -139,12 +141,13 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 	@Autowired
 	public ArchivesView(TrampolineOrderService trampolineOrderService,
 			TrampolineOrderRepository trampolineOrderRepository, UserService userService, UserRepository userRepository,
-			LogEntryRepository logEntryRepository) {
+			LogEntryRepository logEntryRepository, WebhookRepository webhookRepository) {
 		this.trampolineOrderService = trampolineOrderService;
 		this.trampolineOrderRepository = trampolineOrderRepository;
 		this.userService = userService;
 		this.userRepository = userRepository;
 		this.logEntryRepository = logEntryRepository;
+		this.webhookRepository = webhookRepository;
 		addClassNames("trampoline-orders-view");
 
 //    	Notification.show("Welcome, " + username, 4000, Position.TOP_CENTER).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
@@ -213,14 +216,25 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 
 				// Log order edited action.
 				if (currentActionCategory == "Edited Order") {
-					LogEntry logEntry = new LogEntry(logEntryRepository, currentUser.getId(), currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
-							this.trampolineOrder.getId().toString(), customerName, currentActionCategory,
+					LogEntry logEntry = new LogEntry(
+							logEntryRepository, 
+							webhookRepository, 
+							currentUser.getId(), 
+							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
+							this.trampolineOrder.getId().toString(), 
+							customerName, currentActionCategory,
 							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails + this.trampolineOrder.getId().toString(),
 							new Timestamp(new Date().getTime()));
 				} else if (currentActionCategory == "Created Order") {
 					// Log new order created action.
-					LogEntry logEntry = new LogEntry(logEntryRepository, currentUser.getId(), currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
-							this.trampolineOrder.getId().toString(), customerName, currentActionCategory,
+					LogEntry logEntry = new LogEntry(
+							logEntryRepository, 
+							webhookRepository, 
+							currentUser.getId(), 
+							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
+							this.trampolineOrder.getId().toString(), 
+							customerName, 
+							currentActionCategory,
 							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails + this.trampolineOrder.getId().toString(),
 							new Timestamp(new Date().getTime()));
 				}
@@ -376,8 +390,6 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 		
 		
 	    grid.addSelectionListener(selection -> {
-			Notification.show("Listener triggered!", 4000, Position.TOP_CENTER)
-			.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 	    	// Initialize the 'allSelectedOrders' set with the selected items.
 	    	allSelectedOrders = selection.getAllSelectedItems();
 	    	// Show the restore orders button.
@@ -471,6 +483,7 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 					// Log action.
 					LogEntry logEntry = new LogEntry(
 							logEntryRepository, 
+							webhookRepository,
 							currentUser.getId(), 
 							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
 							targetOrderIds.toString(),
@@ -483,7 +496,8 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 				else if (!restoringMultipleOrders) {
 					// Log action.
 					LogEntry logEntry = new LogEntry(
-							logEntryRepository, 
+							logEntryRepository,
+							webhookRepository,
 							currentUser.getId(), 
 							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
 							targetOrderId,

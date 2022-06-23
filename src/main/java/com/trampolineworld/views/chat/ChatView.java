@@ -4,6 +4,7 @@ import com.vaadin.collaborationengine.CustomMessageInput;
 import com.trampolineworld.data.entity.User;
 import com.trampolineworld.data.service.UserRepository;
 import com.trampolineworld.data.service.UserService;
+import com.trampolineworld.data.service.WebhookRepository;
 import com.trampolineworld.views.MainLayout;
 import com.vaadin.collaborationengine.CollaborationAvatarGroup;
 import com.vaadin.collaborationengine.CollaborationMessageList;
@@ -29,14 +30,16 @@ public class ChatView extends VerticalLayout implements BeforeEnterObserver, Aft
 
 	private final UserService userService;
 	private final UserRepository userRepository;
+	private WebhookRepository webhookRepository;
 	private String channelName;
 	CollaborationAvatarGroup avatarGroup;
 	
 	private static UserInfo loggedUserInfo;
 
-	public ChatView(UserService userService, UserRepository userRepository) {
+	public ChatView(UserService userService, UserRepository userRepository, WebhookRepository webhookRepository) {
 		this.userService = userService;
 		this.userRepository = userRepository;
+		this.webhookRepository = webhookRepository;
 		addClassName("chat-view");
 		setSpacing(false);
 
@@ -85,7 +88,7 @@ public class ChatView extends VerticalLayout implements BeforeEnterObserver, Aft
 //		input.setWidthFull();
 
 		// JAMES CUSTOM MESSAGE INPUT
-		CustomMessageInput input = new CustomMessageInput(list, userInfo);
+		CustomMessageInput input = new CustomMessageInput(list, userInfo, webhookRepository);
 		input.addClassNames("chat-view-message-input");
 		input.setWidthFull();
 		

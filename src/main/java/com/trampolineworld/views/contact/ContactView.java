@@ -43,6 +43,7 @@ import com.trampolineworld.data.service.UserRepository;
 import com.trampolineworld.data.service.UserService;
 import com.trampolineworld.utilities.DiscordWebhook;
 import com.trampolineworld.views.*;
+import com.trampolineworld.views.archives.ArchivesView;
 import com.trampolineworld.views.trampolineorders.TrampolineOrdersView;
 
 @Route(value = "contact", layout = MainLayout.class)
@@ -167,6 +168,9 @@ public class ContactView extends HorizontalLayout {
 		
 		this.setWidthFull();
 //		this.setHeightFull();
+		
+		// Reload page once to fix UI bugs.
+		UI.getCurrent().navigate(ContactView.class);
 	}
 
 	private void configureWebhookElements() {

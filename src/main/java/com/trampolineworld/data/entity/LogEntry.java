@@ -10,6 +10,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Type;
 
 import com.trampolineworld.data.service.LogEntryRepository;
+import com.trampolineworld.data.service.WebhookRepository;
 import com.trampolineworld.utilities.DiscordWebhook;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
@@ -36,7 +37,7 @@ public class LogEntry extends AbstractEntityUUID {
 	}
 
 	// Order targets.
-	public LogEntry(LogEntryRepository logEntryRepository, UUID userId, String username, String targetOrderId, String customerName, String actionCategory,
+	public LogEntry(LogEntryRepository logEntryRepository, WebhookRepository webhookRepository, UUID userId, String username, String targetOrderId, String customerName, String actionCategory,
 			String actionDetails, Timestamp timestamp) {
 		this.userId = userId;
 		this.username = username;
@@ -47,10 +48,10 @@ public class LogEntry extends AbstractEntityUUID {
 		this.timestamp = timestamp;
 		
 		logEntryRepository.save(this);
-		sendDiscordWebhookMessage(actionDetails + " at " + timestamp.toString());
+		sendDiscordWebhookMessage(webhookRepository, actionDetails + " at " + timestamp.toString());
 	}
 	// User targets.
-	public LogEntry(LogEntryRepository logEntryRepository, UUID userId, String username, UUID targetUserId, String actionCategory,
+	public LogEntry(LogEntryRepository logEntryRepository, WebhookRepository webhookRepository, UUID userId, String username, UUID targetUserId, String actionCategory,
 			String actionDetails, Timestamp timestamp) {
 		this.userId = userId;
 		this.username = username;
@@ -60,7 +61,7 @@ public class LogEntry extends AbstractEntityUUID {
 		this.timestamp = timestamp;
 		
 		logEntryRepository.save(this);
-		sendDiscordWebhookMessage(actionDetails + " at " + timestamp.toString());
+		sendDiscordWebhookMessage(webhookRepository, actionDetails + " at " + timestamp.toString());
 	}
 
 	public UUID getUserId() {
@@ -128,10 +129,22 @@ public class LogEntry extends AbstractEntityUUID {
 		this.customerName = customerName;
 	}
 
-	public static void sendDiscordWebhookMessage(String message) {
+	public static void sendDiscordWebhookMessage(WebhookRepository webhookRepository, String message) {
 		
-		String webhookURL = "https://ptb.discord.com/api/webhooks/988942093059784734/AUdjyyXznFlN1T7IovybkPlu6h_HEdVK4gE80uTgvRiIKEg7UXrvQaHvLtbV66zuwFRY";
+		String webhookURL = webhookRepository.findByWebhookName("Logs (Audit)").getWebhookUrl();
 		
+		// Trim leading & trailing whitespaces.
+		webhookURL = webhookURL.trim();
+		// Check for null or empty URL, if so - return, don't attempt to send.
+		if (webhookURL.isEmpty() || webhookURL == null || webhookURL.equals("") || webhookURL == "") {
+			System.out.println("URL is empty.");
+			return;
+		}
+		// Log output.
+		System.out.println("Attempting to send webhook message.");
+		System.out.println(webhookURL);
+		
+		// Create & send webhook.
 		DiscordWebhook webhook = new DiscordWebhook(webhookURL);
 		webhook.setContent(message);
 		webhook.setTts(false);
@@ -141,5 +154,6 @@ public class LogEntry extends AbstractEntityUUID {
 		} catch (IOException e1) {
 			System.out.println(e1.toString());
 		}
+	
 	}
 }
