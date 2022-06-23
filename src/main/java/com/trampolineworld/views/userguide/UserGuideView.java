@@ -186,9 +186,9 @@ public class UserGuideView extends HorizontalLayout {
 				new ListItem("Profile Customization: Users can customize their own profile picture, color, display name, email address, and password."),
 				new ListItem("Password Resets: If a user forgets their password they can have a reset code sent to their email via the login page. Alternatively, administrators can change their password by hand."),
 				new ListItem("Tooltips & Helper Text: Some columns on the user management page show helpful hints/information if you hover over them with your cursor. Many input fields also have helper text beneath them as guidelines."),
+				new ListItem("Discord Integration: Admins & Techs can use the Discord Integration page to enable or disable data logging to Discord. Three log categories exist: Audit, Chat, and UUID. Alternatively, they can edit webhook URLs to send this data to whichever channel or server they wish."),
 				new ListItem("Open Source: The full source code used to develop this application is freely available to the owners of Trampoline World."),
-				new ListItem("Discord & Email Integration: This application is capable of sending emails, Discord messages, and logging information to either one, if desired."),
-				new ListItem("Questions & Requests: The contact page allows admins to instantly contact the developer if they have questions or want to make requests.")
+				new ListItem("Questions & Requests: The contact page allows admins to instantly contact the developer via email or text-to-speech Discord message if they have questions or want to make requests.")
 			);
 	}
 
