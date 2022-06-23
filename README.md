@@ -25,9 +25,9 @@ https://youtu.be/134bgAV4l8k
 <li>Profile Customization: Users can customize their own profile picture, color, display name, email address, and password.</li>
 <li>Password Resets: If a user forgets their password they can have a reset code sent to their email via the login page. Alternatively, administrators can change their password by hand.</li>
 <li>Tooltips & Helper Text: Some columns on the user management page show helpful hints/information if you hover over them with your cursor. Many input fields also have helper text beneath them as guidelines.</li>
+<li>Discord Integration: Admins & Techs can use the Discord Integration page to enable or disable data logging to Discord. Three log categories exist: Audit, Chat, and UUID. Alternatively, they can edit webhook URLs to send this data to whichever channel or server they wish.</li>
 <li>Open Source: The full source code used to develop this application is freely available to the owners of Trampoline World.</li>
-<li>Discord & Email Integration: This application is capable of sending emails, Discord messages, and logging information to either one, if desired.</li>
-<li>Questions & Requests: The contact page allows admins to instantly contact the developer if they have questions or want to make requests.</li>
+<li>Questions & Requests: The contact page allows admins to instantly contact the developer via email or text-to-speech Discord message if they have questions or want to make requests.</li>
 </ul>
 
 ## Running the Application (Localhost)
