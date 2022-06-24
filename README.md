@@ -25,9 +25,9 @@ https://youtu.be/134bgAV4l8k
 <li>Profile Customization: Users can customize their own profile picture, color, display name, email address, and password.</li>
 <li>Password Resets: If a user forgets their password they can have a reset code sent to their email via the login page. Alternatively, administrators can change their password by hand.</li>
 <li>Tooltips & Helper Text: Some columns on the user management page show helpful hints/information if you hover over them with your cursor. Many input fields also have helper text beneath them as guidelines.</li>
+<li>Discord Integration: Admins & Techs can use the Discord Integration page to enable or disable data logging to Discord. Three log categories exist: Audit, Chat, and UUID. Alternatively, they can edit webhook URLs to send this data to whichever channel or server they wish.</li>
 <li>Open Source: The full source code used to develop this application is freely available to the owners of Trampoline World.</li>
-<li>Discord & Email Integration: This application is capable of sending emails, Discord messages, and logging information to either one, if desired.</li>
-<li>Questions & Requests: The contact page allows admins to instantly contact the developer if they have questions or want to make requests.</li>
+<li>Questions & Requests: The contact page allows admins to instantly contact the developer via email or text-to-speech Discord message if they have questions or want to make requests.</li>
 </ul>
 
 ## Running the Application (Localhost)
@@ -55,7 +55,7 @@ This is for sake of enabling Vaadin's CollaborationEngine features. Although unn
 1. Run `heroku ps:exec` to open a remote shell on the Heroku's linux server.
 2. Run ``jar -xf target/trampolineworld-1.0-SNAPSHOT.jar /META-INF/resources/ce-license.json`` 
 
-Order editing and live chat features currently utilize the CollaborationEngine. While it is possible to recode the application to not use the CollaborationEngine for those capabilities, it isn't necessary with the license, so long as you limit yourself to 20 active user accounts per month. If this limit is surpassed, hypothetically order editing & live chat should still work, but without the collaborative features (user avatars / field highlighting). Still, best not to test the waters. This application will likely be updated soon with hard-coded features to prevent any possibility of surpassing this cap.
+Order editing and live chat features currently utilize the CollaborationEngine. While it is possible to recode the application to not use the CollaborationEngine for those capabilities, it isn't necessary with the license, so long as you limit yourself to 20 active user accounts per month. And even if your surpass this, you get a 30-day grace period in which that limit is increased to 200 users per month before being reset back to 20. If the 200 user limit is surpassed during the grace period, or if you surpass the 20 user limit a second time in the future: Order editing & live chat should still work, but users registered after the first twenty will not be able to take advantage of collaborative features. This means their avatar will not show up in the avatar group and forms they're editing won't get highlighted in their profile color to indicate to other users that they're editing it. The first 20 will always have access to collaborative features, though. This application may someday be updated with hard-coded features to prevent any possibility of surpassing this cap, if desired.
 
 Feel free to ask if you have any questions about this subject.
 
