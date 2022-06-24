@@ -14,6 +14,7 @@ import com.trampolineworld.views.debug.DebugView;
 import com.trampolineworld.views.discord.DiscordIntegrationView;
 import com.trampolineworld.views.export.ExportView;
 import com.trampolineworld.views.manageusers.ManageUsersView;
+import com.trampolineworld.views.schema.SchemaView;
 import com.trampolineworld.views.trampolineorders.TrampolineOrdersView;
 import com.trampolineworld.views.userguide.UserGuideView;
 import com.vaadin.flow.component.Component;
@@ -174,6 +175,7 @@ public class MainLayout extends AppLayout {
 				new MenuItemInfo("User Guide", "las la-info-circle", UserGuideView.class), //
 				new MenuItemInfo("Debug Shell", "las la-bug", DebugView.class), //
 				new MenuItemInfo("Discord Integration", "lab la-discord", DiscordIntegrationView.class), //
+				new MenuItemInfo("Database Structure", "las la-project-diagram", SchemaView.class), //
 				new MenuItemInfo("Developer Contact", "las la-at", ContactView.class), //
 		};
 	}

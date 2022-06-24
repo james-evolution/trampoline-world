@@ -10,6 +10,7 @@ import com.vaadin.collaborationengine.CollaborationMessageList;
 import com.vaadin.collaborationengine.UserInfo;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -53,12 +54,15 @@ public class DebugView extends VerticalLayout {
 		configureShellComponents();
 
 		shellHeaderContainer.add(shellCommandTextField, shellCommandButton);
+		
+		H2 title = new H2("Debug Shell");
+		title.getStyle().set("margin-top", "18px !important");
 
-		add(new Paragraph("This page is only viewable by users with the Tech role. By default, most admin accounts lack this role because this view won't be of use to them."
+		add(title, new Paragraph("This page is only viewable by users with the Tech role. By default, most admin accounts lack this role because this view won't be of use to them."
 				+ "\n\nAt the moment this is the only exclusive permission the Tech role has. The below text field allows you to enter in shell commands and execute them on"
 				+ "\nthe virtual linux container that this application is hosted on. It exists primarily for debugging purposes."
 				+ "\n\nIf you're just exploring and you happened to come across this page and would like to give it a try, execute the following command (all lowercase): ls"
-				+ "\n\nThis will list all the files in your immediate directory. For other commands, see: \n\nhttps://github.com/james-evolution/Bash-Cheat-Sheet"), shellHeaderContainer, consoleParagraph);
+				+ "\nThis will list all the files in your immediate directory. For other commands, see: \n\nhttps://github.com/james-evolution/Bash-Cheat-Sheet"), shellHeaderContainer, consoleParagraph);
 		setSizeFull();
 	}
 

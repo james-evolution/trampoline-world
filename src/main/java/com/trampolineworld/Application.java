@@ -29,6 +29,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.context.annotation.Bean;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 import com.trampolineworld.license.LicenseStorageImplementation;
 import com.vaadin.collaborationengine.CollaborationEngine;
