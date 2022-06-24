@@ -136,7 +136,7 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 	
 	private Grid.Column<TrampolineOrder> columnId, columnComplete, columnFirstName, columnLastName,
 	columnPhoneNumber, columnEmail, columnOrderDescription, columnMeasurements, columnSubtotal,
-	columnTotal, columnDate, columnDeleted;
+	columnTotal, columnDate;
 
 	@Autowired
 	public ArchivesView(TrampolineOrderService trampolineOrderService,
@@ -177,7 +177,7 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 		createEditorLayout(splitLayout);
 
 		// Configure the grid.
-		configureGrid(trampolineOrderService, splitLayout);
+		configureGrid(splitLayout);
 
 		// Create button header bar.
 		createButtonHeader(splitLayout); // Requires splitLayout argument to define button functions.
@@ -187,14 +187,14 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 		add(splitLayout);
 		
 		// Create context menu.
-		createContextMenu(trampolineOrderService); // View & Delete buttons.
+		createContextMenu(); // View & Delete buttons.
 
 		// Configure the form.
 		configureForm(userInfo);
-		configureFormButtons(trampolineOrderService);
+		configureFormButtons();
 	}
 
-	private void configureFormButtons(TrampolineOrderService trampolineOrderService) {
+	private void configureFormButtons() {
 		// When the cancel button is clicked, clear the form and refresh the grid.
 		cancel.addClickListener(e -> {
 			clearForm();
@@ -223,8 +223,7 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")",
 							this.trampolineOrder.getId().toString(), 
 							customerName, currentActionCategory,
-							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails + this.trampolineOrder.getId().toString(),
-							new Timestamp(new Date().getTime()));
+							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails + this.trampolineOrder.getId().toString());
 				} else if (currentActionCategory == "Created Order") {
 					// Log new order created action.
 					LogEntry logEntry = new LogEntry(
@@ -235,8 +234,7 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 							this.trampolineOrder.getId().toString(), 
 							customerName, 
 							currentActionCategory,
-							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails + this.trampolineOrder.getId().toString(),
-							new Timestamp(new Date().getTime()));
+							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails + this.trampolineOrder.getId().toString());
 				}
 
 				clearForm();
@@ -349,7 +347,7 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 		return layout;
 	}
 
-	private void configureGrid(TrampolineOrderService trampolineOrderService, SplitLayout splitLayout) {
+	private void configureGrid(SplitLayout splitLayout) {
 		grid.setColumnReorderingAllowed(true);
 		grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
 		grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
@@ -361,7 +359,6 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 		// Add columns to the grid.
 //		grid.addColumn(createStatusComponentRenderer()).setAutoWidth(true).setResizable(true);
 		columnId = grid.addColumn("id").setAutoWidth(true).setResizable(true);
-		columnDeleted = grid.addColumn("deleted").setAutoWidth(true).setResizable(true);
 		columnComplete = grid.addColumn("complete").setAutoWidth(true).setResizable(true);
 		columnFirstName = grid.addColumn("firstName").setAutoWidth(true).setResizable(true);
 		columnLastName = grid.addColumn("lastName").setAutoWidth(true).setResizable(true);
@@ -434,7 +431,7 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 		return new ComponentRenderer<>(Span::new, statusComponentUpdater);
 	}
 
-	private void createContextMenu(TrampolineOrderService trampolineOrderService) {
+	private void createContextMenu() {
 		// Add the context menu to the grid.
 		menu = grid.addContextMenu();
 
@@ -489,8 +486,7 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 							targetOrderIds.toString(),
 							customerNames.toString(),
 							currentActionCategory,
-							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails,
-							new Timestamp(new Date().getTime())
+							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails
 							);				
 				}
 				else if (!restoringMultipleOrders) {
@@ -503,8 +499,7 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
 							targetOrderId,
 							customerName,
 							currentActionCategory,
-							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails,
-							new Timestamp(new Date().getTime())
+							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails
 						);	
 				}
 				// Hide the restore orders button.
@@ -559,7 +554,6 @@ public class ArchivesView extends Div implements BeforeEnterObserver {
         columnToggleContextMenu.addColumnToggleItem("Subtotal", columnSubtotal);
         columnToggleContextMenu.addColumnToggleItem("Total", columnTotal);
         columnToggleContextMenu.addColumnToggleItem("Date", columnDate);
-        columnToggleContextMenu.addColumnToggleItem("Deleted", columnDeleted);
         
 		buttonHeaderContainer.add(menuButton, filterTextField, hideSidebarButton, restoreOrdersButton);
 	}

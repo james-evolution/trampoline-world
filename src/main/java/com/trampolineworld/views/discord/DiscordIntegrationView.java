@@ -166,7 +166,7 @@ public class DiscordIntegrationView extends Div implements BeforeEnterObserver {
 				.addThemeVariants(NotificationVariant.LUMO_ERROR);
 			}
 		});
-		saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
 		resetToDefaultsButton.addClickListener(e -> {
 			try {
 				resetToDefaults();

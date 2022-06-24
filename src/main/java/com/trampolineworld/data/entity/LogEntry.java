@@ -2,6 +2,7 @@ package com.trampolineworld.data.entity;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.UUID;
 
 import javax.persistence.Entity;
@@ -38,27 +39,27 @@ public class LogEntry extends AbstractEntityUUID {
 
 	// Order targets.
 	public LogEntry(LogEntryRepository logEntryRepository, WebhookRepository webhookRepository, UUID userId, String username, String targetOrderId, String customerName, String actionCategory,
-			String actionDetails, Timestamp timestamp) {
+			String actionDetails) {
 		this.userId = userId;
 		this.username = username;
 		this.targetOrderId = targetOrderId;
 		this.setCustomerName(customerName);
 		this.actionCategory = actionCategory;
 		this.actionDetails = actionDetails;
-		this.timestamp = timestamp;
+		this.timestamp = new Timestamp(new Date().getTime());
 		
 		logEntryRepository.save(this);
 		sendDiscordWebhookMessage(webhookRepository, actionDetails + " at " + timestamp.toString());
 	}
 	// User targets.
 	public LogEntry(LogEntryRepository logEntryRepository, WebhookRepository webhookRepository, UUID userId, String username, UUID targetUserId, String actionCategory,
-			String actionDetails, Timestamp timestamp) {
+			String actionDetails) {
 		this.userId = userId;
 		this.username = username;
 		this.targetUserId = targetUserId;
 		this.actionCategory = actionCategory;
 		this.actionDetails = actionDetails;
-		this.timestamp = timestamp;
+		this.timestamp = new Timestamp(new Date().getTime());
 		
 		logEntryRepository.save(this);
 		sendDiscordWebhookMessage(webhookRepository, actionDetails + " at " + timestamp.toString());

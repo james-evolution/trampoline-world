@@ -53,6 +53,10 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,7 +122,17 @@ public class AuditLogView extends Div implements BeforeEnterObserver {
 	}
 
 	private void updateGrid() {
-		grid.setItems(logEntryService.findAll(filterTextField.getValue()));
+		List<LogEntry> allLogs = logEntryService.findAll(filterTextField.getValue());
+		List<LogEntry> formattedLogs = new ArrayList<LogEntry>();
+		
+		for (LogEntry log : allLogs) {
+			String stringTimestamp = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(log.getTimestamp());
+			Timestamp formattedTimestamp = Timestamp.valueOf(stringTimestamp);
+			log.setTimestamp(formattedTimestamp);
+			formattedLogs.add(log);
+		}
+		grid.setItems(formattedLogs);
+//		grid.setItems(logEntryService.findAll(filterTextField.getValue()));
 //		grid.setItems(logEntryService.findAllNoFilter());
 	}
 

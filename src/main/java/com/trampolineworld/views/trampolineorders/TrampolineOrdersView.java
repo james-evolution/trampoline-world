@@ -79,7 +79,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 @RolesAllowed({ "ADMIN", "TECH", "USER"})
 @Uses(Icon.class)
 @CssImport(themeFor = "vaadin-grid", value = "./themes/trampolineworld/views/grid-theme.css")
-@CssImport(value = "./themes/trampolineworld/views/dialog.css", themeFor = "vaadin-dialog-overlay")
+@CssImport(themeFor = "vaadin-horizontal-layout", value = "./themes/trampolineworld/views/grid-theme.css")
+@CssImport(themeFor = "vaadin-dialog-overlay", value = "./themes/trampolineworld/views/dialog.css")
+
 public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 
 	private User currentUser;
@@ -95,11 +97,12 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 	private Grid<TrampolineOrder> grid = new Grid<>(TrampolineOrder.class, false);
 	CollaborationAvatarGroup avatarGroup;
 	H2 editTitle;
-	private TextField filterTextField = new TextField();
-	private Checkbox complete;
-	private TextField firstName, lastName, phoneNumber, email, subtotal, total;
-	private TextArea orderDescription, measurements;
-	private DatePicker date;
+	
+	private TextField inputSearchFilter = new TextField();
+	private Checkbox inputComplete;
+	private TextField inputFirstName, inputLastName, inputPhoneNumber, inputEmail, inputSubtotal, inputTotal;
+	private TextArea inputOrderDescription, inputMeasurements;
+	private DatePicker inputDate;
 
 	private GridContextMenu<TrampolineOrder> menu;
 	private Div editorLayoutDiv;
@@ -107,10 +110,10 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 
 	private Dialog confirmDeleteDialog = new Dialog();
 
-	private Button cancel = new Button("Cancel");
-	private Button save = new Button("Save");
-	private Button newOrderButton = new Button("New Order");
-	private Button hideSidebarButton = new Button("Hide");
+	private Button buttonCancel = new Button("Cancel");
+	private Button buttonSave = new Button("Save");
+	private Button buttonNewOrder = new Button("New Order");
+	private Button buttonHideSidebar = new Button("Cancel");
 
 	private CollaborationBinder<TrampolineOrder> binder;
 	private TrampolineOrder trampolineOrder;
@@ -154,7 +157,14 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 
 		// Create split-view UI
 		SplitLayout splitLayout = new SplitLayout();
-
+		splitLayout.getStyle().set("margin-top", "0px !important");		
+		splitLayout.getStyle().set("border-style", "solid");
+		splitLayout.getStyle().set("border-top", "1px");
+		splitLayout.getStyle().set("border-bottom", "0px");
+		splitLayout.getStyle().set("border-left", "0px");
+		splitLayout.getStyle().set("border-right", "0px");
+		splitLayout.getStyle().set("border-color", "rgb(5, 57, 54)");
+		
 		// Configure avatar group (users / pfps)
 		avatarGroup = new CollaborationAvatarGroup(userInfo, null);
 		avatarGroup.getStyle().set("visibility", "visible");
@@ -202,16 +212,16 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 
 	private void configureFormButtons(TrampolineOrderService trampolineOrderService) {
 		// When the cancel button is clicked, clear the form and refresh the grid.
-		cancel.addClickListener(e -> {
+		buttonCancel.addClickListener(e -> {
 			clearForm();
 //            refreshGrid();
 			updateGrid();
 			editorLayoutDiv.setVisible(false);
-			hideSidebarButton.setVisible(false);
+			buttonHideSidebar.setVisible(false);
 		});
 
 		// When the save button is clicked, save the new order.
-		save.addClickListener(e -> {
+		buttonSave.addClickListener(e -> {
 			try {
 				if (this.trampolineOrder == null) {
 					this.trampolineOrder = new TrampolineOrder();
@@ -231,8 +241,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 							this.trampolineOrder.getId().toString(), 
 							customerName, 
 							currentActionCategory,
-							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails + this.trampolineOrder.getId().toString() + " for " + customerName,
-							new Timestamp(new Date().getTime())
+							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails + this.trampolineOrder.getId().toString() + " for " + customerName
 						);
 				} else if (currentActionCategory == "Created Order") {
 //					// Get all trampoline orders from the database.
@@ -250,14 +259,14 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 							this.trampolineOrder.getId().toString(), 
 							customerName, 
 							currentActionCategory,
-							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails + this.trampolineOrder.getId().toString() + " for " + customerName,
-							new Timestamp(new Date().getTime()));
+							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails + this.trampolineOrder.getId().toString() + " for " + customerName
+						);
 				}
 
 				clearForm();
 				updateGrid();
 				editorLayoutDiv.setVisible(false);
-				hideSidebarButton.setVisible(false);
+				buttonHideSidebar.setVisible(false);
 				Notification.show("Order details stored.", 4000, Position.TOP_CENTER)
 						.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 				UI.getCurrent().navigate(TrampolineOrdersView.class);
@@ -278,11 +287,11 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 	private void configureForm(UserInfo userInfo) {
 		binder = new CollaborationBinder<>(TrampolineOrder.class, userInfo);
 		// Bind fields. This is where you'd define e.g. validation rules
-		binder.forField(subtotal, String.class).asRequired("Subtotal field cannot be empty.")
+		binder.forField(inputSubtotal, String.class).asRequired("Subtotal field cannot be empty.")
 				.withConverter(new StringToDoubleConverter("Only numbers are allowed")).bind("subtotal");
-		binder.forField(total, String.class).asRequired("Total field cannot be empty.")
+		binder.forField(inputTotal, String.class).asRequired("Total field cannot be empty.")
 				.withConverter(new StringToDoubleConverter("Only numbers are allowed")).bind("total");
-		binder.forField(date, LocalDate.class).asRequired("Date field cannot be empty.").bind("date");
+		binder.forField(inputDate, LocalDate.class).asRequired("Date field cannot be empty.").bind("date");
 		binder.bindInstanceFields(this);
 	}
 	
@@ -404,7 +413,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 		grid.asSingleSelect().addValueChangeListener(event -> {
 			if (event.getValue() != null) {
 				editorLayoutDiv.setVisible(true);
-				hideSidebarButton.setVisible(true);
+				buttonHideSidebar.setVisible(true);
 				splitLayout.setSplitterPosition(0);
 				UI.getCurrent().navigate(String.format(TRAMPOLINEORDER_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
 			} else {
@@ -416,7 +425,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 	}
 
 	private void updateGrid() {
-		grid.setItems(trampolineOrderService.findAll(filterTextField.getValue()));
+		grid.setItems(trampolineOrderService.findAll(inputSearchFilter.getValue()));
 	}
 
 	private static final SerializableBiConsumer<Span, TrampolineOrder> statusComponentUpdater = (span, order) -> {
@@ -470,34 +479,34 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 		buttonHeaderContainer.setSpacing(false);
 		buttonHeaderContainer.setAlignItems(Alignment.BASELINE);
 
-		newOrderButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		newOrderButton.getElement().getStyle().set("margin-left", "6px");
-		newOrderButton.getElement().getStyle().set("margin-right", "6px");
-		newOrderButton.addClickListener(e -> {
+		buttonNewOrder.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		buttonNewOrder.getElement().getStyle().set("margin-left", "6px");
+		buttonNewOrder.getElement().getStyle().set("margin-right", "6px");
+		buttonNewOrder.addClickListener(e -> {
 			clearForm();
 			updateGrid();
 			editorLayoutDiv.setVisible(true);
-			hideSidebarButton.setVisible(true);
+			buttonHideSidebar.setVisible(true);
 			splitLayout.setSplitterPosition(0);
 		});
 
-		hideSidebarButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-		hideSidebarButton.getElement().getStyle().set("margin-left", "0px !important");
-		hideSidebarButton.getElement().getStyle().set("margin-right", "6px");
-		hideSidebarButton.setVisible(false);
+//		hideSidebarButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+		buttonHideSidebar.getElement().getStyle().set("margin-left", "0px !important");
+		buttonHideSidebar.getElement().getStyle().set("margin-right", "6px");
+		buttonHideSidebar.setVisible(false);
 
-		hideSidebarButton.addClickListener(e -> {
+		buttonHideSidebar.addClickListener(e -> {
 			clearForm();
 			updateGrid();
 			editorLayoutDiv.setVisible(false);
-			hideSidebarButton.setVisible(false);
+			buttonHideSidebar.setVisible(false);
 		});
 
-		filterTextField.setPlaceholder("Search...");
-		filterTextField.setHelperText("Filter by name, email, or number");
-		filterTextField.setClearButtonVisible(true);
-		filterTextField.setValueChangeMode(ValueChangeMode.LAZY); // Don't hit database on every keystroke. Wait for
-		filterTextField.addValueChangeListener(e -> updateGrid());
+		inputSearchFilter.setPlaceholder("Search...");
+		inputSearchFilter.setHelperText("Filter by name, email, or number");
+		inputSearchFilter.setClearButtonVisible(true);
+		inputSearchFilter.setValueChangeMode(ValueChangeMode.LAZY); // Don't hit database on every keystroke. Wait for
+		inputSearchFilter.addValueChangeListener(e -> updateGrid());
 
         Button menuButton = new Button("Show/Hide Columns");
         menuButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
@@ -517,7 +526,10 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
         columnToggleContextMenu.addColumnToggleItem("Subtotal", columnSubtotal);
         columnToggleContextMenu.addColumnToggleItem("Total", columnTotal);
         columnToggleContextMenu.addColumnToggleItem("Date", columnDate);	
-		buttonHeaderContainer.add(menuButton, filterTextField, newOrderButton, hideSidebarButton);
+
+//		buttonHeaderContainer.add(menuButton, filterTextField, newOrderButton, hideSidebarButton);
+		buttonHeaderContainer.getStyle().set("margin-bottom", "0px !important");
+        buttonHeaderContainer.add(menuButton, inputSearchFilter, buttonNewOrder);
 	}
 	
     private static class ColumnToggleContextMenu extends ContextMenu {
@@ -593,8 +605,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 						targetId.toString(), 
 						customerName, 
 						currentActionCategory,
-						currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails,
-						new Timestamp(new Date().getTime()));				
+						currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails);				
 				// Notify of deletion success.
 				Notification.show("Order deleted.", 4000, Position.TOP_CENTER)
 						.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
@@ -622,32 +633,44 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 		editorLayoutDiv.add(editorDiv);
 
 		FormLayout formLayout = new FormLayout();
-		firstName = new TextField("First Name");
-		lastName = new TextField("Last Name");
-		phoneNumber = new TextField("Phone Number");
-		email = new TextField("Email");
-		orderDescription = new TextArea("Order Description");
-		measurements = new TextArea("Measurements");
-		subtotal = new TextField("Subtotal");
-		total = new TextField("Total");
-		date = new DatePicker("Date");
-		complete = new Checkbox("Complete");
-		Component[] fields = new Component[] { firstName, lastName, phoneNumber, email, orderDescription, measurements,
-				subtotal, total, date, complete };
+		inputFirstName = new TextField("First Name");
+		inputLastName = new TextField("Last Name");
+		inputPhoneNumber = new TextField("Phone Number");
+		inputEmail = new TextField("Email");
+		inputOrderDescription = new TextArea("Order Description");
+		inputMeasurements = new TextArea("Measurements");
+		inputSubtotal = new TextField("Subtotal");
+		inputTotal = new TextField("Total");
+		inputDate = new DatePicker("Date");
+		inputComplete = new Checkbox("Complete");
+		Component[] fields = new Component[] { inputFirstName, inputLastName, inputPhoneNumber, inputEmail, inputOrderDescription, inputMeasurements,
+				inputSubtotal, inputTotal, inputDate, inputComplete };
 
 		formLayout.add(fields);
-		editorDiv.add(avatarGroup, editTitle, formLayout);
+		
+		// Create editor header row.
+		HorizontalLayout editorHeader = new HorizontalLayout();
+		editorHeader.setAlignItems(Alignment.CENTER);
+		// Style hide button.
+		buttonHideSidebar.setWidth("100px");
+		buttonHideSidebar.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+		// Add avatar group & hide button to header row.
+		editorHeader.add(avatarGroup, buttonHideSidebar);
+		// Add header row, title, and form to editor div.
+		editorDiv.add(editorHeader, editTitle, formLayout);
+		
 		createButtonLayout(editorLayoutDiv);
-
 		splitLayout.addToSecondary(editorLayoutDiv);
 	}
 
 	private void createButtonLayout(Div editorLayoutDiv) {
 		HorizontalLayout buttonLayout = new HorizontalLayout();
 		buttonLayout.setClassName("button-layout");
-		cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-		save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		buttonLayout.add(save, cancel);
+		buttonCancel.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_ERROR);
+		buttonSave.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
+		buttonLayout.getStyle().set("background-color", "black");
+		buttonLayout.getStyle().set("opacity", "0.7");
+		buttonLayout.add(buttonSave, buttonCancel);
 		editorLayoutDiv.add(buttonLayout);
 	}
 

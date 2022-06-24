@@ -444,11 +444,11 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
 	}
 
 	private void styleButtons() {
-		buttonSaveProfileUrl.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		buttonSaveUsername.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		buttonSaveDisplayName.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		buttonSaveEmail.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		buttonSavePassword.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		buttonSaveProfileUrl.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
+		buttonSaveUsername.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
+		buttonSaveDisplayName.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
+		buttonSaveEmail.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
+		buttonSavePassword.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
 	}
 
 	private void configureRows() {

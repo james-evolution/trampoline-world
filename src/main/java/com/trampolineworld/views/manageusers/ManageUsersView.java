@@ -27,6 +27,7 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -87,15 +88,16 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 	private boolean isNewUser = false;
 
 	private Grid<User> grid = new Grid<>(User.class, false);
-	H2 editTitle;
-	private TextField filterTextField = new TextField();
-	private TextField username, displayName, email, profilePictureUrl;
-	private PasswordField hashedPassword;
+	private H2 editTitle;
+	
+	private TextField inputSearchFilter = new TextField();
+	private TextField inputUsername, inputDisplayName, inputEmail, inputProfilePictureUrl;
+	private PasswordField inputHashedPassword;
 
-	CheckboxGroup<Role> roles;
-	Select<Integer> colorIndex;
+	private CheckboxGroup<Role> inputRoles;
+	private Select<Integer> inputColorIndex;
 
-	private GridContextMenu<User> menu;
+	private GridContextMenu<User> contextMenu;
 	private Div editorLayoutDiv;
 	private Div editorDiv;
 	private FormLayout formLayout;
@@ -103,10 +105,10 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 
 	private Dialog confirmDeleteDialog = new Dialog();
 
-	private Button cancel = new Button("Cancel");
-	private Button save = new Button("Save");
-	private Button newUserButton = new Button("New User");
-	private Button hideSidebarButton = new Button("Hide");
+	private Button buttonCancel = new Button("Cancel");
+	private Button buttonSave = new Button("Save");
+	private Button buttonNewUser = new Button("New User");
+	private Button buttonHideSidebar = new Button("Cancel");
 
 	private CollaborationBinder<User> binder;
 	private User user;
@@ -137,8 +139,16 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 
 		// Create split-view UI
 		SplitLayout splitLayout = new SplitLayout();
+//		splitLayout.getStyle().set("border", "var(--_lumo-grid-border-width) solid var(--_lumo-grid-border-color)");
+		splitLayout.getStyle().set("margin-top", "0px !important");
+		splitLayout.getStyle().set("border-style", "solid");
+		splitLayout.getStyle().set("border-top", "1px");
+		splitLayout.getStyle().set("border-bottom", "0px");
+		splitLayout.getStyle().set("border-left", "0px");
+		splitLayout.getStyle().set("border-right", "0px");
+		splitLayout.getStyle().set("border-color", "rgb(5, 57, 54)");
 
-		// Create grid and editor layouts.
+		// Create grid and editor layouts
 		createGridLayout(splitLayout);
 		createEditorLayout(splitLayout);
 
@@ -163,15 +173,15 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 
 	private void configureFormButtons(UserService userService) {
 		// When the cancel button is clicked, clear the form and refresh the grid.
-		cancel.addClickListener(e -> {
+		buttonCancel.addClickListener(e -> {
 			clearForm();
 			updateGrid();
 			editorLayoutDiv.setVisible(false);
-			hideSidebarButton.setVisible(false);
+			buttonHideSidebar.setVisible(false);
 		});
 
 		// When the save button is clicked, save the new user.
-		save.addClickListener(e -> {
+		buttonSave.addClickListener(e -> {
 			try {
 				// Pull data from form, update user object, update repository.
 				updateUserFromForm(userService);
@@ -181,14 +191,14 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 					LogEntry logEntry = new LogEntry(logEntryRepository, webhookRepository, currentUser.getId(),
 							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")", createdUser.getId(),
 							currentActionCategory, currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")"
-									+ currentActionDetails + " " + createdUser.getId().toString(),
-							new Timestamp(new Date().getTime()));
+									+ currentActionDetails + " " + createdUser.getId().toString()
+							);
 				} else if (currentActionCategory == "Edited User") {
 					LogEntry logEntry = new LogEntry(logEntryRepository, webhookRepository, currentUser.getId(),
 							currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")", this.user.getId(),
 							currentActionCategory, currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")"
-									+ currentActionDetails + " " + this.user.getId().toString(),
-							new Timestamp(new Date().getTime()));
+									+ currentActionDetails + " " + this.user.getId().toString()
+							);
 				}
 
 				// Clear form, update grid.
@@ -196,7 +206,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 				updateGrid();
 				// Hide editor & hide 'hide' button.
 				editorLayoutDiv.setVisible(false);
-				hideSidebarButton.setVisible(false);
+				buttonHideSidebar.setVisible(false);
 				// Notify of success.
 				Notification.show("User details stored.", 4000, Position.TOP_CENTER)
 						.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
@@ -216,35 +226,35 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 		// default encoded password.
 		if (isNewUser) {
 			User newUser = new User();
-			newUser.setUsername(username.getValue());
-			newUser.setDisplayName(displayName.getValue());
-			newUser.setEmail(email.getValue());
-			newUser.setRoles(roles.getValue());
-			newUser.setColorIndex(colorIndex.getValue() == null ? 1 : colorIndex.getValue());
-			newUser.setProfilePictureUrl(profilePictureUrl.getValue());
+			newUser.setUsername(inputUsername.getValue());
+			newUser.setDisplayName(inputDisplayName.getValue());
+			newUser.setEmail(inputEmail.getValue());
+			newUser.setRoles(inputRoles.getValue());
+			newUser.setColorIndex(inputColorIndex.getValue() == null ? 1 : inputColorIndex.getValue());
+			newUser.setProfilePictureUrl(inputProfilePictureUrl.getValue());
 			newUser.setHashedPassword(passwordEncoder.encode("user"));
 //			userService.update(newUser);
 			userRepository.save(newUser);
 
-			createdUser = userRepository.findByUsername(username.getValue());
+			createdUser = userRepository.findByUsername(inputUsername.getValue());
 
 			currentActionCategory = "Created User";
 			currentActionDetails = " created an account for " + createdUser.getUsername() + " ("
 					+ createdUser.getDisplayName() + ")";
 			sendDiscordWebhookMessage(webhookRepository, newUser.getUsername() + ": " + createdUser.getId().toString());
 		} else {
-			this.user.setUsername(username.getValue());
-			this.user.setDisplayName(displayName.getValue());
-			this.user.setEmail(email.getValue());
-			this.user.setRoles(roles.getValue());
-			this.user.setColorIndex(colorIndex.getValue() == null ? 1 : colorIndex.getValue());
-			this.user.setProfilePictureUrl(profilePictureUrl.getValue());
+			this.user.setUsername(inputUsername.getValue());
+			this.user.setDisplayName(inputDisplayName.getValue());
+			this.user.setEmail(inputEmail.getValue());
+			this.user.setRoles(inputRoles.getValue());
+			this.user.setColorIndex(inputColorIndex.getValue() == null ? 1 : inputColorIndex.getValue());
+			this.user.setProfilePictureUrl(inputProfilePictureUrl.getValue());
 			// If password field is empty or null, do nothing. Leave it as is.
-			if (hashedPassword.getValue().isEmpty() || hashedPassword.getValue() == null) {
+			if (inputHashedPassword.getValue().isEmpty() || inputHashedPassword.getValue() == null) {
 			}
 			// Else, encode the new password.
 			else {
-				this.user.setHashedPassword(passwordEncoder.encode(hashedPassword.getValue()));
+				this.user.setHashedPassword(passwordEncoder.encode(inputHashedPassword.getValue()));
 			}
 
 			currentActionCategory = "Edited User";
@@ -330,7 +340,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 				userToEdit = event.getValue();
 				// Show layout & hide button.
 				editorLayoutDiv.setVisible(true);
-				hideSidebarButton.setVisible(true);
+				buttonHideSidebar.setVisible(true);
 				splitLayout.setSplitterPosition(0);
 				UI.getCurrent().navigate(String.format(USER_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
 			} else {
@@ -343,7 +353,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 	}
 
 	private void updateGrid() {
-		grid.setItems(userService.findAll(filterTextField.getValue()));
+		grid.setItems(userService.findAll(inputSearchFilter.getValue()));
 
 		// Log UUIDs so we can keep track of them for the CE license.
 		List<User> users = userService.findAllNoFilter();
@@ -396,37 +406,37 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 		buttonHeaderContainer.setSpacing(false);
 		buttonHeaderContainer.setAlignItems(Alignment.BASELINE);
 
-		newUserButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		newUserButton.getElement().getStyle().set("margin-left", "6px");
-		newUserButton.getElement().getStyle().set("margin-right", "6px");
-		newUserButton.addClickListener(e -> {
+		buttonNewUser.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		buttonNewUser.getElement().getStyle().set("margin-left", "6px");
+		buttonNewUser.getElement().getStyle().set("margin-right", "6px");
+		buttonNewUser.addClickListener(e -> {
 			// Clear form contents & update grid data.
 			clearForm();
 			updateGrid();
 			// Show editor layout, show hide button.
 			editorLayoutDiv.setVisible(true);
-			hideSidebarButton.setVisible(true);
+			buttonHideSidebar.setVisible(true);
 			// Full screen the editor.
 			splitLayout.setSplitterPosition(0);
 		});
 
-		hideSidebarButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-		hideSidebarButton.getElement().getStyle().set("margin-left", "0px !important");
-		hideSidebarButton.getElement().getStyle().set("margin-right", "6px");
-		hideSidebarButton.setVisible(false);
+//		buttonHideSidebar.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+		buttonHideSidebar.getElement().getStyle().set("margin-left", "0px !important");
+		buttonHideSidebar.getElement().getStyle().set("margin-right", "6px");
+		buttonHideSidebar.setVisible(false);
 
-		hideSidebarButton.addClickListener(e -> {
+		buttonHideSidebar.addClickListener(e -> {
 			clearForm();
 			updateGrid();
 			editorLayoutDiv.setVisible(false);
-			hideSidebarButton.setVisible(false);
+			buttonHideSidebar.setVisible(false);
 		});
 
-		filterTextField.setPlaceholder("Search...");
-		filterTextField.setHelperText("Filter by name or email");
-		filterTextField.setClearButtonVisible(true);
-		filterTextField.setValueChangeMode(ValueChangeMode.LAZY); // Don't hit database on every keystroke. Wait for
-		filterTextField.addValueChangeListener(e -> updateGrid());
+		inputSearchFilter.setPlaceholder("Search...");
+		inputSearchFilter.setHelperText("Filter by name or email");
+		inputSearchFilter.setClearButtonVisible(true);
+		inputSearchFilter.setValueChangeMode(ValueChangeMode.LAZY); // Don't hit database on every keystroke. Wait for
+		inputSearchFilter.addValueChangeListener(e -> updateGrid());
 
 		Button menuButton = new Button("Show/Hide Columns");
 		menuButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
@@ -442,7 +452,9 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 		columnToggleContextMenu.addColumnToggleItem("Profile Picture Url", columnProfilePictureUrl);
 		columnToggleContextMenu.addColumnToggleItem("Color Index", columnColorIndex);
 
-		buttonHeaderContainer.add(menuButton, filterTextField, newUserButton, hideSidebarButton);
+//		buttonHeaderContainer.add(menuButton, inputSearchFilter, buttonNewUser, buttonHideSidebar);
+		buttonHeaderContainer.getStyle().set("margin-bottom", "0px !important");
+		buttonHeaderContainer.add(menuButton, inputSearchFilter, buttonNewUser);
 //		buttonHeaderContainer.setAlignItems(Alignment.BASELINE);
 	}
 
@@ -491,44 +503,59 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 		editorDiv.setClassName("editor");
 		editorLayoutDiv.add(editorDiv);
 
-		username = new TextField("Username");
-		username.setHelperText(
+		inputUsername = new TextField("Username");
+		inputUsername.setHelperText(
 				"Your username is the one you log in with. This is not to be confused with the display name, which is simply for aesthetics.");
 
-		displayName = new TextField("Display Name");
-		displayName.setHelperText(
+		inputDisplayName = new TextField("Display Name");
+		inputDisplayName.setHelperText(
 				"Your display name is essentially your nickname. It's what will be displayed to other users in the system. It's a good idea to have a different display name than username, that way people don't know what username to type if they attempt to log into your account.");
 
-		email = new TextField("Email");
-		email.setHelperText(
+		inputEmail = new TextField("Email");
+		inputEmail.setHelperText(
 				"An email is not required, but if you ever forget your password, this is where your reset link & code will be sent.");
 
-		roles = new CheckboxGroup<>();
-		roles.setLabel("Roles");
-		roles.setItems(Role.ADMIN, Role.TECH, Role.USER);
-		roles.setHelperText(
+		inputRoles = new CheckboxGroup<>();
+		inputRoles.setLabel("Roles");
+		inputRoles.setItems(Role.ADMIN, Role.TECH, Role.USER);
+		inputRoles.setHelperText(
 				"Admins have all permissions but cannot see the debug page. Techs can see the debug page. Users can only access the orders page and the chat. They cannot delete orders, but they can add, edit, and view them.");
 
-		colorIndex = new Select<>();
-		colorIndex.setLabel("Color Index");
-		colorIndex.setItems(0, 1, 2, 3, 4, 5, 6, 7);
-		colorIndex.setHelperText("[0=None] [1=Pink] [2=Purple] [3=Green] [4=Orange] [5=Magenta] [6=Cyan] [7=Yellow]");
+		inputColorIndex = new Select<>();
+		inputColorIndex.setLabel("Color Index");
+		inputColorIndex.setItems(0, 1, 2, 3, 4, 5, 6, 7);
+		inputColorIndex.setHelperText("[0=None] [1=Pink] [2=Purple] [3=Green] [4=Orange] [5=Magenta] [6=Cyan] [7=Yellow]");
 
-		hashedPassword = new PasswordField();
-		hashedPassword.setLabel("Password");
-		hashedPassword.setHelperText(
+		inputHashedPassword = new PasswordField();
+		inputHashedPassword.setLabel("Password");
+		inputHashedPassword.setHelperText(
 				"To leave the password unchanged or default (default password for new accounts is 'user'), leave this field blank. WARNING: Do not change the value of this field if you don't want to change a user's password. It will get encrypted.");
-		hashedPassword.setValueChangeMode(ValueChangeMode.LAZY);
+		inputHashedPassword.setValueChangeMode(ValueChangeMode.LAZY);
 
-		profilePictureUrl = new TextField("Profile Picture URL");
-		profilePictureUrl.setHelperText(
+		inputProfilePictureUrl = new TextField("Profile Picture URL");
+		inputProfilePictureUrl.setHelperText(
 				"File uploads are not yet supported for profile pictures. You can, however, pass in an image URL. Right click on an image from the net and select 'Copy Image Address' and then paste it here. The url path must end in .jpg, .png, or .webp");
 
-		Component[] fields = new Component[] { username, displayName, email, roles, hashedPassword, profilePictureUrl,
-				colorIndex };
+		Component[] fields = new Component[] { inputUsername, inputDisplayName, inputEmail, inputRoles, inputHashedPassword, inputProfilePictureUrl,
+				inputColorIndex };
 
 		formLayout.add(fields);
-		editorDiv.add(editTitle, formLayout);
+		
+//		editorDiv.add(editTitle, formLayout);
+		
+		// Create editor header row.
+		HorizontalLayout editorHeader = new HorizontalLayout();
+		editorHeader.setAlignItems(Alignment.BASELINE);
+		// Style hide button.
+		buttonHideSidebar.setWidth("100px");
+		buttonHideSidebar.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+		editTitle.setWidth("100%");
+		// Add avatar group & hide button to header row.
+		editorHeader.add(editTitle, buttonHideSidebar);
+		
+		// Add header row, title, and form to editor div.
+		editorDiv.add(editorHeader, formLayout);		
+		
 		createButtonLayout(editorLayoutDiv);
 		splitLayout.addToSecondary(editorLayoutDiv);
 	}
@@ -536,9 +563,11 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 	private void createButtonLayout(Div editorLayoutDiv) {
 		HorizontalLayout buttonLayout = new HorizontalLayout();
 		buttonLayout.setClassName("button-layout");
-		cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-		save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		buttonLayout.add(save, cancel);
+		buttonCancel.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_ERROR);
+		buttonSave.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
+		buttonLayout.getStyle().set("background-color", "black");
+		buttonLayout.getStyle().set("opacity", "0.7");		
+		buttonLayout.add(buttonSave, buttonCancel);
 		editorLayoutDiv.add(buttonLayout);
 	}
 
@@ -562,22 +591,22 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 			editTitle.setText("Edit User");
 			isNewUser = false;
 			// Populate form data here.
-			username.setValue(value.getUsername() == null ? "" : value.getUsername());
-			displayName.setValue(value.getDisplayName() == null ? "" : value.getDisplayName());
-			email.setValue(value.getEmail() == null ? "" : value.getEmail());
-			roles.setValue(value.getRoles());
-			colorIndex.setValue(value.getColorIndex() == null ? 1 : value.getColorIndex());
-			profilePictureUrl.setValue(value.getProfilePictureUrl() == null ? "" : value.getProfilePictureUrl());
+			inputUsername.setValue(value.getUsername() == null ? "" : value.getUsername());
+			inputDisplayName.setValue(value.getDisplayName() == null ? "" : value.getDisplayName());
+			inputEmail.setValue(value.getEmail() == null ? "" : value.getEmail());
+			inputRoles.setValue(value.getRoles());
+			inputColorIndex.setValue(value.getColorIndex() == null ? 1 : value.getColorIndex());
+			inputProfilePictureUrl.setValue(value.getProfilePictureUrl() == null ? "" : value.getProfilePictureUrl());
 		} else {
 			// Clear form data here.
 			editTitle.setText("New User");
 			isNewUser = true;
-			username.clear();
-			displayName.clear();
-			email.clear();
-			roles.clear();
-			colorIndex.clear();
-			profilePictureUrl.clear();
+			inputUsername.clear();
+			inputDisplayName.clear();
+			inputEmail.clear();
+			inputRoles.clear();
+			inputColorIndex.clear();
+			inputProfilePictureUrl.clear();
 		}
 
 	}
