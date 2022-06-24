@@ -529,7 +529,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 		inputHashedPassword = new PasswordField();
 		inputHashedPassword.setLabel("Password");
 		inputHashedPassword.setHelperText(
-				"To leave the password unchanged or default (default password for new accounts is 'user'), leave this field blank. WARNING: Do not change the value of this field if you don't want to change a user's password. It will get encrypted.");
+				"When creating a new user, leave this field blank if you wish to use the default password, 'user'. When editing existing users, leave this field blank to leave their password as is. WARNING: Do not change the value of this field if you don't want to change a user's password. It will get encrypted.");
 		inputHashedPassword.setValueChangeMode(ValueChangeMode.LAZY);
 
 		inputProfilePictureUrl = new TextField("Profile Picture URL");

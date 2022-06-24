@@ -20,15 +20,6 @@ public interface LogEntryRepository extends JpaRepository<LogEntry, UUID> {
 	+ "or lower(logEntry.actionCategory) like lower(concat('%', :filterText, '%'))"
 	)
 	
-//	@Query(
-//	"select u from LogEntry u " + 
-//	"where lower(u.username) like lower(concat('%', :filterText, '%')) "
-//	)
-	
-//	@Query(
-//			  value = "SELECT * FROM LogEn u WHERE u.status = 1", 
-//			  nativeQuery = true)	
-	
 	List<LogEntry> search(@Param("filterText") String filterText);
 	
 	LogEntry findByUserId(UUID userId);

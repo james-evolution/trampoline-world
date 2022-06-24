@@ -287,6 +287,12 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
 	private void configureForm(UserInfo userInfo) {
 		binder = new CollaborationBinder<>(TrampolineOrder.class, userInfo);
 		// Bind fields. This is where you'd define e.g. validation rules
+		binder.forField(inputFirstName, String.class).bind("firstName");
+		binder.forField(inputLastName, String.class).bind("lastName");
+		binder.forField(inputPhoneNumber, String.class).bind("phoneNumber");
+		binder.forField(inputEmail, String.class).bind("email");
+		binder.forField(inputOrderDescription, String.class).bind("orderDescription");
+		binder.forField(inputMeasurements, String.class).bind("measurements");
 		binder.forField(inputSubtotal, String.class).asRequired("Subtotal field cannot be empty.")
 				.withConverter(new StringToDoubleConverter("Only numbers are allowed")).bind("subtotal");
 		binder.forField(inputTotal, String.class).asRequired("Total field cannot be empty.")
