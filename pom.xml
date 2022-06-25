@@ -98,6 +98,13 @@
 		  <artifactId>DynamicJasper-core-fonts</artifactId>
 		  <version>1.0</version>
 		</dependency>
+		
+		<!-- For copying text to the clipboard -->
+		<dependency>
+		   <groupId>org.vaadin.olli</groupId>
+		   <artifactId>clipboardhelper</artifactId>
+		   <version>1.2.0</version>
+		</dependency>
 
      	<!--   
      	<dependency>
@@ -106,6 +113,14 @@
             <scope>runtime</scope>
         </dependency>	   
      	-->
+     	
+     	<!-- https://mvnrepository.com/artifact/org.json/json -->
+		<dependency>
+		    <groupId>org.json</groupId>
+		    <artifactId>json</artifactId>
+		    <version>20220320</version>
+		</dependency>
+
          
 	    <dependency>
 	      <groupId>mysql</groupId>

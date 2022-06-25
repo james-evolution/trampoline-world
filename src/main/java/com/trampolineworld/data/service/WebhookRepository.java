@@ -10,11 +10,11 @@ import org.springframework.data.repository.query.Param;
 
 public interface WebhookRepository extends JpaRepository<Webhook, UUID> {
 
-	@Query(
-	"select w from Webhook w " + 
-	"where lower(w.webhookName) like lower(concat('%', :filterText, '%')) "
-	+ "or lower(w.webhookUrl) like lower(concat('%', :filterText, '%'))"
-	)
-	List<Webhook> search(@Param("filterText") String filterText);
+  @Query(
+  "select w from Webhook w " + 
+  "where lower(w.webhookName) like lower(concat('%', :filterText, '%')) "
+  + "or lower(w.webhookUrl) like lower(concat('%', :filterText, '%'))"
+  )
+  List<Webhook> search(@Param("filterText") String filterText);
     Webhook findByWebhookName(String webhookName);
 }

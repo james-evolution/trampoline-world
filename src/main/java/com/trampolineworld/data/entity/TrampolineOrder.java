@@ -82,11 +82,11 @@ public class TrampolineOrder extends AbstractEntity {
     public void setDate(LocalDate date) {
         this.date = date;
     }
-	public boolean isDeleted() {
-		return deleted;
-	}
-	public void setDeleted(boolean deleted) {
-		this.deleted = deleted;
-	}
+  public boolean isDeleted() {
+    return deleted;
+  }
+  public void setDeleted(boolean deleted) {
+    this.deleted = deleted;
+  }
 
 }

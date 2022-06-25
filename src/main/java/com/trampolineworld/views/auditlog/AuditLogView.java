@@ -69,117 +69,117 @@ import org.springframework.beans.factory.annotation.Autowired;
 @CssImport(value = "./themes/trampolineworld/views/dialog.css", themeFor = "vaadin-dialog-overlay")
 public class AuditLogView extends Div implements BeforeEnterObserver {
 
-	private Grid<LogEntry> grid = new Grid<>(LogEntry.class, false);
-	H2 editTitle;
-	private TextField filterTextField = new TextField();
-	private HorizontalLayout buttonHeaderContainer = new HorizontalLayout();
-	private LogEntryService logEntryService;
+  private Grid<LogEntry> grid = new Grid<>(LogEntry.class, false);
+  H2 editTitle;
+  private TextField filterTextField = new TextField();
+  private HorizontalLayout buttonHeaderContainer = new HorizontalLayout();
+  private LogEntryService logEntryService;
 
-	private Grid.Column<LogEntry> columnUserId, columnUsername, columnActionCategory, 
-	columnActionDetails, columnCustomerName, columnTargetOrderId, columnTargetUserId, columnTimestamp;
+  private Grid.Column<LogEntry> columnUserId, columnUsername, columnActionCategory, 
+  columnActionDetails, columnCustomerName, columnTargetOrderId, columnTargetUserId, columnTimestamp;
 
-	@Autowired
-	public AuditLogView(LogEntryService logEntryService) {
-		addClassNames("trampoline-orders-view");
-		this.logEntryService = logEntryService;
+  @Autowired
+  public AuditLogView(LogEntryService logEntryService) {
+    addClassNames("trampoline-orders-view");
+    this.logEntryService = logEntryService;
 
-		// Configure the grid.
-		configureGrid(logEntryService);
+    // Configure the grid.
+    configureGrid(logEntryService);
 
-		// Create button header bar.
-		createButtonHeader(); // Requires splitLayout argument to define button functions.
-		
-		// Add buttonHeaderContainer and splitLayout to view.
-		add(buttonHeaderContainer);
-		
-		add(grid);
-	}
+    // Create button header bar.
+    createButtonHeader(); // Requires splitLayout argument to define button functions.
+    
+    // Add buttonHeaderContainer and splitLayout to view.
+    add(buttonHeaderContainer);
+    
+    add(grid);
+  }
 
-	private void configureGrid(LogEntryService logEntryService) {
-		grid.setColumnReorderingAllowed(true);
-		grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
-		grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
-//		grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
+  private void configureGrid(LogEntryService logEntryService) {
+    grid.setColumnReorderingAllowed(true);
+    grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
+    grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
+//    grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
-		// Add columns to the grid.
-		columnUserId =  grid.addColumn("userId").setAutoWidth(true).setResizable(true).setHeader("User ID");
-		columnUsername = grid.addColumn("username").setAutoWidth(true).setResizable(true);
-		columnActionCategory = grid.addColumn(createStatusComponentRenderer()).setHeader("Action Category").setAutoWidth(true).setResizable(true);
-		columnActionDetails = grid.addColumn("actionDetails").setAutoWidth(true).setResizable(true);
-		columnCustomerName = grid.addColumn("customerName").setAutoWidth(true).setResizable(true);
-		columnTargetOrderId = grid.addColumn("targetOrderId").setAutoWidth(true).setResizable(true);
-		columnTargetUserId = grid.addColumn("targetUserId").setAutoWidth(true).setResizable(true);
-		columnTimestamp = grid.addColumn("timestamp").setAutoWidth(true).setResizable(true);
-		
-		// Make certain columns invisible by default.
-		columnUserId.setVisible(false);
-		columnUsername.setVisible(false);
-		columnCustomerName.setVisible(false);
-		columnTargetOrderId.setVisible(false);
-		columnTargetUserId.setVisible(false);
-		
-		updateGrid();
-	}
+    // Add columns to the grid.
+    columnUserId =  grid.addColumn("userId").setAutoWidth(true).setResizable(true).setHeader("User ID");
+    columnUsername = grid.addColumn("username").setAutoWidth(true).setResizable(true);
+    columnActionCategory = grid.addColumn(createStatusComponentRenderer()).setHeader("Action Category").setAutoWidth(true).setResizable(true);
+    columnActionDetails = grid.addColumn("actionDetails").setAutoWidth(true).setResizable(true);
+    columnCustomerName = grid.addColumn("customerName").setAutoWidth(true).setResizable(true);
+    columnTargetOrderId = grid.addColumn("targetOrderId").setAutoWidth(true).setResizable(true);
+    columnTargetUserId = grid.addColumn("targetUserId").setAutoWidth(true).setResizable(true);
+    columnTimestamp = grid.addColumn("timestamp").setAutoWidth(true).setResizable(true);
+    
+    // Make certain columns invisible by default.
+    columnUserId.setVisible(false);
+    columnUsername.setVisible(false);
+    columnCustomerName.setVisible(false);
+    columnTargetOrderId.setVisible(false);
+    columnTargetUserId.setVisible(false);
+    
+    updateGrid();
+  }
 
-	private void updateGrid() {
-		List<LogEntry> allLogs = logEntryService.findAll(filterTextField.getValue());
-		List<LogEntry> formattedLogs = new ArrayList<LogEntry>();
-		
-		for (LogEntry log : allLogs) {
-			String stringTimestamp = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(log.getTimestamp());
-			Timestamp formattedTimestamp = Timestamp.valueOf(stringTimestamp);
-			log.setTimestamp(formattedTimestamp);
-			formattedLogs.add(log);
-		}
-		grid.setItems(formattedLogs);
-//		grid.setItems(logEntryService.findAll(filterTextField.getValue()));
-//		grid.setItems(logEntryService.findAllNoFilter());
-	}
+  private void updateGrid() {
+    List<LogEntry> allLogs = logEntryService.findAll(filterTextField.getValue());
+    List<LogEntry> formattedLogs = new ArrayList<LogEntry>();
+    
+    for (LogEntry log : allLogs) {
+      String stringTimestamp = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(log.getTimestamp());
+      Timestamp formattedTimestamp = Timestamp.valueOf(stringTimestamp);
+      log.setTimestamp(formattedTimestamp);
+      formattedLogs.add(log);
+    }
+    grid.setItems(formattedLogs);
+//    grid.setItems(logEntryService.findAll(filterTextField.getValue()));
+//    grid.setItems(logEntryService.findAllNoFilter());
+  }
 
-	// Logic for generating role badges.
-	private static final SerializableBiConsumer<Span, LogEntry> statusComponentUpdater = (span, logEntry) -> {
+  // Logic for generating role badges.
+  private static final SerializableBiConsumer<Span, LogEntry> statusComponentUpdater = (span, logEntry) -> {
 
-		String actionCategory = logEntry.getActionCategory();
-		
-		Span badge = new Span(actionCategory);
-		badge.getElement().getStyle().set("margin", "3px");
-		
-		
-		if (actionCategory.equals("Created Order")) {
-			badge.getElement().getThemeList().add("badge success pill");
-		} else if (actionCategory.equals("Edited Order")) {
-			badge.getElement().getThemeList().add("badge pill");
-		} else if (actionCategory.equals("Deleted Order")) {
-			badge.getElement().getThemeList().add("badge error pill");
-		} else if (actionCategory.equals("Created User")) {
-			badge.getElement().getThemeList().add("badge success pill");
-		} else if (actionCategory.equals("Edited User")) {
-			badge.getElement().getThemeList().add("badge pill");
-		} else if (actionCategory.equals("Restored Order") || actionCategory.equals("Restored Orders")) {
-			badge.getElement().getThemeList().add("badge success pill");
-		}
-		
+    String actionCategory = logEntry.getActionCategory();
+    
+    Span badge = new Span(actionCategory);
+    badge.getElement().getStyle().set("margin", "3px");
+    
+    
+    if (actionCategory.equals("Created Order")) {
+      badge.getElement().getThemeList().add("badge success pill");
+    } else if (actionCategory.equals("Edited Order")) {
+      badge.getElement().getThemeList().add("badge pill");
+    } else if (actionCategory.equals("Deleted Order")) {
+      badge.getElement().getThemeList().add("badge error pill");
+    } else if (actionCategory.equals("Created User")) {
+      badge.getElement().getThemeList().add("badge success pill");
+    } else if (actionCategory.equals("Edited User")) {
+      badge.getElement().getThemeList().add("badge pill");
+    } else if (actionCategory.equals("Restored Order") || actionCategory.equals("Restored Orders")) {
+      badge.getElement().getThemeList().add("badge success pill");
+    }
+    
 
-		span.add(badge);
-	};
+    span.add(badge);
+  };
 
-	// For rendering a more complex component in a grid cell.
-	private static ComponentRenderer<Span, LogEntry> createStatusComponentRenderer() {
-		return new ComponentRenderer<>(Span::new, statusComponentUpdater);
-	}
+  // For rendering a more complex component in a grid cell.
+  private static ComponentRenderer<Span, LogEntry> createStatusComponentRenderer() {
+    return new ComponentRenderer<>(Span::new, statusComponentUpdater);
+  }
 
-	private void createButtonHeader() {
-		// Configure button header container.
-		buttonHeaderContainer.setSpacing(false);
-		buttonHeaderContainer.setAlignItems(Alignment.BASELINE);
+  private void createButtonHeader() {
+    // Configure button header container.
+    buttonHeaderContainer.setSpacing(false);
+    buttonHeaderContainer.setAlignItems(Alignment.BASELINE);
 
-		filterTextField.setPlaceholder("Search...");
-		filterTextField.setHelperText("Filter name, action, or id");
-		filterTextField.setClearButtonVisible(true);
-		filterTextField.setValueChangeMode(ValueChangeMode.LAZY); // Don't hit database on every keystroke. Wait for
-																	// user to finish typing.
-		filterTextField.addValueChangeListener(e -> updateGrid());
-		
+    filterTextField.setPlaceholder("Search...");
+    filterTextField.setHelperText("Filter name, action, or id");
+    filterTextField.setClearButtonVisible(true);
+    filterTextField.setValueChangeMode(ValueChangeMode.LAZY); // Don't hit database on every keystroke. Wait for
+                                  // user to finish typing.
+    filterTextField.addValueChangeListener(e -> updateGrid());
+    
         Button menuButton = new Button("Show/Hide Columns");
         menuButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
         menuButton.getStyle().set("margin-right", "6px");
@@ -196,9 +196,9 @@ public class AuditLogView extends Div implements BeforeEnterObserver {
         columnToggleContextMenu.addColumnToggleItem("Target User ID", columnTargetUserId);
         columnToggleContextMenu.addColumnToggleItem("Timestamp", columnTimestamp);
 
-		buttonHeaderContainer.add(menuButton, filterTextField);
-	}
-	
+    buttonHeaderContainer.add(menuButton, filterTextField);
+  }
+  
     private static class ColumnToggleContextMenu extends ContextMenu {
         public ColumnToggleContextMenu(Component target) {
             super(target);
@@ -214,8 +214,8 @@ public class AuditLogView extends Div implements BeforeEnterObserver {
         }
     }
 
-	@Override
-	public void beforeEnter(BeforeEnterEvent event) {
-		
-	}
+  @Override
+  public void beforeEnter(BeforeEnterEvent event) {
+    
+  }
 }

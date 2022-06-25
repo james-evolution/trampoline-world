@@ -1,6 +1,5 @@
 package com.trampolineworld.views;
 
-import com.trampolineworld.data.Role;
 import com.trampolineworld.data.entity.User;
 import com.trampolineworld.data.service.UserRepository;
 import com.trampolineworld.data.service.UserService;
@@ -10,11 +9,11 @@ import com.trampolineworld.views.archives.ArchivesView;
 import com.trampolineworld.views.auditlog.AuditLogView;
 import com.trampolineworld.views.chat.ChatView;
 import com.trampolineworld.views.contact.ContactView;
+import com.trampolineworld.views.databaseconfig.DatabaseConfigurationView;
 import com.trampolineworld.views.debug.DebugView;
 import com.trampolineworld.views.discord.DiscordIntegrationView;
 import com.trampolineworld.views.export.ExportView;
 import com.trampolineworld.views.manageusers.ManageUsersView;
-import com.trampolineworld.views.schema.SchemaView;
 import com.trampolineworld.views.trampolineorders.TrampolineOrdersView;
 import com.trampolineworld.views.userguide.UserGuideView;
 import com.vaadin.flow.component.Component;
@@ -37,190 +36,187 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * The main view is a top-level placeholder for other views.
  */
 public class MainLayout extends AppLayout {
 
-	/**
-	 * A simple navigation item component, based on ListItem element.
-	 */
-	public static class MenuItemInfo extends ListItem {
+  /**
+   * A simple navigation item component, based on ListItem element.
+   */
+  public static class MenuItemInfo extends ListItem {
 
-		private final Class<? extends Component> view;
+    private final Class<? extends Component> view;
 
-		public MenuItemInfo(String menuTitle, String iconClass, Class<? extends Component> view) {
-			this.view = view;
-			RouterLink link = new RouterLink();
-			link.addClassNames("menu-item-link");
-			link.setRoute(view);
+    public MenuItemInfo(String menuTitle, String iconClass, Class<? extends Component> view) {
+      this.view = view;
+      RouterLink link = new RouterLink();
+      link.addClassNames("menu-item-link");
+      link.setRoute(view);
 
-			Span text = new Span(menuTitle);
-			text.addClassNames("menu-item-text");
+      Span text = new Span(menuTitle);
+      text.addClassNames("menu-item-text");
 
-			link.add(new LineAwesomeIcon(iconClass), text);
-			add(link);
-		}
+      link.add(new LineAwesomeIcon(iconClass), text);
+      add(link);
+    }
 
-		public Class<?> getView() {
-			return view;
-		}
+    public Class<?> getView() {
+      return view;
+    }
 
-		/**
-		 * Simple wrapper to create icons using LineAwesome iconset. See
-		 * https://icons8.com/line-awesome
-		 */
-		@NpmPackage(value = "line-awesome", version = "1.3.0")
-		public static class LineAwesomeIcon extends Span {
-			public LineAwesomeIcon(String lineawesomeClassnames) {
-				addClassNames("menu-item-icon");
-				if (!lineawesomeClassnames.isEmpty()) {
-					addClassNames(lineawesomeClassnames);
-				}
-			}
-		}
+    /**
+     * Simple wrapper to create icons using LineAwesome iconset. See
+     * https://icons8.com/line-awesome
+     */
+    @NpmPackage(value = "line-awesome", version = "1.3.0")
+    public static class LineAwesomeIcon extends Span {
+      public LineAwesomeIcon(String lineawesomeClassnames) {
+        addClassNames("menu-item-icon");
+        if (!lineawesomeClassnames.isEmpty()) {
+          addClassNames(lineawesomeClassnames);
+        }
+      }
+    }
 
-	}
+  }
 
-	private H1 viewTitle;
+  private H1 viewTitle;
 
-	private AuthenticatedUser authenticatedUser;
-	private AccessAnnotationChecker accessChecker;
-	private final UserService userService;
-	private final UserRepository userRepository;
+  private AuthenticatedUser authenticatedUser;
+  private AccessAnnotationChecker accessChecker;
+  private final UserService userService;
+  private final UserRepository userRepository;
 
-	public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker,
-			UserService userService, UserRepository userRepository) {
-		this.authenticatedUser = authenticatedUser;
-		this.accessChecker = accessChecker;
-		this.userService = userService;
-		this.userRepository = userRepository;
+  public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker, UserService userService,
+      UserRepository userRepository) {
+    this.authenticatedUser = authenticatedUser;
+    this.accessChecker = accessChecker;
+    this.userService = userService;
+    this.userRepository = userRepository;
 
-		setPrimarySection(Section.DRAWER);
-		// First parameter is touchOptimized. If true, navbar will show at the bottom in
-		// mobile views.
-		addToNavbar(false, createHeaderContent());
-		addToDrawer(createDrawerContent());
-	}
+    setPrimarySection(Section.DRAWER);
+    // First parameter is touchOptimized. If true, navbar will show at the bottom in
+    // mobile views.
+    addToNavbar(false, createHeaderContent());
+    addToDrawer(createDrawerContent());
+  }
 
-	private Component createHeaderContent() {
-		DrawerToggle toggle = new DrawerToggle();
-		toggle.addClassNames("view-toggle");
-		toggle.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
-		toggle.getElement().setAttribute("aria-label", "Menu toggle");
+  private Component createHeaderContent() {
+    DrawerToggle toggle = new DrawerToggle();
+    toggle.addClassNames("view-toggle");
+    toggle.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+    toggle.getElement().setAttribute("aria-label", "Menu toggle");
 
-		viewTitle = new H1();
-		viewTitle.addClassNames("view-title");
+    viewTitle = new H1();
+    viewTitle.addClassNames("view-title");
 
-		Header header = new Header(toggle, viewTitle);
-		header.addClassNames("view-header");
-		return header;
-	}
+    Header header = new Header(toggle, viewTitle);
+    header.addClassNames("view-header");
+    return header;
+  }
 
-	private Component createDrawerContent() {
-		H2 appName = new H2("Trampoline World");
-		appName.addClassNames("app-name");
+  private Component createDrawerContent() {
+    H2 appName = new H2("Trampoline World");
+    appName.addClassNames("app-name");
 
-		appName.addClickListener(e -> {
-			UI.getCurrent().navigate(TrampolineOrdersView.class);
-		});
+    appName.addClickListener(e -> {
+      UI.getCurrent().navigate(TrampolineOrdersView.class);
+    });
 
-		com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(appName,
-				createNavigation(), createFooter());
-		section.addClassNames("drawer-section");
-		return section;
-	}
+    com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(appName,
+        createNavigation(), createFooter());
+    section.addClassNames("drawer-section");
+    return section;
+  }
 
-	private Nav createNavigation() {
-		Nav nav = new Nav();
-		nav.addClassNames("menu-item-container");
-		nav.getElement().setAttribute("aria-labelledby", "views");
+  private Nav createNavigation() {
+    Nav nav = new Nav();
+    nav.addClassNames("menu-item-container");
+    nav.getElement().setAttribute("aria-labelledby", "views");
 
-		// Wrap the links in a list; improves accessibility
-		UnorderedList list = new UnorderedList();
-		list.addClassNames("navigation-list");
-		nav.add(list);
+    // Wrap the links in a list; improves accessibility
+    UnorderedList list = new UnorderedList();
+    list.addClassNames("navigation-list");
+    nav.add(list);
 
-		int count = 1;
-		for (MenuItemInfo menuItem : createMenuItems()) {
-			count ++;
-			if (accessChecker.hasAccess(menuItem.getView())) {
-				list.add(menuItem);
-				if (count == 4 || count == 9) {
-					list.add(new Hr());
-				}
-			}
+    int count = 1;
+    for (MenuItemInfo menuItem : createMenuItems()) {
+      count++;
+      if (accessChecker.hasAccess(menuItem.getView())) {
+        list.add(menuItem);
+        if (count == 4 || count == 9) {
+          list.add(new Hr());
+        }
+      }
 
-		}
-		return nav;
-	}
+    }
+    return nav;
+  }
 
-	private MenuItemInfo[] createMenuItems() {
+  private MenuItemInfo[] createMenuItems() {
 
-		return new MenuItemInfo[] { //
-				new MenuItemInfo("Trampoline Orders", "las la-clipboard-check", TrampolineOrdersView.class), //
-				new MenuItemInfo("Chat Room", "la la-comments", ChatView.class), //
-				new MenuItemInfo("Export PDF / CSV", "las la-file-pdf", ExportView.class), //
-//				new MenuItemInfo("", "", ChatView.class),
-				new MenuItemInfo("Account", "lar la-user", AccountView.class), //
-				new MenuItemInfo("Manage Users", "las la-users", ManageUsersView.class), //
-				new MenuItemInfo("Audit Log", "las la-database", AuditLogView.class), //
-				new MenuItemInfo("Order Archives", "las la-server", ArchivesView.class), //
-//				new MenuItemInfo("", "", ChatView.class),
-				new MenuItemInfo("User Guide", "las la-info-circle", UserGuideView.class), //
-				new MenuItemInfo("Debug Shell", "las la-bug", DebugView.class), //
-				new MenuItemInfo("Discord Integration", "lab la-discord", DiscordIntegrationView.class), //
-				new MenuItemInfo("Database Structure", "las la-project-diagram", SchemaView.class), //
-				new MenuItemInfo("Developer Contact", "las la-at", ContactView.class), //
-		};
-	}
-	
-	
-	private Footer createFooter() {
-		Footer layout = new Footer();
-		layout.addClassNames("footer");
+    return new MenuItemInfo[] { //
+        new MenuItemInfo("Trampoline Orders", "las la-clipboard-check", TrampolineOrdersView.class), //
+        new MenuItemInfo("Chat Room", "la la-comments", ChatView.class), //
+        new MenuItemInfo("Export PDF / CSV", "las la-file-pdf", ExportView.class), //
+//        new MenuItemInfo("", "", ChatView.class),
+        new MenuItemInfo("Account", "lar la-user", AccountView.class), //
+        new MenuItemInfo("Manage Users", "las la-users", ManageUsersView.class), //
+        new MenuItemInfo("Audit Log", "las la-database", AuditLogView.class), //
+        new MenuItemInfo("Order Archives", "las la-server", ArchivesView.class), //
+//        new MenuItemInfo("", "", ChatView.class),
+        new MenuItemInfo("User Guide", "las la-info-circle", UserGuideView.class), //
+        new MenuItemInfo("Debug Shell", "las la-bug", DebugView.class), //
+        new MenuItemInfo("Discord Integration", "lab la-discord", DiscordIntegrationView.class), //
+        new MenuItemInfo("Database Configuration", "las la-project-diagram", DatabaseConfigurationView.class), //
+        new MenuItemInfo("Developer Contact", "las la-at", ContactView.class), //
+    };
+  }
 
-		Optional<User> maybeUser = authenticatedUser.get();	
-		if (maybeUser.isPresent()) {
-			User user = maybeUser.get();
+  private Footer createFooter() {
+    Footer layout = new Footer();
+    layout.addClassNames("footer");
 
-			Avatar avatar = new Avatar(user.getDisplayName(), user.getProfilePictureUrl());
-			avatar.addClassNames("me-xs");
+    Optional<User> maybeUser = authenticatedUser.get();
+    if (maybeUser.isPresent()) {
+      User user = maybeUser.get();
 
-			ContextMenu userMenu = new ContextMenu(avatar);
-			userMenu.setOpenOnClick(true);
-			userMenu.addItem("Account", e -> {
-				UI.getCurrent().navigate(AccountView.class);
-			});
-			userMenu.addItem("Logout", e -> {
-				authenticatedUser.logout();
-			});
+      Avatar avatar = new Avatar(user.getDisplayName(), user.getProfilePictureUrl());
+      avatar.addClassNames("me-xs");
 
-			Span name = new Span(user.getDisplayName());
-			name.addClassNames("font-medium", "text-s", "text-secondary");
+      ContextMenu userMenu = new ContextMenu(avatar);
+      userMenu.setOpenOnClick(true);
+      userMenu.addItem("Account", e -> {
+        UI.getCurrent().navigate(AccountView.class);
+      });
+      userMenu.addItem("Logout", e -> {
+        authenticatedUser.logout();
+      });
 
-			layout.add(avatar, name);
-		} else {
-			Anchor loginLink = new Anchor("login", "Sign in");
-			layout.add(loginLink);
-		}
+      Span name = new Span(user.getDisplayName());
+      name.addClassNames("font-medium", "text-s", "text-secondary");
 
-		return layout;
-	}
+      layout.add(avatar, name);
+    } else {
+      Anchor loginLink = new Anchor("login", "Sign in");
+      layout.add(loginLink);
+    }
 
-	@Override
-	protected void afterNavigation() {
-		super.afterNavigation();
-		viewTitle.setText(getCurrentPageTitle());
-	}
+    return layout;
+  }
 
-	private String getCurrentPageTitle() {
-		PageTitle title = getContent().getClass().getAnnotation(PageTitle.class);
-		return title == null ? "" : title.value();
-	}
+  @Override
+  protected void afterNavigation() {
+    super.afterNavigation();
+    viewTitle.setText(getCurrentPageTitle());
+  }
+
+  private String getCurrentPageTitle() {
+    PageTitle title = getContent().getClass().getAnnotation(PageTitle.class);
+    return title == null ? "" : title.value();
+  }
 }

@@ -63,8 +63,8 @@ public class CustomMessageInput extends Composite<MessageInput>
         list.setSubmitter(activationContext -> {
             getContent().setEnabled(true);
             Registration registration = getContent().addSubmitListener(event -> {
-            	activationContext.appendMessage(event.getValue());
-            	sendDiscordWebhookMessage(webhookRepository, userInfo.getName(), userInfo.getImage(), event.getValue());
+              activationContext.appendMessage(event.getValue());
+              sendDiscordWebhookMessage(webhookRepository, userInfo.getName(), userInfo.getImage(), event.getValue());
             });
             return () -> {
                 registration.remove();
@@ -103,32 +103,32 @@ public class CustomMessageInput extends Composite<MessageInput>
     }
     
     public static void sendDiscordWebhookMessage(WebhookRepository webhookRepository, String username, String avatarURL, String message) {
-    	
-		String webhookURL = webhookRepository.findByWebhookName("Logs (Chat)").getWebhookUrl();
-		
-		// Trim leading & trailing whitespaces.
-		webhookURL = webhookURL.trim();
-		// Check for null or empty URL, if so - return, don't attempt to send.
-		if (webhookURL.isEmpty() || webhookURL == null || webhookURL.equals("") || webhookURL == "") {
-			System.out.println("URL is empty.");
-			return;
-		}
-		// Log output.
-		System.out.println("Attempting to send webhook message.");
-		System.out.println(webhookURL);    
-    	
-		// Create & send webhook.
-		DiscordWebhook webhook = new DiscordWebhook(webhookURL);
-    	webhook.setUsername(username);
-    	webhook.setAvatarUrl(avatarURL);
-    	webhook.setContent(message);
-    	webhook.setTts(false);
+      
+    String webhookURL = webhookRepository.findByWebhookName("Logs (Chat)").getWebhookUrl();
+    
+    // Trim leading & trailing whitespaces.
+    webhookURL = webhookURL.trim();
+    // Check for null or empty URL, if so - return, don't attempt to send.
+    if (webhookURL.isEmpty() || webhookURL == null || webhookURL.equals("") || webhookURL == "") {
+      System.out.println("URL is empty.");
+      return;
+    }
+    // Log output.
+    System.out.println("Attempting to send webhook message.");
+    System.out.println(webhookURL);    
+      
+    // Create & send webhook.
+    DiscordWebhook webhook = new DiscordWebhook(webhookURL);
+      webhook.setUsername(username);
+      webhook.setAvatarUrl(avatarURL);
+      webhook.setContent(message);
+      webhook.setTts(false);
 
-		try {
-			webhook.execute();
-		} catch (IOException e1) {
-			System.out.println(e1.toString());
-		}
+    try {
+      webhook.execute();
+    } catch (IOException e1) {
+      System.out.println(e1.toString());
+    }
     }     
 }
 

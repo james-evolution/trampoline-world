@@ -41,16 +41,16 @@ public class WebhookService {
     }
     
     public List<Webhook> findAll(String filterText) {
-    	if (filterText == null || filterText.isEmpty()) {
-    		return repository.findAll();
-    	}
-    	else {
-    		return repository.search(filterText);
-    	}
+      if (filterText == null || filterText.isEmpty()) {
+        return repository.findAll();
+      }
+      else {
+        return repository.search(filterText);
+      }
     }
     
     public List<Webhook> findAllNoFilter() {
- 		return repository.findAll();
+     return repository.findAll();
      }       
 
 }

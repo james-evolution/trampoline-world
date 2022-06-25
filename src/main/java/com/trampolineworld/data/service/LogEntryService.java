@@ -43,33 +43,33 @@ public class LogEntryService {
         return (int) repository.count();
     }
     
-	private class SortByTimestamp implements Comparator<LogEntry> {
-		// Sort by the most recent timestamp.
-		public int compare(LogEntry a, LogEntry b) {
-			return (int) (b.getTimestamp().compareTo(a.getTimestamp()));
-		}
-	}
-	
+  private class SortByTimestamp implements Comparator<LogEntry> {
+    // Sort by the most recent timestamp.
+    public int compare(LogEntry a, LogEntry b) {
+      return (int) (b.getTimestamp().compareTo(a.getTimestamp()));
+    }
+  }
+  
     public List<LogEntry> findAll(String filterText) {
-    	if (filterText == null || filterText.isEmpty()) {
-    		List<LogEntry> allLogs = repository.findAll();
-    		Collections.sort(allLogs, new SortByTimestamp());
-    		return allLogs;
-//    		return repository.findAll();
-    	}
-    	else {
-    		List<LogEntry> allFilteredLogs = repository.search(filterText);
-    		Collections.sort(allFilteredLogs, new SortByTimestamp());
-    		return allFilteredLogs;
-//    		return repository.search(filterText);
-    	}
+      if (filterText == null || filterText.isEmpty()) {
+        List<LogEntry> allLogs = repository.findAll();
+        Collections.sort(allLogs, new SortByTimestamp());
+        return allLogs;
+//        return repository.findAll();
+      }
+      else {
+        List<LogEntry> allFilteredLogs = repository.search(filterText);
+        Collections.sort(allFilteredLogs, new SortByTimestamp());
+        return allFilteredLogs;
+//        return repository.search(filterText);
+      }
     }
     
     public List<LogEntry> findAllNoFilter() {
-		List<LogEntry> allLogs = repository.findAll();
-		Collections.sort(allLogs, new SortByTimestamp());
-		return allLogs;
-// 		return repository.findAll();
+    List<LogEntry> allLogs = repository.findAll();
+    Collections.sort(allLogs, new SortByTimestamp());
+    return allLogs;
+//     return repository.findAll();
      }       
 
 }

@@ -11,18 +11,18 @@ import org.springframework.data.repository.query.Param;
 
 public interface LogEntryRepository extends JpaRepository<LogEntry, UUID> {
 
-	@Query(
-	"select logEntry from LogEntry logEntry " + 
-	"where logEntry.userId like concat('%', :filterText, '%')"
-	+ "or lower(logEntry.username) like lower(concat('%', :filterText, '%'))"
-	+ "or logEntry.targetUserId like concat('%', :filterText, '%')"
-	+ "or logEntry.targetOrderId like concat('%', :filterText, '%')"
-	+ "or lower(logEntry.actionCategory) like lower(concat('%', :filterText, '%'))"
-	)
-	
-	List<LogEntry> search(@Param("filterText") String filterText);
-	
-	LogEntry findByUserId(UUID userId);
+  @Query(
+  "select logEntry from LogEntry logEntry " + 
+  "where logEntry.userId like concat('%', :filterText, '%')"
+  + "or lower(logEntry.username) like lower(concat('%', :filterText, '%'))"
+  + "or logEntry.targetUserId like concat('%', :filterText, '%')"
+  + "or logEntry.targetOrderId like concat('%', :filterText, '%')"
+  + "or lower(logEntry.actionCategory) like lower(concat('%', :filterText, '%'))"
+  )
+  
+  List<LogEntry> search(@Param("filterText") String filterText);
+  
+  LogEntry findByUserId(UUID userId);
     LogEntry findByUsername(String username);
     LogEntry findByTargetUserId(UUID targetUserId);
     LogEntry findByTargetOrderId(Long targetOrderId);

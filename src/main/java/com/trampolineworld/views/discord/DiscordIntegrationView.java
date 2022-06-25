@@ -58,224 +58,235 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 @CssImport(value = "./themes/trampolineworld/views/dialog.css", themeFor = "vaadin-dialog-overlay")
 public class DiscordIntegrationView extends Div implements BeforeEnterObserver {
 
-	private WebhookRepository webhookRepository;
-	private WebhookService webhookService;
-	private Webhook currentWebhook;
-	private Grid<Webhook> grid;
-	private IFrame videoFrame = new IFrame();
-	private H2 titleDiscordIntegration = new H2("Discord Integration Settings");
-	private H2 titleCreatingWebhooks = new H2("Creating Webhooks");
-	private H2 titleWebhooks= new H2("Webhooks");
-	private H2 titleWebhookDescriptions = new H2("Webhook Descriptions");
-	private Button resetToDefaultsButton = new Button("Reset to Defaults");
-	
-	@Autowired
-	public DiscordIntegrationView(WebhookRepository webhookRepository, WebhookService webhookService) {
-		addClassNames("trampoline-orders-view");
-		this.webhookRepository = webhookRepository;
-		this.webhookService = webhookService;
-		
-		HorizontalLayout headerRow = new HorizontalLayout();
-		VerticalLayout verticalLayout = new VerticalLayout();
-		
-		HorizontalLayout descriptionRow = new HorizontalLayout();
-		descriptionRow.setAlignItems(Alignment.BASELINE);
+  private WebhookRepository webhookRepository;
+  private WebhookService webhookService;
+  private Webhook currentWebhook;
+  private Grid<Webhook> grid;
+  private IFrame videoFrame = new IFrame();
+  private H2 titleDiscordIntegration = new H2("Discord Integration Settings");
+  private H2 titleCreatingWebhooks = new H2("Creating Webhooks");
+  private H2 titleWebhooks = new H2("Webhooks");
+  private H2 titleWebhookDescriptions = new H2("Webhook Descriptions");
+  private Button resetToDefaultsButton = new Button("Reset to Defaults");
 
-		Paragraph descriptionParagraph = new Paragraph("An optional feature of this system is the ability to log certain data to Discord. Webhooks are the method by which we send that information."
-				+ "\nEvery time a webhook is created, it generates a URL. The webhook URL is what tells the data which channel to go to."
-				+ "\nTo disable logging, simply edit the webhook URL and save it as an empty field."
-				+ "\nAlternatively, if you wish to customize where this data is sent (such as ensuring it's sent to your own Discord server), you can quickly and easily create webhooks of your own."
-				+ "\nThen, simply replace these URLs with yours, and the data will be routed there in the future. A video guide on that process is below. (It's easier than it sounds!)");
-		
-		videoFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/134bgAV4l8k");
-		videoFrame.getElement().setAttribute("title", "YouTube video player");
-		videoFrame.getElement().setAttribute("frameborder", "0");
-		videoFrame.getElement().setAttribute("allow", "accelerometer");
-		videoFrame.getElement().setAttribute("autoplay", "true");
-		videoFrame.getElement().setAttribute("allowfullscreen", "true");
-		
-		UnorderedList webhookDescriptionsList = new UnorderedList(
-//				new ListItem("CE License Events: This is where license alerts are sent. In the event that our CollaborationEngine license needs to be renewed or upgraded, we'll be notified here."),
-				new ListItem("Logs (Audit): Just as every user action is logged in a database and displayed on the Audit Log page, it's also possible to have them logged to Discord, so we have a backup. This webhook specifies where those backup logs will be stored."),
-				new ListItem("Logs (Chat): At the moment, logs from the chat room are not persisted to a database (yet). They're stored in memory which only lasts as long as the server is running. If the server is rebooted, chat history is lost. A short term solution to this is to log messages to Discord, if you desire."),
-				new ListItem("Logs (UUIDs): This is where we log the universally unique identifiers (uuids) of new users. It's important to store these UIIDs so we don't lose them.")
-			);
-		
-		titleDiscordIntegration.getStyle().set("margin-top", "8px !important");
-		titleDiscordIntegration.getStyle().set("margin-bottom", "0px !important");
-		descriptionParagraph.getStyle().set("margin-bottom", "0px !important");
-		titleCreatingWebhooks.getStyle().set("margin-top", "8px !important");
-		
-		titleWebhooks.getStyle().set("margin-top", "8px !important");
-		
-		titleWebhookDescriptions.getStyle().set("margin-top", "8px !important");
-		titleWebhookDescriptions.getStyle().set("margin-bottom", "0px !important");
-		webhookDescriptionsList.getStyle().set("margin-top", "0px !important");
-		
-		verticalLayout.add(titleDiscordIntegration, descriptionParagraph, new Hr(), titleCreatingWebhooks, videoFrame, new Hr());
+  @Autowired
+  public DiscordIntegrationView(WebhookRepository webhookRepository, WebhookService webhookService) {
+    addClassNames("trampoline-orders-view");
+    this.webhookRepository = webhookRepository;
+    this.webhookService = webhookService;
 
-		// Create grid & editor.
-		grid = new Grid<>(Webhook.class, false);
-		grid.setColumnReorderingAllowed(true);
-		grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
-		grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
-		grid.addThemeVariants(GridVariant.LUMO_COMPACT);
-		Editor<Webhook> editor = grid.getEditor();
+    HorizontalLayout headerRow = new HorizontalLayout();
+    VerticalLayout verticalLayout = new VerticalLayout();
 
-		// Create columns.
-		Grid.Column<Webhook> webhookNameColumn = grid.addColumn(Webhook::getWebhookName).setHeader("Webhook Name")
-				.setAutoWidth(true).setFlexGrow(0).setResizable(true).setSortable(true);;
-		Grid.Column<Webhook> webhookUrlColumn = grid.addColumn(Webhook::getWebhookUrl).setHeader("Webhook URL")
-				.setAutoWidth(true).setFlexGrow(0).setResizable(true).setSortable(true);;
-				
-		// Create edit column & add edit button to it.
-		Grid.Column<Webhook> editColumn = grid.addComponentColumn(webhook -> {
-			Button editButton = new Button("Edit");
-			// Edit button click listener.
-			editButton.addClickListener(e -> {
-				currentWebhook = webhook;
-				if (editor.isOpen())
-					editor.cancel();
-				grid.getEditor().editItem(webhook);
-			});
-			editButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
-			return editButton;
-		}).setWidth("150px").setFlexGrow(0);
+    HorizontalLayout descriptionRow = new HorizontalLayout();
+    descriptionRow.setAlignItems(Alignment.BASELINE);
 
-		// Create data binder for the Webhook class, and bind to the editor.
-		Binder<Webhook> binder = new Binder<>(Webhook.class);
-		editor.setBinder(binder);
-		editor.setBuffered(true);
+    Paragraph descriptionParagraph = new Paragraph(
+        "An optional feature of this system is the ability to log certain data to Discord. Webhooks are the method by which we send that information."
+            + "\nEvery time a webhook is created, it generates a URL. The webhook URL is what tells the data which channel to go to."
+            + "\n\nTo disable logging, simply edit the webhook URL and save it as an empty field."
+            + "\n\nAlternatively, if you wish to customize where this data is sent (such as ensuring it's sent to your own Discord server), you can quickly and easily create webhooks of your own."
+            + " Then, simply replace these URLs with yours, and the data will be routed there in the future. A video guide on that process is below. (It's easier than it sounds!)"
+            + "\n\n(Estimated Setup Time: 2-5 minutes)");
 
-		TextField webhookUrlField = new TextField();
-		webhookUrlField.setWidthFull();
-		binder.forField(webhookUrlField).bind(Webhook::getWebhookUrl,
-				Webhook::setWebhookUrl);
-		webhookUrlColumn.setEditorComponent(webhookUrlField);
+    videoFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/134bgAV4l8k");
+    videoFrame.getElement().setAttribute("title", "YouTube video player");
+    videoFrame.getElement().setAttribute("frameborder", "0");
+    videoFrame.getElement().setAttribute("allow", "accelerometer");
+    videoFrame.getElement().setAttribute("autoplay", "true");
+    videoFrame.getElement().setAttribute("allowfullscreen", "true");
 
-		// Create buttons & add to a horizontal layout, then add that to the editor.
-		Button saveButton = new Button("Save", e -> {
-			try {
-				editor.save();
-				webhookService.update(currentWebhook);
-				Notification.show("Webhook updated!", 4000, Position.TOP_CENTER)
-				.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-			} 
-			catch (Exception exception) {
-				Notification.show("An error occurred.", 4000, Position.TOP_CENTER)
-				.addThemeVariants(NotificationVariant.LUMO_ERROR);
-			}
-		});
-		saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
-		resetToDefaultsButton.addClickListener(e -> {
-			try {
-				resetToDefaults();
-				Notification.show("Webhooks URLs reset to their default values.", 4000, Position.TOP_CENTER)
-				.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-			}
-			catch (Exception exception) {
-				Notification.show("An error occurred.", 4000, Position.TOP_CENTER)
-				.addThemeVariants(NotificationVariant.LUMO_ERROR);
-			}
-		});
-		resetToDefaultsButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+    UnorderedList webhookDescriptionsList = new UnorderedList(
+//        new ListItem("CE License Events: This is where license alerts are sent. In the event that our CollaborationEngine license needs to be renewed or upgraded, we'll be notified here."),
+        new ListItem(
+            "Logs (Audit): Just as every user action is logged in a database and displayed on the Audit Log page, it's also possible to have them logged to Discord, so we have a backup. This webhook specifies where those backup logs will be stored."),
+        new ListItem(
+            "Logs (Chat): At the moment, logs from the chat room are not persisted to a database (yet). They're stored in memory which only lasts as long as the server is running. If the server is rebooted, chat history is lost. A short term solution to this is to log messages to Discord, if you desire."),
+        new ListItem(
+            "Logs (UUIDs): This is where we log the universally unique identifiers (uuids) of new users. It's important to store these UIIDs so we don't lose them."));
 
-		Button cancelButton = new Button(VaadinIcon.CLOSE.create(), e -> editor.cancel());
-		cancelButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_ERROR);
-		HorizontalLayout actions = new HorizontalLayout(saveButton, cancelButton);
-		actions.setPadding(false);
-		editColumn.setEditorComponent(actions);
+    titleDiscordIntegration.getStyle().set("margin-top", "8px !important");
+    titleDiscordIntegration.getStyle().set("margin-bottom", "0px !important");
+    descriptionParagraph.getStyle().set("margin-bottom", "0px !important");
+    titleCreatingWebhooks.getStyle().set("margin-top", "8px !important");
 
-		editor.addCancelListener(e -> {
-			// Do nothing.
-		});
-		
-//		grid.setAllRowsVisible(true);
-		grid.setHeight("220px");
-		updateGrid();
-		
-		
-		verticalLayout.add(titleWebhooks, grid, resetToDefaultsButton, new Hr());
-		verticalLayout.add(titleWebhookDescriptions, webhookDescriptionsList);
-		headerRow.add(verticalLayout);
-		add(headerRow);
-	}
-	
-	// Sorts in descending alphabetical order, A first, Z last.
-	private class SortByName implements Comparator<Webhook> {
-		// Used for sorting in descending order of ID
-		public int compare(Webhook a, Webhook b) {
-			return (int) (a.getWebhookName().compareTo(b.getWebhookName()));
-		}
-	}
-	
+    titleWebhooks.getStyle().set("margin-top", "8px !important");
 
-	private void updateGrid() {
-		// Load webhooks from the database & set grid items.
-		List<Webhook> allWebhooks = webhookRepository.findAll();
-		List<Webhook> webhooksToDisplay = new ArrayList<Webhook>();
-		
-		for (Webhook webhook : allWebhooks) {
-			if (webhook.getWebhookName().equals("Developer Contact") || webhook.getWebhookName().equals("Logs (Debug)") || webhook.getWebhookName().equals("CE License Events")) {
-				// Do nothing. These are irrelevant to admins so they don't need to be displayed.
-				// Developer Contact webhook is what the contact page depends on.
-				// Debug Logs are obviously for the developer to debug things.
-			}
-			else {
-				webhooksToDisplay.add(webhook);
-			}
-		}
-		Collections.sort(webhooksToDisplay, new SortByName());
-		grid.setItems(webhooksToDisplay);
-	}
-	
-	public void resetToDefaults() {
-		webhookRepository.deleteAll();
-		
-    	// For contacting the developer on Discord via text-to-speech messages.
-    	Webhook contactWebhook = new Webhook();
-    	contactWebhook.setWebhookName("Developer Contact");
-    	contactWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/988724055765033000/tSmaOypQVKtCkDBzpWCLWIF-drMcLKun0Otjd0Rrt79evjno_4Bb9bxkYP86nK5F2-SP");
-    	webhookRepository.save(contactWebhook);
-    	
-    	// For notifying the developer of CollaborationEngine license events, as documented at https://vaadin.com/docs/latest/tools/ce/going-to-production
-    	Webhook licenseEventsWebhook = new Webhook();
-    	licenseEventsWebhook.setWebhookName("CE License Events");
-    	licenseEventsWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/988366724682379294/g20NbSzfeL_QrZhZVWt-2rJh4I6MmSU_FtkPNv-9qeYq1MHbs5TKsv1g2NkMq8TLYT9o");
-    	webhookRepository.save(licenseEventsWebhook);
-    	
-    	// For backing up the audit logs to Discord.
-    	Webhook auditLogWebhook = new Webhook();
-    	auditLogWebhook.setWebhookName("Logs (Audit)");
-    	auditLogWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/988942093059784734/AUdjyyXznFlN1T7IovybkPlu6h_HEdVK4gE80uTgvRiIKEg7UXrvQaHvLtbV66zuwFRY");
-    	webhookRepository.save(auditLogWebhook);
-    	
-    	// For persisting chat logs to Discord (optional - if Admins desire this)
-    	Webhook chatLogsWebhook = new Webhook();
-    	chatLogsWebhook.setWebhookName("Logs (Chat)");
-    	chatLogsWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/988770668554375240/r-W13i9JLGQxmvV-6UzLiPVtTCzKBzG_jNUaJiwUtislZ4t_7MqflRb3uPTW1A93SjDL");
-    	webhookRepository.save(chatLogsWebhook);
-    	
-    	// For logging the universally unique identifiers (UUIDS) of newly created users. This allows us to re-use them to avoid surpassing the 20 user CollaborationEngine monthly quota.
-    	Webhook userUuidWebhook = new Webhook();
-    	userUuidWebhook.setWebhookName("Logs (UUIDs)");
-    	userUuidWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/988570358691016784/MWE8EIOOh7-Eohofs0Dp6Wu6DiyEmr91hUcUXBMnyt6t0esLraN7XPTc-fKTNpfOjjvW");
-    	webhookRepository.save(userUuidWebhook);
+    titleWebhookDescriptions.getStyle().set("margin-top", "8px !important");
+    titleWebhookDescriptions.getStyle().set("margin-bottom", "0px !important");
+    webhookDescriptionsList.getStyle().set("margin-top", "0px !important");
 
-    	// For routing debug logs to Discord for developer usage.
-    	Webhook debugLogsWebhook = new Webhook();
-    	debugLogsWebhook.setWebhookName("Logs (Debug)");
-    	debugLogsWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/988568130093744218/xoLscoKMWCX3_7t63MESyA4FW3P_KSY6dlLB0hzYxbrqw6mTLlLsMXr7GlBbYd5rI3Ku");
-    	webhookRepository.save(debugLogsWebhook);
-    	
-    	updateGrid();
-	}
+    verticalLayout.add(titleDiscordIntegration, descriptionParagraph, new Hr(), titleCreatingWebhooks, videoFrame,
+        new Hr());
 
+    // Create grid & editor.
+    grid = new Grid<>(Webhook.class, false);
+    grid.setColumnReorderingAllowed(true);
+    grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
+    grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
+    grid.addThemeVariants(GridVariant.LUMO_COMPACT);
+    Editor<Webhook> editor = grid.getEditor();
 
-	@Override
-	public void beforeEnter(BeforeEnterEvent event) {
-		// TODO Auto-generated method stub
+    // Create columns.
+    Grid.Column<Webhook> webhookNameColumn = grid.addColumn(Webhook::getWebhookName).setHeader("Webhook Name")
+        .setAutoWidth(true).setFlexGrow(0).setResizable(true).setSortable(true);
+    ;
+    Grid.Column<Webhook> webhookUrlColumn = grid.addColumn(Webhook::getWebhookUrl).setHeader("Webhook URL")
+        .setAutoWidth(true).setFlexGrow(0).setResizable(true).setSortable(true);
+    ;
 
-	}
+    // Create edit column & add edit button to it.
+    Grid.Column<Webhook> editColumn = grid.addComponentColumn(webhook -> {
+      Button editButton = new Button("Edit");
+      // Edit button click listener.
+      editButton.addClickListener(e -> {
+        currentWebhook = webhook;
+        if (editor.isOpen())
+          editor.cancel();
+        grid.getEditor().editItem(webhook);
+      });
+      editButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+      return editButton;
+    }).setWidth("150px").setFlexGrow(0);
+
+    // Create data binder for the Webhook class, and bind to the editor.
+    Binder<Webhook> binder = new Binder<>(Webhook.class);
+    editor.setBinder(binder);
+    editor.setBuffered(true);
+
+    TextField webhookUrlField = new TextField();
+    webhookUrlField.setWidthFull();
+    binder.forField(webhookUrlField).bind(Webhook::getWebhookUrl, Webhook::setWebhookUrl);
+    webhookUrlColumn.setEditorComponent(webhookUrlField);
+
+    // Create buttons & add to a horizontal layout, then add that to the editor.
+    Button saveButton = new Button("Save", e -> {
+      try {
+        editor.save();
+        webhookService.update(currentWebhook);
+        Notification.show("Webhook updated!", 4000, Position.TOP_CENTER)
+            .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+      } catch (Exception exception) {
+        Notification.show("An error occurred.", 4000, Position.TOP_CENTER)
+            .addThemeVariants(NotificationVariant.LUMO_ERROR);
+      }
+    });
+    saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
+    resetToDefaultsButton.addClickListener(e -> {
+      try {
+        resetToDefaults();
+        Notification.show("Webhooks URLs reset to their default values.", 4000, Position.TOP_CENTER)
+            .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+      } catch (Exception exception) {
+        Notification.show("An error occurred.", 4000, Position.TOP_CENTER)
+            .addThemeVariants(NotificationVariant.LUMO_ERROR);
+      }
+    });
+    resetToDefaultsButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+
+    Button cancelButton = new Button(VaadinIcon.CLOSE.create(), e -> editor.cancel());
+    cancelButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_ERROR);
+    HorizontalLayout actions = new HorizontalLayout(saveButton, cancelButton);
+    actions.setPadding(false);
+    editColumn.setEditorComponent(actions);
+
+    editor.addCancelListener(e -> {
+      // Do nothing.
+    });
+
+//    grid.setAllRowsVisible(true);
+    grid.setHeight("220px");
+    updateGrid();
+
+    verticalLayout.add(titleWebhooks, grid, resetToDefaultsButton, new Hr());
+    verticalLayout.add(titleWebhookDescriptions, webhookDescriptionsList);
+    headerRow.add(verticalLayout);
+    add(headerRow);
+  }
+
+  // Sorts in descending alphabetical order, A first, Z last.
+  private class SortByName implements Comparator<Webhook> {
+    // Used for sorting in descending order of ID
+    public int compare(Webhook a, Webhook b) {
+      return (int) (a.getWebhookName().compareTo(b.getWebhookName()));
+    }
+  }
+
+  private void updateGrid() {
+    // Load webhooks from the database & set grid items.
+    List<Webhook> allWebhooks = webhookRepository.findAll();
+    List<Webhook> webhooksToDisplay = new ArrayList<Webhook>();
+
+    for (Webhook webhook : allWebhooks) {
+      if (webhook.getWebhookName().equals("Developer Contact") || webhook.getWebhookName().equals("Logs (Debug)")
+          || webhook.getWebhookName().equals("CE License Events")) {
+        // Do nothing. These are irrelevant to admins so they don't need to be
+        // displayed.
+        // Developer Contact webhook is what the contact page depends on.
+        // Debug Logs are obviously for the developer to debug things.
+      } else {
+        webhooksToDisplay.add(webhook);
+      }
+    }
+    Collections.sort(webhooksToDisplay, new SortByName());
+    grid.setItems(webhooksToDisplay);
+  }
+
+  public void resetToDefaults() {
+    webhookRepository.deleteAll();
+
+    // For contacting the developer on Discord via text-to-speech messages.
+    Webhook contactWebhook = new Webhook();
+    contactWebhook.setWebhookName("Developer Contact");
+    contactWebhook.setWebhookUrl(
+        "https://ptb.discord.com/api/webhooks/988724055765033000/tSmaOypQVKtCkDBzpWCLWIF-drMcLKun0Otjd0Rrt79evjno_4Bb9bxkYP86nK5F2-SP");
+    webhookRepository.save(contactWebhook);
+
+    // For notifying the developer of CollaborationEngine license events, as
+    // documented at https://vaadin.com/docs/latest/tools/ce/going-to-production
+    Webhook licenseEventsWebhook = new Webhook();
+    licenseEventsWebhook.setWebhookName("CE License Events");
+    licenseEventsWebhook.setWebhookUrl(
+        "https://ptb.discord.com/api/webhooks/988366724682379294/g20NbSzfeL_QrZhZVWt-2rJh4I6MmSU_FtkPNv-9qeYq1MHbs5TKsv1g2NkMq8TLYT9o");
+    webhookRepository.save(licenseEventsWebhook);
+
+    // For backing up the audit logs to Discord.
+    Webhook auditLogWebhook = new Webhook();
+    auditLogWebhook.setWebhookName("Logs (Audit)");
+    auditLogWebhook.setWebhookUrl(
+        "https://ptb.discord.com/api/webhooks/988942093059784734/AUdjyyXznFlN1T7IovybkPlu6h_HEdVK4gE80uTgvRiIKEg7UXrvQaHvLtbV66zuwFRY");
+    webhookRepository.save(auditLogWebhook);
+
+    // For persisting chat logs to Discord (optional - if Admins desire this)
+    Webhook chatLogsWebhook = new Webhook();
+    chatLogsWebhook.setWebhookName("Logs (Chat)");
+    chatLogsWebhook.setWebhookUrl(
+        "https://ptb.discord.com/api/webhooks/988770668554375240/r-W13i9JLGQxmvV-6UzLiPVtTCzKBzG_jNUaJiwUtislZ4t_7MqflRb3uPTW1A93SjDL");
+    webhookRepository.save(chatLogsWebhook);
+
+    // For logging the universally unique identifiers (UUIDS) of newly created
+    // users. This allows us to re-use them to avoid surpassing the 20 user
+    // CollaborationEngine monthly quota.
+    Webhook userUuidWebhook = new Webhook();
+    userUuidWebhook.setWebhookName("Logs (UUIDs)");
+    userUuidWebhook.setWebhookUrl(
+        "https://ptb.discord.com/api/webhooks/988570358691016784/MWE8EIOOh7-Eohofs0Dp6Wu6DiyEmr91hUcUXBMnyt6t0esLraN7XPTc-fKTNpfOjjvW");
+    webhookRepository.save(userUuidWebhook);
+
+    // For routing debug logs to Discord for developer usage.
+    Webhook debugLogsWebhook = new Webhook();
+    debugLogsWebhook.setWebhookName("Logs (Debug)");
+    debugLogsWebhook.setWebhookUrl(
+        "https://ptb.discord.com/api/webhooks/988568130093744218/xoLscoKMWCX3_7t63MESyA4FW3P_KSY6dlLB0hzYxbrqw6mTLlLsMXr7GlBbYd5rI3Ku");
+    webhookRepository.save(debugLogsWebhook);
+
+    updateGrid();
+  }
+
+  @Override
+  public void beforeEnter(BeforeEnterEvent event) {
+    // TODO Auto-generated method stub
+
+  }
 
 }

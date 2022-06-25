@@ -32,7 +32,7 @@ public class DataGenerator {
             
             // Check if the user database is NOT EMPTY.
             if (userRepository.count() != 0L) {
-            	// If not empty, use existing database.
+              // If not empty, use existing database.
                 logger.info("Using existing database");
 //                return; // Return to exit method.
             }
@@ -61,7 +61,7 @@ public class DataGenerator {
                 tech.setColorIndex(6);
                 tech.setHashedPassword(passwordEncoder.encode("stranger410"));
                 tech.setProfilePictureUrl(
-                		"https://static.wixstatic.com/media/759627_2ad5404df0dc4455af631dbeaf83e8bf~mv2.png/v1/fill/w_347,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/Trampoline-2.png");
+                    "https://static.wixstatic.com/media/759627_2ad5404df0dc4455af631dbeaf83e8bf~mv2.png/v1/fill/w_347,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/Trampoline-2.png");
                 tech.setRoles(Set.of(Role.ADMIN, Role.TECH));
                 userRepository.save(tech);
            
@@ -73,7 +73,7 @@ public class DataGenerator {
                 admin.setColorIndex(3);
                 admin.setHashedPassword(passwordEncoder.encode("ozzyandbear410"));
                 admin.setProfilePictureUrl(
-                		"https://static.wixstatic.com/media/759627_2ad5404df0dc4455af631dbeaf83e8bf~mv2.png/v1/fill/w_347,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/Trampoline-2.png");
+                    "https://static.wixstatic.com/media/759627_2ad5404df0dc4455af631dbeaf83e8bf~mv2.png/v1/fill/w_347,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/Trampoline-2.png");
                 admin.setRoles(Set.of(Role.ADMIN, Role.TECH));
                 userRepository.save(admin);
             }
@@ -81,46 +81,46 @@ public class DataGenerator {
             
             // Check if the webhook database is NOT EMPTY.
             if (webhookRepository.count() != 0L) {
-            	// If not empty, use existing database.
+              // If not empty, use existing database.
                 logger.info("Using existing database");
 //                return; // Return to exit method.
             }
             else {
-            	// For contacting the developer on Discord via text-to-speech messages.
-            	Webhook contactWebhook = new Webhook();
-            	contactWebhook.setWebhookName("Developer Contact");
-            	contactWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/988724055765033000/tSmaOypQVKtCkDBzpWCLWIF-drMcLKun0Otjd0Rrt79evjno_4Bb9bxkYP86nK5F2-SP");
-            	webhookRepository.save(contactWebhook);
-            	
-            	// For notifying the developer of CollaborationEngine license events, as documented at https://vaadin.com/docs/latest/tools/ce/going-to-production
-            	Webhook licenseEventsWebhook = new Webhook();
-            	licenseEventsWebhook.setWebhookName("CE License Events");
-            	licenseEventsWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/988366724682379294/g20NbSzfeL_QrZhZVWt-2rJh4I6MmSU_FtkPNv-9qeYq1MHbs5TKsv1g2NkMq8TLYT9o");
-            	webhookRepository.save(licenseEventsWebhook);
-            	
-            	// For backing up the audit logs to Discord.
-            	Webhook auditLogWebhook = new Webhook();
-            	auditLogWebhook.setWebhookName("Logs (Audit)");
-            	auditLogWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/988942093059784734/AUdjyyXznFlN1T7IovybkPlu6h_HEdVK4gE80uTgvRiIKEg7UXrvQaHvLtbV66zuwFRY");
-            	webhookRepository.save(auditLogWebhook);
-            	
-            	// For persisting chat logs to Discord (optional - if Admins desire this)
-            	Webhook chatLogsWebhook = new Webhook();
-            	chatLogsWebhook.setWebhookName("Logs (Chat)");
-            	chatLogsWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/988770668554375240/r-W13i9JLGQxmvV-6UzLiPVtTCzKBzG_jNUaJiwUtislZ4t_7MqflRb3uPTW1A93SjDL");
-            	webhookRepository.save(chatLogsWebhook);
+              // For contacting the developer on Discord via text-to-speech messages.
+              Webhook contactWebhook = new Webhook();
+              contactWebhook.setWebhookName("Developer Contact");
+              contactWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/988724055765033000/tSmaOypQVKtCkDBzpWCLWIF-drMcLKun0Otjd0Rrt79evjno_4Bb9bxkYP86nK5F2-SP");
+              webhookRepository.save(contactWebhook);
+              
+              // For notifying the developer of CollaborationEngine license events, as documented at https://vaadin.com/docs/latest/tools/ce/going-to-production
+              Webhook licenseEventsWebhook = new Webhook();
+              licenseEventsWebhook.setWebhookName("CE License Events");
+              licenseEventsWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/988366724682379294/g20NbSzfeL_QrZhZVWt-2rJh4I6MmSU_FtkPNv-9qeYq1MHbs5TKsv1g2NkMq8TLYT9o");
+              webhookRepository.save(licenseEventsWebhook);
+              
+              // For backing up the audit logs to Discord.
+              Webhook auditLogWebhook = new Webhook();
+              auditLogWebhook.setWebhookName("Logs (Audit)");
+              auditLogWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/988942093059784734/AUdjyyXznFlN1T7IovybkPlu6h_HEdVK4gE80uTgvRiIKEg7UXrvQaHvLtbV66zuwFRY");
+              webhookRepository.save(auditLogWebhook);
+              
+              // For persisting chat logs to Discord (optional - if Admins desire this)
+              Webhook chatLogsWebhook = new Webhook();
+              chatLogsWebhook.setWebhookName("Logs (Chat)");
+              chatLogsWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/988770668554375240/r-W13i9JLGQxmvV-6UzLiPVtTCzKBzG_jNUaJiwUtislZ4t_7MqflRb3uPTW1A93SjDL");
+              webhookRepository.save(chatLogsWebhook);
 
-            	// For logging the universally unique identifiers (UUIDS) of newly created users. This allows us to re-use them to avoid surpassing the 20 user CollaborationEngine monthly quota.
-            	Webhook userUuidWebhook = new Webhook();
-            	userUuidWebhook.setWebhookName("Logs (UUIDs)");
-            	userUuidWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/988570358691016784/MWE8EIOOh7-Eohofs0Dp6Wu6DiyEmr91hUcUXBMnyt6t0esLraN7XPTc-fKTNpfOjjvW");
-            	webhookRepository.save(userUuidWebhook);
-            	
-            	// For routing debug logs to Discord for developer usage.
-            	Webhook debugLogsWebhook = new Webhook();
-            	debugLogsWebhook.setWebhookName("Logs (Debug)");
-            	debugLogsWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/988568130093744218/xoLscoKMWCX3_7t63MESyA4FW3P_KSY6dlLB0hzYxbrqw6mTLlLsMXr7GlBbYd5rI3Ku");
-            	webhookRepository.save(debugLogsWebhook);
+              // For logging the universally unique identifiers (UUIDS) of newly created users. This allows us to re-use them to avoid surpassing the 20 user CollaborationEngine monthly quota.
+              Webhook userUuidWebhook = new Webhook();
+              userUuidWebhook.setWebhookName("Logs (UUIDs)");
+              userUuidWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/988570358691016784/MWE8EIOOh7-Eohofs0Dp6Wu6DiyEmr91hUcUXBMnyt6t0esLraN7XPTc-fKTNpfOjjvW");
+              webhookRepository.save(userUuidWebhook);
+              
+              // For routing debug logs to Discord for developer usage.
+              Webhook debugLogsWebhook = new Webhook();
+              debugLogsWebhook.setWebhookName("Logs (Debug)");
+              debugLogsWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/988568130093744218/xoLscoKMWCX3_7t63MESyA4FW3P_KSY6dlLB0hzYxbrqw6mTLlLsMXr7GlBbYd5rI3Ku");
+              webhookRepository.save(debugLogsWebhook);
             }
         };
     }

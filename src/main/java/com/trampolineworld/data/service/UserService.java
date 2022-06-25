@@ -42,16 +42,16 @@ public class UserService {
     }
     
     public List<User> findAll(String filterText) {
-    	if (filterText == null || filterText.isEmpty()) {
-    		return repository.findAll();
-    	}
-    	else {
-    		return repository.search(filterText);
-    	}
+      if (filterText == null || filterText.isEmpty()) {
+        return repository.findAll();
+      }
+      else {
+        return repository.search(filterText);
+      }
     }
     
     public List<User> findAllNoFilter() {
- 		return repository.findAll();
+     return repository.findAll();
      }       
 
 }

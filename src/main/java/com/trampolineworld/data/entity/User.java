@@ -33,12 +33,12 @@ public class User extends AbstractEntityUUID {
     public void setUsername(String username) {
         this.username = username;
     }
-	public String getDisplayName() {
-		return displayName;
-	}
-	public void setDisplayName(String displayName) {
-		this.displayName = displayName;
-	}    
+  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
+  }    
     public String getHashedPassword() {
         return hashedPassword;
     }
@@ -57,16 +57,16 @@ public class User extends AbstractEntityUUID {
     public void setProfilePictureUrl(String profilePictureUrl) {
         this.profilePictureUrl = profilePictureUrl;
     }
-	public String getEmail() {
-		return email;
-	}
-	public void setEmail(String email) {
-		this.email = email;
-	}
-	public Integer getColorIndex() {
-		return colorIndex;
-	}
-	public void setColorIndex(Integer colorIndex) {
-		this.colorIndex = colorIndex;
-	}
+  public String getEmail() {
+    return email;
+  }
+  public void setEmail(String email) {
+    this.email = email;
+  }
+  public Integer getColorIndex() {
+    return colorIndex;
+  }
+  public void setColorIndex(Integer colorIndex) {
+    this.colorIndex = colorIndex;
+  }
 }
