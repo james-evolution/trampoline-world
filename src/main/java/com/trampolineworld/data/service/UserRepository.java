@@ -18,5 +18,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
   )
   List<User> search(@Param("filterText") String filterText);
   
-    User findByUsername(String username);
+  User findByUsername(String username);
 }

@@ -56,21 +56,23 @@ public class CustomMessageInput extends Composite<MessageInput>
      *            the list which will display the submitted messages, not null
      * @param userInfo 
      */
-    public CustomMessageInput(CollaborationMessageList list, UserInfo userInfo, WebhookRepository webhookRepository) {
+    public CustomMessageInput(CollaborationMessageList list) {
         Objects.requireNonNull(list,
                 "A list instance to connect this component to is required");
-        getContent().setEnabled(false);
-        list.setSubmitter(activationContext -> {
-            getContent().setEnabled(true);
-            Registration registration = getContent().addSubmitListener(event -> {
-              activationContext.appendMessage(event.getValue());
-              sendDiscordWebhookMessage(webhookRepository, userInfo.getName(), userInfo.getImage(), event.getValue());
-            });
-            return () -> {
-                registration.remove();
-                getContent().setEnabled(false);
-            };
-        });
+        getContent().setEnabled(true);
+//        getContent().setEnabled(false);
+        
+//        list.setSubmitter(activationContext -> {
+//            getContent().setEnabled(true);
+//            Registration registration = getContent().addSubmitListener(event -> {
+////              activationContext.appendMessage(event.getValue()); // No need for this anymore. Message gets posted through the manager.
+//            });
+//            return () -> {
+//                registration.remove();
+//                getContent().setEnabled(false);
+//            };
+//        });
+//        
     }
 
     /**

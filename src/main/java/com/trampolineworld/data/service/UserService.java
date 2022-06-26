@@ -52,6 +52,11 @@ public class UserService {
     
     public List<User> findAllNoFilter() {
      return repository.findAll();
-     }       
+     }
+
+    public Optional<User> findById(String id) {
+      UUID uuid = UUID.fromString(id);
+      return repository.findById(uuid);
+    }       
 
 }
