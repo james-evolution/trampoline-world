@@ -114,7 +114,7 @@ CREATE TABLE webhooks (
 While the above script should create the necessary schema automatically, if you wish to do it by hand, the database structure is outlined below.
 
 
-[<img src="https://faintdev.net/trampolineworld/Layout.svg">]
+
 
 
 ##Tables
