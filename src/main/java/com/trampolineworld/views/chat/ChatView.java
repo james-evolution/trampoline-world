@@ -12,10 +12,8 @@ import com.trampolineworld.utilities.DiscordWebhook;
 import com.trampolineworld.utilities.MessagePersister;
 import com.trampolineworld.views.MainLayout;
 import com.vaadin.collaborationengine.CollaborationAvatarGroup;
-import com.vaadin.collaborationengine.CollaborationMessage;
 import com.vaadin.collaborationengine.CollaborationMessageList;
 import com.vaadin.collaborationengine.UserInfo;
-import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
@@ -45,6 +43,10 @@ public class ChatView extends VerticalLayout implements BeforeEnterObserver {
   private UserInfo userInfo;
   private String currentTopic = "chat/#general";
   private static UserInfo loggedUserInfo;
+  
+  private MessageManager messageManagerGeneral;
+  private MessageManager messageManagerNotes;
+  private MessageManager messageManagerIssues;
 
   public ChatView(UserService userService, UserRepository userRepository, WebhookRepository webhookRepository,
       MessageService messageService, MessageRepository messageRepository) {
@@ -56,65 +58,53 @@ public class ChatView extends VerticalLayout implements BeforeEnterObserver {
     addClassName("chat-view");
     setSpacing(false);
 
-    // Gets currently logged in user.
+    // Gets the currently logged in user.
     String currentUsername = VaadinRequest.getCurrent().getUserPrincipal().getName();
     User currentUser = userRepository.findByUsername(currentUsername);
 
-    // UserInfo is used by Collaboration Engine and is used to share details
-    // of users to each other to able collaboration. Replace this with
-    // information about the actual user that is logged, providing a user
-    // identifier, and the user's real name. You can also provide the users
-    // avatar by passing an url to the image as a third parameter, or by
-    // configuring an `ImageProvider` to `avatarGroup`.
-    userInfo = new UserInfo(currentUser.getId().toString(), currentUser.getDisplayName());
-    userInfo.setImage(currentUser.getProfilePictureUrl());
+    // Create the user info object and avatar group to display which users are currently viewing the chat.
+    userInfo = new UserInfo(currentUser.getId().toString(), currentUser.getDisplayName(), currentUser.getProfilePictureUrl());
     userInfo.setColorIndex(currentUser.getColorIndex());
     avatarGroup = new CollaborationAvatarGroup(userInfo, null);
     avatarGroup.getStyle().set("visibility", "visible");
+    avatarGroup.getStyle().set("margin-bottom", "10px");
 
     // Tabs allow us to change chat rooms.
     Tabs tabs = new Tabs(new Tab("#general"), new Tab("#notes"), new Tab("#issues"));
     tabs.setWidthFull();
 
-    // `CollaborationMessageList` displays messages that are in a
-    // Collaboration Engine topic. You should give in the user details of
-    // the current user using the component, and a topic Id. Topic id can be
-    // any freeform string. In this template, we have used the format
-    // "chat/#general". Check
-    // https://vaadin.com/docs/latest/ce/collaboration-message-list/#persisting-messages
-    // for information on how to persisting are retrieving messages over
-    // server restarts.
+    // Create the message list & set the initial topic.
     list = new CollaborationMessageList(userInfo, "chat/#general");
-    list.setWidthFull();
     list.addClassNames("chat-view-message-list");
+    list.setWidthFull();
 
-    // MessageService messageService, MessageRepository messageRepository,
-    // UserService userService
-    MessageManager messageManager = createManagerWithPersister(
-        new MessagePersister(messageService, messageRepository, userService));
-
-    messageManager.setMessageHandler(context -> {
-      CollaborationMessage message = context.getMessage();
-      UserInfo user = message.getUser();
-    });
-
-    // `CollaborationMessageInput is a textfield and button, to be able to
-    // submit new messages. To avoid having to set the same info into both
-    // the message list and message input, the input takes in the list as an
-    // constructor argument to get the information from there.
-
-    // JAMES CUSTOM MESSAGE INPUT
+    createMessageManagersWithPersisters();
+    
+    
+    // JAMES' CUSTOM MESSAGE INPUT. This component is both a text field & a button.
     CustomMessageInput input = new CustomMessageInput(list);
     input.addClassNames("chat-view-message-input");
     input.setWidthFull();
     input.getContent().addSubmitListener(event -> {
       String message = event.getValue();
-      messageManager.submit(message);
+      
+      if (currentTopic.equals("chat/#general")) {
+        messageManagerGeneral.submit(message);
+        System.out.println("Trying to store a general message");
+      }
+      else if (currentTopic.equals("chat/#notes")) {
+        System.out.println("Trying to store a note");
+        messageManagerNotes.submit(message);
+      }
+      else if (currentTopic.equals("chat/#issues")) {
+        messageManagerIssues.submit(message);
+        System.out.println("Trying to store an issue");
+      }
 //      sendDiscordWebhookMessage(webhookRepository, userInfo.getName(), userInfo.getImage(), message);
     });
 
     // Add components to layout.
-    add(avatarGroup, new Paragraph(), tabs, list, input);
+    add(avatarGroup, tabs, list, input);
     setSizeFull();
     expand(list);
 
@@ -125,24 +115,25 @@ public class ChatView extends VerticalLayout implements BeforeEnterObserver {
       currentTopic = "chat/" + channelName;
     });
   }
-
-  public MessageManager createManagerWithPersister(MessagePersister persister) {
-//    UserInfo localUser = new UserInfo("john");
-//    String topicId = "chat/#general";
-    return new MessageManager(this, userInfo, currentTopic, persister);
+  
+  /*
+   * The Message Manager will not only persist chat logs to the database
+   * but it will also post the messages to the message list.
+   */
+  public void createMessageManagersWithPersisters() {
+     messageManagerGeneral = new MessageManager(this, userInfo, "chat/#general", new MessagePersister(messageService, messageRepository, userService));
+     messageManagerNotes = new MessageManager(this, userInfo, "chat/#notes", new MessagePersister(messageService, messageRepository, userService));
+     messageManagerIssues = new MessageManager(this, userInfo, "chat/#issues", new MessagePersister(messageService, messageRepository, userService));
   }
 
   @Override
   public void beforeEnter(BeforeEnterEvent event) {
-    // TODO Auto-generated method stub
     avatarGroup.setTopic("chat/" + channelName);
   }
 
   public static void sendDiscordWebhookMessage(WebhookRepository webhookRepository, String username, String avatarURL,
       String message) {
-
     String webhookURL = webhookRepository.findByWebhookName("Logs (Chat)").getWebhookUrl();
-
     // Trim leading & trailing whitespaces.
     webhookURL = webhookURL.trim();
     // Check for null or empty URL, if so - return, don't attempt to send.
@@ -153,14 +144,12 @@ public class ChatView extends VerticalLayout implements BeforeEnterObserver {
     // Log output.
     System.out.println("Attempting to send webhook message.");
     System.out.println(webhookURL);
-
     // Create & send webhook.
     DiscordWebhook webhook = new DiscordWebhook(webhookURL);
     webhook.setUsername(username);
     webhook.setAvatarUrl(avatarURL);
     webhook.setContent(message);
     webhook.setTts(false);
-
     try {
       webhook.execute();
     } catch (IOException e1) {

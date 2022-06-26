@@ -12,10 +12,8 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
 
   @Query(
   "select m from Message m " + 
-  "where lower(m.topic) like lower(concat('%', :filterText, '%')) "
-  + "or lower(m.text) like lower(concat('%', :filterText, '%'))"
-  + "or lower(m.authorId) like lower(concat('%', :filterText, '%'))"
+  "where lower(m.topic) like lower(concat('%', :topic, '%')) "
   )
   
-  List<Message> search(@Param("filterText") String filterText);
+  List<Message> search(@Param("topic") String filterText);
 }
