@@ -113,99 +113,97 @@ CREATE TABLE webhooks (
 ## Database Structure
 While the above script should create the necessary schema automatically, if you wish to do it by hand, the database structure is outlined below.
 
-
-
-
+[<img src="https://faintdev.net/trampolineworld/tw_layout.svg">]
 
 ##Tables
 
-1. [faintdev_trampolineworld.application_user](#faintdev_trampolineworld.application_user) 2. [faintdev_trampolineworld.audit_logs](#faintdev_trampolineworld.audit_logs) 3. [faintdev_trampolineworld.chat_logs](#faintdev_trampolineworld.chat_logs) 4. [faintdev_trampolineworld.trampoline_order](#faintdev_trampolineworld.trampoline_order) 5. [faintdev_trampolineworld.user_roles](#faintdev_trampolineworld.user_roles) 6. [faintdev_trampolineworld.webhooks](#faintdev_trampolineworld.webhooks) 
+1. [trampolineworld.application_user](#trampolineworld.application_user) 2. [trampolineworld.audit_logs](#trampolineworld.audit_logs) 3. [trampolineworld.chat_logs](#trampolineworld.chat_logs) 4. [trampolineworld.trampoline_order](#trampolineworld.trampoline_order) 5. [trampolineworld.user_roles](#trampolineworld.user_roles) 6. [trampolineworld.webhooks](#trampolineworld.webhooks) 
 
-### Table faintdev_trampolineworld.application_user 
+### Table trampolineworld.application_user 
 | Idx | Field Name | Data Type |
 |---|---|---|
-| *🔑 | <a name='faintdev_trampolineworld.application_user_id'>id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT '' |
-|  | <a name='faintdev_trampolineworld.application_user_username'>username</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
-|  | <a name='faintdev_trampolineworld.application_user_display_name'>display&#95;name</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
-|  | <a name='faintdev_trampolineworld.application_user_email'>email</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
-|  | <a name='faintdev_trampolineworld.application_user_hashed_password'>hashed&#95;password</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
-|  | <a name='faintdev_trampolineworld.application_user_roles'>roles</a>| SET&#40;&#39;Value A&#39;&#44;&#39;Value B&#39;&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
-|  | <a name='faintdev_trampolineworld.application_user_profile_picture_url'>profile&#95;picture&#95;url</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
-| *| <a name='faintdev_trampolineworld.application_user_color_index'>color&#95;index</a>| INT  DEFAULT '0' |
+| *🔑 | <a name='trampolineworld.application_user_id'>id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT '' |
+|  | <a name='trampolineworld.application_user_username'>username</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
+|  | <a name='trampolineworld.application_user_display_name'>display&#95;name</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
+|  | <a name='trampolineworld.application_user_email'>email</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
+|  | <a name='trampolineworld.application_user_hashed_password'>hashed&#95;password</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
+|  | <a name='trampolineworld.application_user_roles'>roles</a>| SET&#40;&#39;Value A&#39;&#44;&#39;Value B&#39;&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
+|  | <a name='trampolineworld.application_user_profile_picture_url'>profile&#95;picture&#95;url</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
+| *| <a name='trampolineworld.application_user_color_index'>color&#95;index</a>| INT  DEFAULT '0' |
 | Indexes |
 | 🔑 | pk&#95;application&#95;user || ON id|
 | Options |
 | ENGINE&#61;InnoDB DEFAULT CHARSET&#61;utf8 COLLATE&#61;utf8&#95;unicode&#95;ci |
 
 
-### Table faintdev_trampolineworld.audit_logs 
+### Table trampolineworld.audit_logs 
 | Idx | Field Name | Data Type |
 |---|---|---|
-| *🔑 | <a name='faintdev_trampolineworld.audit_logs_id'>id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci |
-| *| <a name='faintdev_trampolineworld.audit_logs_user_id'>user&#95;id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci |
-| *| <a name='faintdev_trampolineworld.audit_logs_username'>username</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci |
-|  | <a name='faintdev_trampolineworld.audit_logs_target_user_id'>target&#95;user&#95;id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
-|  | <a name='faintdev_trampolineworld.audit_logs_target_order_id'>target&#95;order&#95;id</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
-|  | <a name='faintdev_trampolineworld.audit_logs_customer_name'>customer&#95;name</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
-|  | <a name='faintdev_trampolineworld.audit_logs_action_category'>action&#95;category</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
-|  | <a name='faintdev_trampolineworld.audit_logs_action_details'>action&#95;details</a>| TEXT COLLATE utf8&#95;unicode&#95;ci |
-| *| <a name='faintdev_trampolineworld.audit_logs_timestamp'>timestamp</a>| TIMESTAMP  DEFAULT CURRENT_TIMESTAMP |
+| *🔑 | <a name='trampolineworld.audit_logs_id'>id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci |
+| *| <a name='trampolineworld.audit_logs_user_id'>user&#95;id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci |
+| *| <a name='trampolineworld.audit_logs_username'>username</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci |
+|  | <a name='trampolineworld.audit_logs_target_user_id'>target&#95;user&#95;id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
+|  | <a name='trampolineworld.audit_logs_target_order_id'>target&#95;order&#95;id</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
+|  | <a name='trampolineworld.audit_logs_customer_name'>customer&#95;name</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
+|  | <a name='trampolineworld.audit_logs_action_category'>action&#95;category</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
+|  | <a name='trampolineworld.audit_logs_action_details'>action&#95;details</a>| TEXT COLLATE utf8&#95;unicode&#95;ci |
+| *| <a name='trampolineworld.audit_logs_timestamp'>timestamp</a>| TIMESTAMP  DEFAULT CURRENT_TIMESTAMP |
 | Indexes |
 | 🔑 | pk&#95;audit&#95;logs || ON id|
 | Options |
 | ENGINE&#61;InnoDB DEFAULT CHARSET&#61;utf8 COLLATE&#61;utf8&#95;unicode&#95;ci |
 
 
-### Table faintdev_trampolineworld.chat_logs 
+### Table trampolineworld.chat_logs 
 | Idx | Field Name | Data Type |
 |---|---|---|
-| *| <a name='faintdev_trampolineworld.chat_logs_topic'>topic</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci |
-| *| <a name='faintdev_trampolineworld.chat_logs_text'>text</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci |
-| *| <a name='faintdev_trampolineworld.chat_logs_author_id'>author&#95;id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci |
-| *| <a name='faintdev_trampolineworld.chat_logs_timestamp'>timestamp</a>| TIMESTAMP ON UPDATE CURRENT&#95;TIMESTAMP DEFAULT CURRENT_TIMESTAMP |
-| *🔑 | <a name='faintdev_trampolineworld.chat_logs_id'>id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci |
+| *| <a name='trampolineworld.chat_logs_topic'>topic</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci |
+| *| <a name='trampolineworld.chat_logs_text'>text</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci |
+| *| <a name='trampolineworld.chat_logs_author_id'>author&#95;id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci |
+| *| <a name='trampolineworld.chat_logs_timestamp'>timestamp</a>| TIMESTAMP ON UPDATE CURRENT&#95;TIMESTAMP DEFAULT CURRENT_TIMESTAMP |
+| *🔑 | <a name='trampolineworld.chat_logs_id'>id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci |
 | Indexes |
 | 🔑 | pk&#95;chat&#95;logs || ON id|
 | Options |
 | ENGINE&#61;InnoDB DEFAULT CHARSET&#61;utf8 COLLATE&#61;utf8&#95;unicode&#95;ci |
 
 
-### Table faintdev_trampolineworld.trampoline_order 
+### Table trampolineworld.trampoline_order 
 | Idx | Field Name | Data Type |
 |---|---|---|
-| *🔑 | <a name='faintdev_trampolineworld.trampoline_order_id'>id</a>| BIGINT AUTO_INCREMENT |
-|  | <a name='faintdev_trampolineworld.trampoline_order_complete'>complete</a>| TINYINT  DEFAULT NULL |
-|  | <a name='faintdev_trampolineworld.trampoline_order_first_name'>first&#95;name</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
-|  | <a name='faintdev_trampolineworld.trampoline_order_last_name'>last&#95;name</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
-|  | <a name='faintdev_trampolineworld.trampoline_order_phone_number'>phone&#95;number</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
-|  | <a name='faintdev_trampolineworld.trampoline_order_email'>email</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
-|  | <a name='faintdev_trampolineworld.trampoline_order_order_description'>order&#95;description</a>| TEXT COLLATE utf8&#95;unicode&#95;ci |
-|  | <a name='faintdev_trampolineworld.trampoline_order_measurements'>measurements</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
-|  | <a name='faintdev_trampolineworld.trampoline_order_subtotal'>subtotal</a>| DOUBLE  DEFAULT NULL |
-|  | <a name='faintdev_trampolineworld.trampoline_order_total'>total</a>| DOUBLE  DEFAULT NULL |
-|  | <a name='faintdev_trampolineworld.trampoline_order_date'>date</a>| DATE  DEFAULT NULL |
-|  | <a name='faintdev_trampolineworld.trampoline_order_deleted'>deleted</a>| TINYINT  DEFAULT '0' |
+| *🔑 | <a name='trampolineworld.trampoline_order_id'>id</a>| BIGINT AUTO_INCREMENT |
+|  | <a name='trampolineworld.trampoline_order_complete'>complete</a>| TINYINT  DEFAULT NULL |
+|  | <a name='trampolineworld.trampoline_order_first_name'>first&#95;name</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
+|  | <a name='trampolineworld.trampoline_order_last_name'>last&#95;name</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
+|  | <a name='trampolineworld.trampoline_order_phone_number'>phone&#95;number</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
+|  | <a name='trampolineworld.trampoline_order_email'>email</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
+|  | <a name='trampolineworld.trampoline_order_order_description'>order&#95;description</a>| TEXT COLLATE utf8&#95;unicode&#95;ci |
+|  | <a name='trampolineworld.trampoline_order_measurements'>measurements</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
+|  | <a name='trampolineworld.trampoline_order_subtotal'>subtotal</a>| DOUBLE  DEFAULT NULL |
+|  | <a name='trampolineworld.trampoline_order_total'>total</a>| DOUBLE  DEFAULT NULL |
+|  | <a name='trampolineworld.trampoline_order_date'>date</a>| DATE  DEFAULT NULL |
+|  | <a name='trampolineworld.trampoline_order_deleted'>deleted</a>| TINYINT  DEFAULT '0' |
 | Indexes |
 | 🔑 | pk&#95;trampoline&#95;order || ON id|
 | Options |
 | ENGINE&#61;InnoDB AUTO&#95;INCREMENT&#61;70039 DEFAULT CHARSET&#61;utf8 COLLATE&#61;utf8&#95;unicode&#95;ci |
 
 
-### Table faintdev_trampolineworld.user_roles 
+### Table trampolineworld.user_roles 
 | Idx | Field Name | Data Type |
 |---|---|---|
-|  | <a name='faintdev_trampolineworld.user_roles_user_id'>user&#95;id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
-|  | <a name='faintdev_trampolineworld.user_roles_roles'>roles</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
+|  | <a name='trampolineworld.user_roles_user_id'>user&#95;id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
+|  | <a name='trampolineworld.user_roles_roles'>roles</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
 | Options |
 | ENGINE&#61;InnoDB DEFAULT CHARSET&#61;utf8 COLLATE&#61;utf8&#95;unicode&#95;ci |
 
 
-### Table faintdev_trampolineworld.webhooks 
+### Table trampolineworld.webhooks 
 | Idx | Field Name | Data Type |
 |---|---|---|
-| *🔑 | <a name='faintdev_trampolineworld.webhooks_id'>id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci |
-| *| <a name='faintdev_trampolineworld.webhooks_webhook_name'>webhook&#95;name</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci |
-| *| <a name='faintdev_trampolineworld.webhooks_webhook_url'>webhook&#95;url</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci |
+| *🔑 | <a name='trampolineworld.webhooks_id'>id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci |
+| *| <a name='trampolineworld.webhooks_webhook_name'>webhook&#95;name</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci |
+| *| <a name='trampolineworld.webhooks_webhook_url'>webhook&#95;url</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci |
 | Indexes |
 | 🔑 | pk&#95;webhooks || ON id|
 | Options |
