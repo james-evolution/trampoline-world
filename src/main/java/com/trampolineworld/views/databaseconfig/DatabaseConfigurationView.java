@@ -40,7 +40,7 @@ import com.trampolineworld.views.schema.SchemaView;
 
 @Route(value = "database", layout = MainLayout.class)
 @PageTitle("Database Configuration")
-@JavaScript("/js/script.js")
+@JavaScript("./js/script.js")
 //@CssImport("./styles/views/view_order/single-order-view.css")
 //@RouteAlias(value = "", layout = MainLayout.class)
 @CssImport(themeFor = "vaadin-horizontal-layout", value = "./themes/trampolineworld/views/userguide-theme.css")
@@ -75,43 +75,65 @@ public class DatabaseConfigurationView extends HorizontalLayout {
   IFrame tutorialVideo = new IFrame();
 
   Button sqlCopyButton = new Button("Copy SQL Script");
-  private String sqlStatement = ("CREATE SCHEMA trampolineworld;\r\n" + "\r\n" + "CREATE TABLE application_user ( \r\n"
-      + "  id                   VARCHAR(200)  NOT NULL DEFAULT ''   PRIMARY KEY,\r\n"
-      + "  username             VARCHAR(255)   DEFAULT NULL   ,\r\n"
-      + "  display_name         VARCHAR(255)   DEFAULT NULL   ,\r\n"
-      + "  email                VARCHAR(255)   DEFAULT NULL   ,\r\n"
-      + "  hashed_password      VARCHAR(255)   DEFAULT NULL   ,\r\n"
-      + "  roles                SET('Value A','Value B')   DEFAULT NULL   ,\r\n"
-      + "  profile_picture_url  VARCHAR(255)   DEFAULT NULL   ,\r\n"
-      + "  color_index          INT  NOT NULL DEFAULT '0'   \r\n"
-      + " ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;\r\n" + "\r\n" + "CREATE TABLE audit_logs ( \r\n"
+  private String sqlStatement = ("CREATE SCHEMA trampolineworld;\r\n"
+      + "\r\n"
+      + "CREATE TABLE application_user ( \r\n"
+      + "  id                   VARCHAR(200)  NOT NULL DEFAULT ('')   PRIMARY KEY,\r\n"
+      + "  username             VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
+      + "  display_name         VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
+      + "  email                VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
+      + "  hashed_password      VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
+      + "  roles                SET('Value A','Value B')   DEFAULT (NULL)   ,\r\n"
+      + "  profile_picture_url  VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
+      + "  color_index          INT  NOT NULL DEFAULT ('0')   \r\n"
+      + " ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;\r\n"
+      + "\r\n"
+      + "CREATE TABLE audit_logs ( \r\n"
       + "  id                   VARCHAR(200)  NOT NULL    PRIMARY KEY,\r\n"
       + "  user_id              VARCHAR(200)  NOT NULL    ,\r\n"
       + "  username             VARCHAR(255)  NOT NULL    ,\r\n"
-      + "  target_user_id       VARCHAR(200)   DEFAULT NULL   ,\r\n"
-      + "  target_order_id      VARCHAR(255)   DEFAULT NULL   ,\r\n"
-      + "  customer_name        VARCHAR(255)   DEFAULT NULL   ,\r\n"
-      + "  action_category      VARCHAR(255)   DEFAULT NULL   ,\r\n" + "  action_details       TEXT      ,\r\n"
-      + "  timestamp            TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP   \r\n"
-      + " ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;\r\n" + "\r\n"
+      + "  target_user_id       VARCHAR(200)   DEFAULT (NULL)   ,\r\n"
+      + "  target_order_id      VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
+      + "  customer_name        VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
+      + "  action_category      VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
+      + "  action_details       TEXT      ,\r\n"
+      + "  timestamp            TIMESTAMP  NOT NULL DEFAULT (CURRENT_TIMESTAMP)   \r\n"
+      + " ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;\r\n"
+      + "\r\n"
+      + "CREATE TABLE chat_logs ( \r\n"
+      + "  id                   VARCHAR(200)  NOT NULL    PRIMARY KEY,\r\n"
+      + "  topic                VARCHAR(255)  NOT NULL    ,\r\n"
+      + "  `text`               VARCHAR(255)  NOT NULL    ,\r\n"
+      + "  author_id            VARCHAR(200)  NOT NULL    ,\r\n"
+      + "  timestamp            TIMESTAMP  NOT NULL DEFAULT (CURRENT_TIMESTAMP)   \r\n"
+      + " ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;\r\n"
+      + "\r\n"
       + "CREATE TABLE trampoline_order ( \r\n"
       + "  id                   BIGINT  NOT NULL  AUTO_INCREMENT  PRIMARY KEY,\r\n"
-      + "  complete             TINYINT   DEFAULT NULL   ,\r\n"
-      + "  first_name           VARCHAR(255)   DEFAULT NULL   ,\r\n"
-      + "  last_name            VARCHAR(255)   DEFAULT NULL   ,\r\n"
-      + "  phone_number         VARCHAR(255)   DEFAULT NULL   ,\r\n"
-      + "  email                VARCHAR(255)   DEFAULT NULL   ,\r\n" + "  order_description    TEXT      ,\r\n"
-      + "  measurements         VARCHAR(255)   DEFAULT NULL   ,\r\n"
-      + "  subtotal             DOUBLE   DEFAULT NULL   ,\r\n" + "  total                DOUBLE   DEFAULT NULL   ,\r\n"
-      + "  `date`               DATE   DEFAULT NULL   ,\r\n" + "  deleted              TINYINT   DEFAULT '0'   \r\n"
-      + " ) ENGINE=InnoDB AUTO_INCREMENT=70039 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;\r\n" + "\r\n"
-      + "CREATE TABLE user_roles ( \r\n" + "  user_id              VARCHAR(200)   DEFAULT NULL   ,\r\n"
-      + "  roles                VARCHAR(255)   DEFAULT NULL   \r\n"
-      + " ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;\r\n" + "\r\n" + "CREATE TABLE webhooks ( \r\n"
+      + "  complete             TINYINT   DEFAULT (NULL)   ,\r\n"
+      + "  first_name           VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
+      + "  last_name            VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
+      + "  phone_number         VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
+      + "  email                VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
+      + "  order_description    TEXT      ,\r\n"
+      + "  measurements         VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
+      + "  subtotal             DOUBLE   DEFAULT (NULL)   ,\r\n"
+      + "  total                DOUBLE   DEFAULT (NULL)   ,\r\n"
+      + "  `date`               DATE   DEFAULT (NULL)   ,\r\n"
+      + "  deleted              TINYINT   DEFAULT ('0')   \r\n"
+      + " ) ENGINE=InnoDB AUTO_INCREMENT=70039 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;\r\n"
+      + "\r\n"
+      + "CREATE TABLE user_roles ( \r\n"
+      + "  user_id              VARCHAR(200)   DEFAULT (NULL)   ,\r\n"
+      + "  roles                VARCHAR(255)   DEFAULT (NULL)   \r\n"
+      + " ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;\r\n"
+      + "\r\n"
+      + "CREATE TABLE webhooks ( \r\n"
       + "  id                   VARCHAR(200)  NOT NULL    PRIMARY KEY,\r\n"
       + "  webhook_name         VARCHAR(255)  NOT NULL    ,\r\n"
       + "  webhook_url          VARCHAR(255)  NOT NULL    \r\n"
-      + " ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;\r\n" + "");
+      + " ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;\r\n"
+      + "");
 
   public DatabaseConfigurationView() {
     // Configure parent layout.
@@ -174,7 +196,7 @@ public class DatabaseConfigurationView extends HorizontalLayout {
     // Video here.
 
     Paragraph sqlInstructions = new Paragraph(
-        "While it's entirely possible to recreate the schema by hand in a visual database editor (such as DbSchema or phpMyAdmin), the easiest way to create the schema is by executing a simple SQL script. The script below, if executed in a MySQL database, will automatically create the schema you need as well as all five tables that this system runs on.");
+        "While it's entirely possible to recreate the schema by hand in a visual database editor (such as DbSchema or phpMyAdmin), the easiest way to create the schema is by executing a simple SQL script. The script below, if executed in a MySQL database, will automatically create the schema you need as well as all six tables that this system runs on.");
 
     sqlGenerateSchema.setValue(sqlStatement);
     sqlGenerateSchema.setWidthFull();

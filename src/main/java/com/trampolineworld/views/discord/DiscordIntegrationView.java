@@ -9,13 +9,10 @@ import javax.annotation.security.RolesAllowed;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.trampolineworld.data.entity.TrampolineOrder;
 import com.trampolineworld.data.entity.Webhook;
 import com.trampolineworld.data.service.WebhookRepository;
 import com.trampolineworld.data.service.WebhookService;
 import com.trampolineworld.views.MainLayout;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -24,7 +21,6 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.IFrame;
@@ -37,12 +33,9 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
@@ -56,7 +49,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 @CssImport(themeFor = "vaadin-vertical-layout", value = "./themes/trampolineworld/views/userguide-theme.css")
 @CssImport(themeFor = "vaadin-scroller", value = "./themes/trampolineworld/views/userguide-theme.css")
 @CssImport(value = "./themes/trampolineworld/views/dialog.css", themeFor = "vaadin-dialog-overlay")
-public class DiscordIntegrationView extends Div implements BeforeEnterObserver {
+public class DiscordIntegrationView extends Div {
 
   private WebhookRepository webhookRepository;
   private WebhookService webhookService;
@@ -74,6 +67,7 @@ public class DiscordIntegrationView extends Div implements BeforeEnterObserver {
     addClassNames("trampoline-orders-view");
     this.webhookRepository = webhookRepository;
     this.webhookService = webhookService;
+    this.setWidthFull();
 
     HorizontalLayout headerRow = new HorizontalLayout();
     VerticalLayout verticalLayout = new VerticalLayout();
@@ -100,8 +94,9 @@ public class DiscordIntegrationView extends Div implements BeforeEnterObserver {
 //        new ListItem("CE License Events: This is where license alerts are sent. In the event that our CollaborationEngine license needs to be renewed or upgraded, we'll be notified here."),
         new ListItem(
             "Logs (Audit): Just as every user action is logged in a database and displayed on the Audit Log page, it's also possible to have them logged to Discord, so we have a backup. This webhook specifies where those backup logs will be stored."),
-        new ListItem(
-            "Logs (Chat): At the moment, logs from the chat room are not persisted to a database (yet). They're stored in memory which only lasts as long as the server is running. If the server is rebooted, chat history is lost. A short term solution to this is to log messages to Discord, if you desire."),
+        new ListItem("Logs (Chat #general): Logs from the #general chat channel are sent via this webhook."),
+        new ListItem("Logs (Chat #notes): Logs from the #notes chat channel are sent via this webhook."),
+        new ListItem("Logs (Chat #issues): Logs from the #issues chat channel are sent via this webhook."),
         new ListItem(
             "Logs (UUIDs): This is where we log the universally unique identifiers (uuids) of new users. It's important to store these UIIDs so we don't lose them."));
 
@@ -147,7 +142,7 @@ public class DiscordIntegrationView extends Div implements BeforeEnterObserver {
       });
       editButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
       return editButton;
-    }).setWidth("150px").setFlexGrow(0);
+    }).setWidth("100px").setFlexGrow(0);
 
     // Create data binder for the Webhook class, and bind to the editor.
     Binder<Webhook> binder = new Binder<>(Webhook.class);
@@ -155,7 +150,7 @@ public class DiscordIntegrationView extends Div implements BeforeEnterObserver {
     editor.setBuffered(true);
 
     TextField webhookUrlField = new TextField();
-    webhookUrlField.setWidthFull();
+//    webhookUrlField.setWidthFull();
     binder.forField(webhookUrlField).bind(Webhook::getWebhookUrl, Webhook::setWebhookUrl);
     webhookUrlColumn.setEditorComponent(webhookUrlField);
 
@@ -195,9 +190,12 @@ public class DiscordIntegrationView extends Div implements BeforeEnterObserver {
     });
 
 //    grid.setAllRowsVisible(true);
-    grid.setHeight("220px");
+    grid.setHeight("330px");
+//    grid.setWidth("470px");
+    grid.getStyle().set("resize", "horizontal");
+    grid.getStyle().set("overflow", "auto");
     updateGrid();
-
+    
     verticalLayout.add(titleWebhooks, grid, resetToDefaultsButton, new Hr());
     verticalLayout.add(titleWebhookDescriptions, webhookDescriptionsList);
     headerRow.add(verticalLayout);
@@ -258,11 +256,25 @@ public class DiscordIntegrationView extends Div implements BeforeEnterObserver {
     webhookRepository.save(auditLogWebhook);
 
     // For persisting chat logs to Discord (optional - if Admins desire this)
-    Webhook chatLogsWebhook = new Webhook();
-    chatLogsWebhook.setWebhookName("Logs (Chat)");
-    chatLogsWebhook.setWebhookUrl(
-        "https://ptb.discord.com/api/webhooks/988770668554375240/r-W13i9JLGQxmvV-6UzLiPVtTCzKBzG_jNUaJiwUtislZ4t_7MqflRb3uPTW1A93SjDL");
-    webhookRepository.save(chatLogsWebhook);
+    Webhook chatLogsGeneralWebhook = new Webhook();
+    chatLogsGeneralWebhook.setWebhookName("Logs (Chat #general)");
+    chatLogsGeneralWebhook.setWebhookUrl(
+        "https://ptb.discord.com/api/webhooks/990505609147338773/Mc95ah2V7y_FRxTpRbuafOyZ8cPFwYtsi5hjC0ZCJXJYcU8H_v_VMKImAxWyI39XCbxI");
+    webhookRepository.save(chatLogsGeneralWebhook);
+
+    // For persisting chat logs to Discord (optional - if Admins desire this)
+    Webhook chatLogsNotesWebhook = new Webhook();
+    chatLogsNotesWebhook.setWebhookName("Logs (Chat #notes)");
+    chatLogsNotesWebhook.setWebhookUrl(
+        "https://ptb.discord.com/api/webhooks/990507943042625576/jHMaf8WyhW7pt6--bJ1Svj1j60bFtQDKWxJKBJhc260OZg_pRjlHfMg5Gm6Ufvku9D0c");
+    webhookRepository.save(chatLogsNotesWebhook);
+
+    // For persisting chat logs to Discord (optional - if Admins desire this)
+    Webhook chatLogsIssuesWebhook = new Webhook();
+    chatLogsIssuesWebhook.setWebhookName("Logs (Chat #issues)");
+    chatLogsIssuesWebhook.setWebhookUrl(
+        "https://ptb.discord.com/api/webhooks/990508043160678460/RvEZrMfakiqBMRq1xRYEjyYCtR3-quSPSUGIWhIBF9meBgiw7o7K7TfbBn47vxN1ivHg");
+    webhookRepository.save(chatLogsIssuesWebhook);
 
     // For logging the universally unique identifiers (UUIDS) of newly created
     // users. This allows us to re-use them to avoid surpassing the 20 user
@@ -282,11 +294,4 @@ public class DiscordIntegrationView extends Div implements BeforeEnterObserver {
 
     updateGrid();
   }
-
-  @Override
-  public void beforeEnter(BeforeEnterEvent event) {
-    // TODO Auto-generated method stub
-
-  }
-
 }

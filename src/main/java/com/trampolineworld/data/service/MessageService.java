@@ -89,5 +89,4 @@ public class MessageService {
       Stream<Message> messageStream = filteredMessages.stream();
       return messageStream;
     }
-
 }

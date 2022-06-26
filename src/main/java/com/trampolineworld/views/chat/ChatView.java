@@ -80,7 +80,6 @@ public class ChatView extends VerticalLayout implements BeforeEnterObserver {
 
     createMessageManagersWithPersisters();
     
-    
     // JAMES' CUSTOM MESSAGE INPUT. This component is both a text field & a button.
     CustomMessageInput input = new CustomMessageInput(list);
     input.addClassNames("chat-view-message-input");
@@ -100,7 +99,7 @@ public class ChatView extends VerticalLayout implements BeforeEnterObserver {
         messageManagerIssues.submit(message);
         System.out.println("Trying to store an issue");
       }
-//      sendDiscordWebhookMessage(webhookRepository, userInfo.getName(), userInfo.getImage(), message);
+      sendDiscordWebhookMessage(webhookRepository, userInfo.getName(), userInfo.getImage(), message);
     });
 
     // Add components to layout.
@@ -131,9 +130,21 @@ public class ChatView extends VerticalLayout implements BeforeEnterObserver {
     avatarGroup.setTopic("chat/" + channelName);
   }
 
-  public static void sendDiscordWebhookMessage(WebhookRepository webhookRepository, String username, String avatarURL,
+  public void sendDiscordWebhookMessage(WebhookRepository webhookRepository, String username, String avatarURL,
       String message) {
-    String webhookURL = webhookRepository.findByWebhookName("Logs (Chat)").getWebhookUrl();
+    
+    String webhookURL = "";
+    
+    if (currentTopic.equals("chat/#general")) {
+      webhookURL = webhookRepository.findByWebhookName("Logs (Chat #general)").getWebhookUrl();
+    }
+    else if (currentTopic.equals("chat/#notes")) {
+      webhookURL = webhookRepository.findByWebhookName("Logs (Chat #notes)").getWebhookUrl();
+    }
+    else if (currentTopic.equals("chat/#issues")) {
+      webhookURL = webhookRepository.findByWebhookName("Logs (Chat #issues)").getWebhookUrl();
+    }
+    
     // Trim leading & trailing whitespaces.
     webhookURL = webhookURL.trim();
     // Check for null or empty URL, if so - return, don't attempt to send.

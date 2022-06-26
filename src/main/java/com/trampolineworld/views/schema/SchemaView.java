@@ -97,7 +97,7 @@ public class SchemaView extends HorizontalLayout {
 
   private void configureSchemaFrame() {
     schemaFrame = new IFrame();
-    schemaFrame.setSrc("https://faintdev.net/trampolineworld/schema.html");
+    schemaFrame.setSrc("https://faintdev.net/trampolineworld/schema3.html");
     schemaFrame.getStyle().set("width", "100% !important");
     schemaFrame.getStyle().set("height", "100% !important");
     schemaFrame.getStyle().set("box-shadow", "none !important");
