@@ -52,46 +52,54 @@ The following SQL script can be executed in any MySQL database to rebuild the sc
 CREATE SCHEMA trampolineworld;
 
 CREATE TABLE application_user ( 
-  id                   VARCHAR(200)  NOT NULL DEFAULT ''   PRIMARY KEY,
-  username             VARCHAR(255)   DEFAULT NULL   ,
-  display_name         VARCHAR(255)   DEFAULT NULL   ,
-  email                VARCHAR(255)   DEFAULT NULL   ,
-  hashed_password      VARCHAR(255)   DEFAULT NULL   ,
-  roles                SET('Value A','Value B')   DEFAULT NULL   ,
-  profile_picture_url  VARCHAR(255)   DEFAULT NULL   ,
-  color_index          INT  NOT NULL DEFAULT '0'   
+  id                   VARCHAR(200)  NOT NULL DEFAULT ('')   PRIMARY KEY,
+  username             VARCHAR(255)   DEFAULT (NULL)   ,
+  display_name         VARCHAR(255)   DEFAULT (NULL)   ,
+  email                VARCHAR(255)   DEFAULT (NULL)   ,
+  hashed_password      VARCHAR(255)   DEFAULT (NULL)   ,
+  roles                SET('Value A','Value B')   DEFAULT (NULL)   ,
+  profile_picture_url  VARCHAR(255)   DEFAULT (NULL)   ,
+  color_index          INT  NOT NULL DEFAULT ('0')   
  ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE audit_logs ( 
   id                   VARCHAR(200)  NOT NULL    PRIMARY KEY,
   user_id              VARCHAR(200)  NOT NULL    ,
   username             VARCHAR(255)  NOT NULL    ,
-  target_user_id       VARCHAR(200)   DEFAULT NULL   ,
-  target_order_id      VARCHAR(255)   DEFAULT NULL   ,
-  customer_name        VARCHAR(255)   DEFAULT NULL   ,
-  action_category      VARCHAR(255)   DEFAULT NULL   ,
+  target_user_id       VARCHAR(200)   DEFAULT (NULL)   ,
+  target_order_id      VARCHAR(255)   DEFAULT (NULL)   ,
+  customer_name        VARCHAR(255)   DEFAULT (NULL)   ,
+  action_category      VARCHAR(255)   DEFAULT (NULL)   ,
   action_details       TEXT      ,
-  timestamp            TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP   
+  timestamp            TIMESTAMP  NOT NULL DEFAULT (CURRENT_TIMESTAMP)   
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE chat_logs ( 
+  id                   VARCHAR(200)  NOT NULL    PRIMARY KEY,
+  topic                VARCHAR(255)  NOT NULL    ,
+  `text`               VARCHAR(255)  NOT NULL    ,
+  author_id            VARCHAR(200)  NOT NULL    ,
+  timestamp            TIMESTAMP  NOT NULL DEFAULT (CURRENT_TIMESTAMP)   
  ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE trampoline_order ( 
   id                   BIGINT  NOT NULL  AUTO_INCREMENT  PRIMARY KEY,
-  complete             TINYINT   DEFAULT NULL   ,
-  first_name           VARCHAR(255)   DEFAULT NULL   ,
-  last_name            VARCHAR(255)   DEFAULT NULL   ,
-  phone_number         VARCHAR(255)   DEFAULT NULL   ,
-  email                VARCHAR(255)   DEFAULT NULL   ,
+  complete             TINYINT   DEFAULT (NULL)   ,
+  first_name           VARCHAR(255)   DEFAULT (NULL)   ,
+  last_name            VARCHAR(255)   DEFAULT (NULL)   ,
+  phone_number         VARCHAR(255)   DEFAULT (NULL)   ,
+  email                VARCHAR(255)   DEFAULT (NULL)   ,
   order_description    TEXT      ,
-  measurements         VARCHAR(255)   DEFAULT NULL   ,
-  subtotal             DOUBLE   DEFAULT NULL   ,
-  total                DOUBLE   DEFAULT NULL   ,
-  `date`               DATE   DEFAULT NULL   ,
-  deleted              TINYINT   DEFAULT '0'   
+  measurements         VARCHAR(255)   DEFAULT (NULL)   ,
+  subtotal             DOUBLE   DEFAULT (NULL)   ,
+  total                DOUBLE   DEFAULT (NULL)   ,
+  `date`               DATE   DEFAULT (NULL)   ,
+  deleted              TINYINT   DEFAULT ('0')   
  ) ENGINE=InnoDB AUTO_INCREMENT=70039 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE user_roles ( 
-  user_id              VARCHAR(200)   DEFAULT NULL   ,
-  roles                VARCHAR(255)   DEFAULT NULL   
+  user_id              VARCHAR(200)   DEFAULT (NULL)   ,
+  roles                VARCHAR(255)   DEFAULT (NULL)   
  ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE webhooks ( 
@@ -99,16 +107,21 @@ CREATE TABLE webhooks (
   webhook_name         VARCHAR(255)  NOT NULL    ,
   webhook_url          VARCHAR(255)  NOT NULL    
  ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 ```
 
-# Database Structure
+## Database Structure
 While the above script should create the necessary schema automatically, if you wish to do it by hand, the database structure is outlined below.
 
-## Tables
 
-1. [faintdev_trampolineworld.application_user](#faintdev_trampolineworld.application_user) 2. [faintdev_trampolineworld.audit_logs](#faintdev_trampolineworld.audit_logs) 3. [faintdev_trampolineworld.trampoline_order](#faintdev_trampolineworld.trampoline_order) 4. [faintdev_trampolineworld.user_roles](#faintdev_trampolineworld.user_roles) 5. [faintdev_trampolineworld.webhooks](#faintdev_trampolineworld.webhooks) 
+[<img src="https://faintdev.net/trampolineworld/Layout.svg">]
 
-### Table application_user 
+
+##Tables
+
+1. [faintdev_trampolineworld.application_user](#faintdev_trampolineworld.application_user) 2. [faintdev_trampolineworld.audit_logs](#faintdev_trampolineworld.audit_logs) 3. [faintdev_trampolineworld.chat_logs](#faintdev_trampolineworld.chat_logs) 4. [faintdev_trampolineworld.trampoline_order](#faintdev_trampolineworld.trampoline_order) 5. [faintdev_trampolineworld.user_roles](#faintdev_trampolineworld.user_roles) 6. [faintdev_trampolineworld.webhooks](#faintdev_trampolineworld.webhooks) 
+
+### Table faintdev_trampolineworld.application_user 
 | Idx | Field Name | Data Type |
 |---|---|---|
 | *🔑 | <a name='faintdev_trampolineworld.application_user_id'>id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT '' |
@@ -125,7 +138,7 @@ While the above script should create the necessary schema automatically, if you 
 | ENGINE&#61;InnoDB DEFAULT CHARSET&#61;utf8 COLLATE&#61;utf8&#95;unicode&#95;ci |
 
 
-### Table audit_logs 
+### Table faintdev_trampolineworld.audit_logs 
 | Idx | Field Name | Data Type |
 |---|---|---|
 | *🔑 | <a name='faintdev_trampolineworld.audit_logs_id'>id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci |
@@ -143,7 +156,21 @@ While the above script should create the necessary schema automatically, if you 
 | ENGINE&#61;InnoDB DEFAULT CHARSET&#61;utf8 COLLATE&#61;utf8&#95;unicode&#95;ci |
 
 
-### Table trampoline_order 
+### Table faintdev_trampolineworld.chat_logs 
+| Idx | Field Name | Data Type |
+|---|---|---|
+| *| <a name='faintdev_trampolineworld.chat_logs_topic'>topic</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci |
+| *| <a name='faintdev_trampolineworld.chat_logs_text'>text</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci |
+| *| <a name='faintdev_trampolineworld.chat_logs_author_id'>author&#95;id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci |
+| *| <a name='faintdev_trampolineworld.chat_logs_timestamp'>timestamp</a>| TIMESTAMP ON UPDATE CURRENT&#95;TIMESTAMP DEFAULT CURRENT_TIMESTAMP |
+| *🔑 | <a name='faintdev_trampolineworld.chat_logs_id'>id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci |
+| Indexes |
+| 🔑 | pk&#95;chat&#95;logs || ON id|
+| Options |
+| ENGINE&#61;InnoDB DEFAULT CHARSET&#61;utf8 COLLATE&#61;utf8&#95;unicode&#95;ci |
+
+
+### Table faintdev_trampolineworld.trampoline_order 
 | Idx | Field Name | Data Type |
 |---|---|---|
 | *🔑 | <a name='faintdev_trampolineworld.trampoline_order_id'>id</a>| BIGINT AUTO_INCREMENT |
@@ -164,7 +191,7 @@ While the above script should create the necessary schema automatically, if you 
 | ENGINE&#61;InnoDB AUTO&#95;INCREMENT&#61;70039 DEFAULT CHARSET&#61;utf8 COLLATE&#61;utf8&#95;unicode&#95;ci |
 
 
-### Table user_roles 
+### Table faintdev_trampolineworld.user_roles 
 | Idx | Field Name | Data Type |
 |---|---|---|
 |  | <a name='faintdev_trampolineworld.user_roles_user_id'>user&#95;id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
@@ -173,7 +200,7 @@ While the above script should create the necessary schema automatically, if you 
 | ENGINE&#61;InnoDB DEFAULT CHARSET&#61;utf8 COLLATE&#61;utf8&#95;unicode&#95;ci |
 
 
-### Table webhooks 
+### Table faintdev_trampolineworld.webhooks 
 | Idx | Field Name | Data Type |
 |---|---|---|
 | *🔑 | <a name='faintdev_trampolineworld.webhooks_id'>id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci |
@@ -183,6 +210,10 @@ While the above script should create the necessary schema automatically, if you 
 | 🔑 | pk&#95;webhooks || ON id|
 | Options |
 | ENGINE&#61;InnoDB DEFAULT CHARSET&#61;utf8 COLLATE&#61;utf8&#95;unicode&#95;ci |
+
+
+
+
 
 ## Collaboration Engine & The Universal License File
 
