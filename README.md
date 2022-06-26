@@ -113,9 +113,9 @@ CREATE TABLE webhooks (
 ## Database Structure
 While the above script should create the necessary schema automatically, if you wish to do it by hand, the database structure is outlined below.
 
-[<img src="https://faintdev.net/trampolineworld/tw_layout.svg">]
+<img src="https://faintdev.net/trampolineworld/tw_layout.svg">
 
-##Tables
+## Tables
 
 1. [trampolineworld.application_user](#trampolineworld.application_user) 2. [trampolineworld.audit_logs](#trampolineworld.audit_logs) 3. [trampolineworld.chat_logs](#trampolineworld.chat_logs) 4. [trampolineworld.trampoline_order](#trampolineworld.trampoline_order) 5. [trampolineworld.user_roles](#trampolineworld.user_roles) 6. [trampolineworld.webhooks](#trampolineworld.webhooks) 
 
