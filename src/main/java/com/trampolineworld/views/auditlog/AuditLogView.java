@@ -155,6 +155,8 @@ public class AuditLogView extends Div implements BeforeEnterObserver {
       badge.getElement().getThemeList().add("badge success pill");
     } else if (actionCategory.equals("Edited User")) {
       badge.getElement().getThemeList().add("badge pill");
+    } else if (actionCategory.equals("Deleted User")) {
+      badge.getElement().getThemeList().add("badge error pill");
     } else if (actionCategory.equals("Restored Order") || actionCategory.equals("Restored Orders")) {
       badge.getElement().getThemeList().add("badge success pill");
     }

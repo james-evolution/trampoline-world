@@ -51,6 +51,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.converter.StringToDoubleConverter;
+import com.vaadin.flow.data.converter.StringToLongConverter;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableBiConsumer;
@@ -100,7 +101,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
   
   private TextField inputSearchFilter = new TextField();
   private Checkbox inputComplete;
-  private TextField inputFirstName, inputLastName, inputPhoneNumber, inputEmail, inputSubtotal, inputTotal;
+  private TextField inputOrderID, inputFirstName, inputLastName, inputPhoneNumber, inputEmail, inputSubtotal, inputTotal;
   private TextArea inputOrderDescription, inputMeasurements;
   private DatePicker inputDate;
 
@@ -294,11 +295,14 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
     binder.forField(inputOrderDescription, String.class).bind("orderDescription");
     binder.forField(inputMeasurements, String.class).bind("measurements");
     binder.forField(inputComplete, Boolean.class).bind("complete");
+    
     binder.forField(inputSubtotal, String.class).asRequired("Subtotal field cannot be empty.")
         .withConverter(new StringToDoubleConverter("Only numbers are allowed")).bind("subtotal");
     binder.forField(inputTotal, String.class).asRequired("Total field cannot be empty.")
         .withConverter(new StringToDoubleConverter("Only numbers are allowed")).bind("total");
     binder.forField(inputDate, LocalDate.class).asRequired("Date field cannot be empty.").bind("date");
+    inputOrderID.setReadOnly(true);
+    binder.forField(inputOrderID, String.class).withConverter(new StringToLongConverter("")).bind("id");
     binder.bindInstanceFields(this);
   }
   
@@ -649,9 +653,10 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
     inputSubtotal = new TextField("Subtotal");
     inputTotal = new TextField("Total");
     inputDate = new DatePicker("Date");
+    inputOrderID = new TextField("Order ID");
     inputComplete = new Checkbox("Complete");
     Component[] fields = new Component[] { inputFirstName, inputLastName, inputPhoneNumber, inputEmail, inputOrderDescription, inputMeasurements,
-        inputSubtotal, inputTotal, inputDate, inputComplete };
+        inputSubtotal, inputTotal, inputDate, inputOrderID, inputComplete };
 
     formLayout.add(fields);
     
