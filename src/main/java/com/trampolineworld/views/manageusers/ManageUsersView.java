@@ -9,8 +9,6 @@ import com.trampolineworld.data.service.UserService;
 import com.trampolineworld.data.service.WebhookRepository;
 import com.trampolineworld.utilities.DiscordWebhook;
 import com.trampolineworld.views.MainLayout;
-import com.vaadin.collaborationengine.CollaborationBinder;
-import com.vaadin.collaborationengine.UserInfo;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -27,7 +25,7 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -35,16 +33,12 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.binder.Result;
-import com.vaadin.flow.data.binder.ValidationException;
-import com.vaadin.flow.data.binder.ValueContext;
-import com.vaadin.flow.data.converter.Converter;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableBiConsumer;
@@ -55,11 +49,15 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinRequest;
 
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.Date;
-import java.util.HashSet;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
@@ -67,6 +65,7 @@ import javax.annotation.security.RolesAllowed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+@SuppressWarnings("serial")
 @PageTitle("Manage Users")
 @Route(value = "users/:userID?/:action?(edit)", layout = MainLayout.class)
 @RolesAllowed({ "ADMIN" })
@@ -75,29 +74,31 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @CssImport(value = "./themes/trampolineworld/views/dialog.css", themeFor = "vaadin-dialog-overlay")
 public class ManageUsersView extends Div implements BeforeEnterObserver {
 
+  private final String DB_URL = "jdbc:mysql://162.241.244.22/faintdev_trampolineworld";
+  private final String USER = "faintdev_twadmin";
+  private final String PASS = "beautifulstranger410";
+
   private String currentActionCategory;
   private String currentActionDetails;
 
   private final String USER_ID = "userID";
   private final String USER_EDIT_ROUTE_TEMPLATE = "users/%s/edit";
-  private final String USER_VIEW_ROUTE_TEMPLATE = "view_user/%s";
   private UUID targetId;
+  private String targetName;
 
-  private UserInfo userInfo;
   private User userToEdit;
   private boolean isNewUser = false;
 
   private Grid<User> grid = new Grid<>(User.class, false);
   private H2 editTitle;
-  
+
   private TextField inputSearchFilter = new TextField();
-  private TextField inputUsername, inputDisplayName, inputEmail, inputProfilePictureUrl;
+  private TextField inputID, inputUsername, inputDisplayName, inputEmail, inputProfilePictureUrl;
   private PasswordField inputHashedPassword;
 
   private CheckboxGroup<Role> inputRoles;
   private Select<Integer> inputColorIndex;
 
-  private GridContextMenu<User> contextMenu;
   private Div editorLayoutDiv;
   private Div editorDiv;
   private FormLayout formLayout;
@@ -110,23 +111,45 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
   private Button buttonNewUser = new Button("New User");
   private Button buttonHideSidebar = new Button("Cancel");
 
-  private CollaborationBinder<User> binder;
   private User user;
   private final LogEntryRepository logEntryRepository;
   private final WebhookRepository webhookRepository;
   private final UserService userService;
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
-  
+
   private User currentUser;
   private User createdUser;
 
   private Grid.Column<User> columnId, columnUsername, columnDisplayName, columnRoles, columnEmail,
       columnProfilePictureUrl, columnColorIndex;
+  private GridContextMenu<User> menu;
+
+  private List<UUID> uuidPriorityOptions = new ArrayList<>(Arrays.asList(
+      UUID.fromString("11c0475e-e6c4-4885-ab3b-933afc925831"), // Ozzy
+      UUID.fromString("c809eeaf-7624-4152-8c5c-2854ca4019ba"), // Bear
+      UUID.fromString("e7f5d385-b7c6-49d6-9fc2-56b264fa2796"), // TW Admin
+      UUID.fromString("52d1376a-b8d4-4d60-874e-b804d078f780"), // TW Tech
+      UUID.fromString("275626f5-d4a0-4ce7-b90f-f34e236b8c6f"), // TW User
+      UUID.fromString("830b6bf0-d783-491c-b7e1-98e219548ab8"), // Sneaky Rat
+      UUID.fromString("11c0475e-e6c4-4885-ab3b-933afc925831"), 
+      UUID.fromString("f60e2718-0600-48a9-849f-20ee79ebdf45"),
+      UUID.fromString("f56e5fd7-4bbc-4d8e-890b-affadbc35d78"), 
+      UUID.fromString("e761fb9a-5e84-4854-ab7c-aa9551791a40"),
+      UUID.fromString("e6414878-931c-43ed-b76d-8b37462fb6d6"), 
+      UUID.fromString("d91687ed-7b89-462b-9f4a-8d5c3b5430dd"),
+      UUID.fromString("d1168d1a-1b86-40ac-b828-8dc6a7e43318"), 
+      UUID.fromString("bc623979-77c1-4a36-80a6-a6eca6cd8ca3"),
+      UUID.fromString("a42449a0-da4e-4a3e-b9ae-ae2729869699"), 
+      UUID.fromString("a236363d-dfa1-4a7e-8e41-8cb787e0ed57"),
+      UUID.fromString("88518b49-916d-4c08-a3b3-a1d85c92939b"), 
+      UUID.fromString("5c2f378b-7667-447a-a996-d8360f6a5451"),
+      UUID.fromString("5c17735c-774b-4c59-ad49-db3829a4d218"),
+      UUID.fromString("59469b67-fe3a-42cb-b8c1-9d0d4327d5d6")));
 
   @Autowired
-  public ManageUsersView(LogEntryRepository logEntryRepository, WebhookRepository webhookRepository, UserService userService,
-      UserRepository userRepository, PasswordEncoder passwordEncoder) {
+  public ManageUsersView(LogEntryRepository logEntryRepository, WebhookRepository webhookRepository,
+      UserService userService, UserRepository userRepository, PasswordEncoder passwordEncoder) {
     this.logEntryRepository = logEntryRepository;
     this.webhookRepository = webhookRepository;
     this.userService = userService;
@@ -139,7 +162,6 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 
     // Create split-view UI
     SplitLayout splitLayout = new SplitLayout();
-//    splitLayout.getStyle().set("border", "var(--_lumo-grid-border-width) solid var(--_lumo-grid-border-color)");
     splitLayout.getStyle().set("margin-top", "0px !important");
     splitLayout.getStyle().set("border-style", "solid");
     splitLayout.getStyle().set("border-top", "1px");
@@ -162,6 +184,12 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
     add(buttonHeaderContainer);
     add(splitLayout);
 
+    // Create context menu.
+    createContextMenu(); // View & Delete buttons.
+    // Configure & add delete confirmation dialog.
+    configureDeleteDialog();
+    add(confirmDeleteDialog);
+
     // Default user is new.
     userToEdit = new User();
     userToEdit.setHashedPassword(passwordEncoder.encode("user"));
@@ -169,6 +197,85 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
     // Configure the form.
 //    configureFormBindings(userInfo);
     configureFormButtons(userService);
+  }
+
+  private void configureDeleteDialog() {
+//    confirmDeleteDialog.setHeaderTitle("Delete " + targetName);
+    confirmDeleteDialog.setDraggable(true);
+    confirmDeleteDialog.addClassName("deleteDialog");
+
+    VerticalLayout dialogLayout = createDialogLayout();
+    confirmDeleteDialog.add(dialogLayout);
+
+    Button dialogDeleteUserButton = createDialogDeleteOrderButton(confirmDeleteDialog);
+    Button cancelButton = new Button("Cancel", e -> confirmDeleteDialog.close());
+    confirmDeleteDialog.getFooter().add(dialogDeleteUserButton);
+    confirmDeleteDialog.getFooter().add(cancelButton);
+  }
+
+  private void createContextMenu() {
+    // Add the context menu to the grid.
+    menu = grid.addContextMenu();
+
+    // Listen for the event in which the context menu is opened, then save the id of
+    // the user that was right clicked on.
+    menu.addGridContextMenuOpenedListener(event -> {
+      targetId = event.getItem().get().getId();
+      targetName = event.getItem().get().getUsername() + " (" + event.getItem().get().getDisplayName() + ")";
+      confirmDeleteDialog.setHeaderTitle("Delete " + targetName);
+    });
+    menu.addItem("Delete", event -> {
+      try {
+        confirmDeleteDialog.open();
+      } catch (Exception e) {
+        Notification.show("An error has occurred, please contact the developer.", 4000, Position.TOP_CENTER)
+            .addThemeVariants(NotificationVariant.LUMO_ERROR);
+      }
+    });
+  }
+
+  private static VerticalLayout createDialogLayout() {
+
+    Paragraph confirmationMessage = new Paragraph("Are you sure you want to delete this user?");
+    VerticalLayout dialogLayout = new VerticalLayout(confirmationMessage);
+    dialogLayout.setPadding(false);
+    dialogLayout.setSpacing(false);
+    dialogLayout.getStyle().set("width", "18rem").set("max-width", "100%");
+
+    return dialogLayout;
+  }
+
+  private Button createDialogDeleteOrderButton(Dialog dialog) {
+    Button dialogDeleteButton = new Button("Delete", e -> {
+      try {
+        Optional<User> userToDelete = userRepository.findById(targetId);
+
+        // Get user name.
+        String userName = userToDelete.get().getUsername() + " (" + userToDelete.get().getDisplayName() + ")";
+        // Delete user from database.
+        userService.delete(targetId);
+
+        // Log action.
+        currentActionCategory = "Deleted User";
+        currentActionDetails = " deleted user " + targetId.toString() + " named " + userName;
+        new LogEntry(logEntryRepository, webhookRepository, currentUser.getId(),
+            currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")", targetId.toString(), userName,
+            currentActionCategory,
+            currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")" + currentActionDetails);
+        // Notify of deletion success.
+        Notification.show("User deleted.", 4000, Position.TOP_CENTER)
+            .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        // Notify of deletion failure.
+      } catch (Exception exception) {
+        Notification.show("Operation failed.", 4000, Position.TOP_CENTER)
+            .addThemeVariants(NotificationVariant.LUMO_ERROR);
+      }
+      dialog.close();
+      updateGrid();
+    });
+    dialogDeleteButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_ERROR);
+
+    return dialogDeleteButton;
   }
 
   private void configureFormButtons(UserService userService) {
@@ -184,21 +291,19 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
     buttonSave.addClickListener(e -> {
       try {
         // Pull data from form, update user object, update repository.
-        updateUserFromForm(userService);
+        updateUserFromForm();
 
         // Log action.
         if (currentActionCategory == "Created User") {
-          LogEntry logEntry = new LogEntry(logEntryRepository, webhookRepository, currentUser.getId(),
+          new LogEntry(logEntryRepository, webhookRepository, currentUser.getId(),
               currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")", createdUser.getId(),
               currentActionCategory, currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")"
-                  + currentActionDetails + " " + createdUser.getId().toString()
-              );
+                  + currentActionDetails + " " + createdUser.getId().toString());
         } else if (currentActionCategory == "Edited User") {
-          LogEntry logEntry = new LogEntry(logEntryRepository, webhookRepository, currentUser.getId(),
+          new LogEntry(logEntryRepository, webhookRepository, currentUser.getId(),
               currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")", this.user.getId(),
               currentActionCategory, currentUser.getUsername() + " (" + currentUser.getDisplayName() + ")"
-                  + currentActionDetails + " " + this.user.getId().toString()
-              );
+                  + currentActionDetails + " " + this.user.getId().toString());
         }
 
         // Clear form, update grid.
@@ -213,14 +318,14 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
         UI.getCurrent().navigate(ManageUsersView.class);
         // Notify of failure.
       } catch (Exception exception) {
-        Notification.show("Invalid form input.", 4000, Position.TOP_CENTER)
+        Notification.show("An error occurred.", 4000, Position.TOP_CENTER)
             .addThemeVariants(NotificationVariant.LUMO_ERROR);
-        System.err.println(exception.toString());
+        exception.printStackTrace();
       }
     });
   }
 
-  private void updateUserFromForm(UserService userService) {
+  private void updateUserFromForm() {
 
     // Check if this is a new user, if it is, create a new user object & use the
     // default encoded password.
@@ -235,6 +340,12 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
       newUser.setHashedPassword(passwordEncoder.encode("user"));
 //      userService.update(newUser);
       userRepository.save(newUser);
+      /*
+       * When a user is saved to the repository a new UUID is generated for it by
+       * Hibernate. This means we cannot update the UUID until after it's been saved
+       * at least once. So, -now- after saving it to the repository, we update the ID.
+       */
+      updateToPriorityID(newUser);
 
       createdUser = userRepository.findByUsername(inputUsername.getValue());
 
@@ -258,9 +369,72 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
       }
 
       currentActionCategory = "Edited User";
-      currentActionDetails = " edited the account for " + this.user.getUsername() + " (" + this.user.getDisplayName() + ")";
+      currentActionDetails = " edited the account for " + this.user.getUsername() + " (" + this.user.getDisplayName()
+          + ")";
       userService.update(this.user);
     }
+  }
+
+  /*
+   * This method will attempt to assign a UUID to the user from a prioritized list
+   * of 20 UUIDS that are already registered with the CollaborationEngine. This is
+   * intended to prevent us from unnecessarily surpassing the 20 user / month
+   * quota. Ideally, this ID should be one that is registered but not currently
+   * taken by an existing user. If all 20 IDs in the priority list are already
+   * assigned to users in the system, we will instead leave this User with their
+   * default, auto-generated UUID, which will count towards the quota.
+   */
+  private void updateToPriorityID(User newUser) {
+    // Get all users, create empty list to store their IDs.
+    List<User> allUsers = userService.findAllNoFilter();
+    List<UUID> allUserIDs = new ArrayList<UUID>();
+    // Loop through all users, add their IDs to the ID list.
+    for (User u : allUsers) {
+      allUserIDs.add(u.getId());
+    }
+    System.out.println("\n\n---------------------------");
+    System.out.println(allUserIDs);
+    // Loop through all user IDs and remove them from the priority options list
+    // (We don't want to pick an ID that's already taken)
+    for (UUID u : allUserIDs) {
+      if (uuidPriorityOptions.contains(u)) {
+        uuidPriorityOptions.remove(u);
+      }
+    }
+
+    System.out.println("Options left: " + String.valueOf(uuidPriorityOptions.size()));
+
+    /*
+     * If there are still priority options left in the options list, use one of those.
+     */
+    if (uuidPriorityOptions.size() > 0) {
+      // Randomly select a new ID from the priority options list.
+      Random rand = new Random();
+      UUID newID = uuidPriorityOptions.get(rand.nextInt(uuidPriorityOptions.size()));
+      /*
+       * UPDATE ID IN THE DATABASE VIA SQL UPDATE STATEMENT
+       */
+         // Open a connection
+         try(Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            Statement stmt = conn.createStatement();
+         ) {         
+            String sql = "UPDATE application_user " +
+               "SET id = \"" + newID + "\" WHERE username = \"" + newUser.getUsername() + "\";";
+            stmt.executeUpdate(sql);
+         } catch (SQLException e) {
+            e.printStackTrace();
+         } 
+      System.out.println("Priority ID selected: " + newID);
+    }
+    /*
+     * If there are NO PRIORITY OPTIONS LEFT, do nothing.
+     * Allow the User to keep their hibernate generated UUID.
+     */
+    else {
+      System.out.println("No priority IDs available. Using generated ID: " + newUser.getId().toString());
+      // Do nothing. Keep the ID as is.
+    }
+    System.out.println("---------------------------\n\n");
   }
 
   private static Component createHeaderRoles() {
@@ -269,7 +443,8 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
     icon.getStyle().set("height", "var(--lumo-font-size-m)").set("color", "var(--lumo-contrast-70pct)");
     icon.getStyle().set("margin-right", "4px");
     HorizontalLayout layout = new HorizontalLayout(icon, span);
-    layout.getElement().setAttribute("title", "Admins have all permissions but cannot see the Debug page. Techs can see the debug page. \nUsers can only see the orders page and the chat, they cannot delete orders.");
+    layout.getElement().setAttribute("title",
+        "Admins have all permissions but cannot see the Debug page. Techs can see the debug page. \nUsers can only see the orders page and the chat, they cannot delete orders.");
     layout.setAlignItems(Alignment.AUTO);
     layout.setSpacing(false);
     return layout;
@@ -281,7 +456,8 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
     icon.getStyle().set("height", "var(--lumo-font-size-m)").set("color", "var(--lumo-contrast-70pct)");
     icon.getStyle().set("margin-right", "4px");
     HorizontalLayout layout = new HorizontalLayout(icon, span);
-    layout.getElement().setAttribute("title", "Determines where a user's reset code will be sent if they forget their password.");
+    layout.getElement().setAttribute("title",
+        "Determines where a user's reset code will be sent if they forget their password.");
     layout.setAlignItems(Alignment.AUTO);
     layout.setSpacing(false);
     return layout;
@@ -305,7 +481,8 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
     icon.getStyle().set("height", "var(--lumo-font-size-m)").set("color", "var(--lumo-contrast-70pct)");
     icon.getStyle().set("margin-right", "4px");
     HorizontalLayout layout = new HorizontalLayout(icon, span);
-    layout.getElement().setAttribute("title", "Determines what color frames a user's profile picture and the fields they're editing.");
+    layout.getElement().setAttribute("title",
+        "Determines what color frames a user's profile picture and the fields they're editing.");
     layout.setAlignItems(Alignment.AUTO);
     layout.setSpacing(false);
     return layout;
@@ -354,12 +531,6 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 
   private void updateGrid() {
     grid.setItems(userService.findAll(inputSearchFilter.getValue()));
-
-    // Log UUIDs so we can keep track of them for the CE license.
-    List<User> users = userService.findAllNoFilter();
-    for (User u : users) {
-//      sendDiscordWebhookMessage(u.getUsername() + ": " + u.getId().toString(), "uuids");
-    }
   }
 
   // Generating icons based upon role.
@@ -481,8 +652,9 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
       if (userFromBackend.isPresent()) {
         populateForm(userToEdit);
       } else {
-        Notification.show(String.format("The requested user was not found, ID = %d", userID.get()), 4000,
-            Position.TOP_CENTER).addThemeVariants(NotificationVariant.LUMO_ERROR);
+        Notification
+            .show(String.format("The requested user was not found, ID = %d", userID.get()), 4000, Position.TOP_CENTER)
+            .addThemeVariants(NotificationVariant.LUMO_ERROR);
         // When a row is selected but the data is no longer available, update the grid
         // component.
         updateGrid();
@@ -502,6 +674,9 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 
     editorDiv.setClassName("editor");
     editorLayoutDiv.add(editorDiv);
+    
+    inputID = new TextField("ID");
+    inputID.setReadOnly(true);
 
     inputUsername = new TextField("Username");
     inputUsername.setHelperText(
@@ -536,13 +711,13 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
     inputProfilePictureUrl.setHelperText(
         "File uploads are not yet supported for profile pictures. You can, however, pass in an image URL. Right click on an image from the net and select 'Copy Image Address' and then paste it here. The url path must end in .jpg, .png, or .webp");
 
-    Component[] fields = new Component[] { inputUsername, inputDisplayName, inputEmail, inputRoles, inputHashedPassword, inputProfilePictureUrl,
-        inputColorIndex };
+    Component[] fields = new Component[] { inputID, inputUsername, inputDisplayName, inputEmail, inputRoles, inputHashedPassword,
+        inputProfilePictureUrl, inputColorIndex };
 
     formLayout.add(fields);
-    
+
 //    editorDiv.add(editTitle, formLayout);
-    
+
     // Create editor header row.
     HorizontalLayout editorHeader = new HorizontalLayout();
     editorHeader.setAlignItems(Alignment.BASELINE);
@@ -552,10 +727,10 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
     editTitle.setWidth("100%");
     // Add avatar group & hide button to header row.
     editorHeader.add(editTitle, buttonHideSidebar);
-    
+
     // Add header row, title, and form to editor div.
-    editorDiv.add(editorHeader, formLayout);    
-    
+    editorDiv.add(editorHeader, formLayout);
+
     createButtonLayout(editorLayoutDiv);
     splitLayout.addToSecondary(editorLayoutDiv);
   }
@@ -566,7 +741,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
     buttonCancel.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_ERROR);
     buttonSave.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
     buttonLayout.getStyle().set("background-color", "black");
-    buttonLayout.getStyle().set("opacity", "0.7");    
+    buttonLayout.getStyle().set("opacity", "0.7");
     buttonLayout.add(buttonSave, buttonCancel);
     editorLayoutDiv.add(buttonLayout);
   }
@@ -584,13 +759,12 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 
   private void populateForm(User value) {
     this.user = value;
-    String topic = null;
 
     if (this.user != null && this.user.getId() != null) {
-      topic = "user/" + this.user.getId();
       editTitle.setText("Edit User");
       isNewUser = false;
       // Populate form data here.
+      inputID.setValue(value.getId().toString());
       inputUsername.setValue(value.getUsername() == null ? "" : value.getUsername());
       inputDisplayName.setValue(value.getDisplayName() == null ? "" : value.getDisplayName());
       inputEmail.setValue(value.getEmail() == null ? "" : value.getEmail());
@@ -601,6 +775,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
       // Clear form data here.
       editTitle.setText("New User");
       isNewUser = true;
+      inputID.clear();
       inputUsername.clear();
       inputDisplayName.clear();
       inputEmail.clear();
@@ -614,8 +789,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
   public static void sendDiscordWebhookMessage(WebhookRepository webhookRepository, String message) {
 
     String webhookURL = webhookRepository.findByWebhookName("Logs (UUIDs)").getWebhookUrl();
-    String webhookUsername = "TW UUID Logger";
-    
+
     // Trim leading & trailing whitespaces.
     webhookURL = webhookURL.trim();
     // Check for null or empty URL, if so - return, don't attempt to send.
@@ -630,7 +804,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
     /*
      * It's important to keep a record of generated UUIDs for system users. This is
      * because the CollaborationEngine will limit us to 20 unique users per month in
-     * the system. This is a limitation of the free universal license. A commerical
+     * the system. This is a limitation of the free universal license. A commercial
      * license to surpass that 20 user quota would cost a minimum of $100 / month.
      * 
      * Thus, it's ideal for us to store and re-use existing UUIDs rather than

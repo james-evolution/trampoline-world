@@ -1,6 +1,5 @@
 package com.trampolineworld.data.service;
 
-import com.trampolineworld.data.entity.TrampolineOrder;
 import com.trampolineworld.data.entity.User;
 
 import java.util.List;

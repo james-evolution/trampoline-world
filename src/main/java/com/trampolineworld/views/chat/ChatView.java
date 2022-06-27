@@ -42,7 +42,6 @@ public class ChatView extends VerticalLayout implements BeforeEnterObserver {
   private CollaborationMessageList list;
   private UserInfo userInfo;
   private String currentTopic = "chat/#general";
-  private static UserInfo loggedUserInfo;
   
   private MessageManager messageManagerGeneral;
   private MessageManager messageManagerNotes;

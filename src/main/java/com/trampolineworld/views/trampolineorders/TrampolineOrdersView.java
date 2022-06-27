@@ -174,7 +174,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
     createEditorLayout(splitLayout);
 
     // Configure the grid.
-    configureGrid(trampolineOrderService, splitLayout);
+    configureGrid(splitLayout);
 
     // Create button header bar.
     createButtonHeader(splitLayout); // Requires splitLayout argument to define button functions.
@@ -184,19 +184,19 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
     add(splitLayout);
 
     // Create context menu.
-    createContextMenu(trampolineOrderService); // View & Delete buttons.
+    createContextMenu(); // View & Delete buttons.
 
 
     // Configure & add delete confirmation dialog.
-    configureDeleteDialog(trampolineOrderService);
+    configureDeleteDialog();
     add(confirmDeleteDialog);
 
     // Configure the form.
     configureForm(userInfo);
-    configureFormButtons(trampolineOrderService);
+    configureFormButtons();
   }
 
-  private void configureDeleteDialog(TrampolineOrderService trampolineOrderService) {
+  private void configureDeleteDialog() {
     confirmDeleteDialog.setHeaderTitle("Delete Order");
     confirmDeleteDialog.setDraggable(true);
     confirmDeleteDialog.addClassName("deleteDialog");
@@ -210,7 +210,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
     confirmDeleteDialog.getFooter().add(cancelButton);
   }
 
-  private void configureFormButtons(TrampolineOrderService trampolineOrderService) {
+  private void configureFormButtons() {
     // When the cancel button is clicked, clear the form and refresh the grid.
     buttonCancel.addClickListener(e -> {
       clearForm();
@@ -293,6 +293,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
     binder.forField(inputEmail, String.class).bind("email");
     binder.forField(inputOrderDescription, String.class).bind("orderDescription");
     binder.forField(inputMeasurements, String.class).bind("measurements");
+    binder.forField(inputComplete, Boolean.class).bind("complete");
     binder.forField(inputSubtotal, String.class).asRequired("Subtotal field cannot be empty.")
         .withConverter(new StringToDoubleConverter("Only numbers are allowed")).bind("subtotal");
     binder.forField(inputTotal, String.class).asRequired("Total field cannot be empty.")
@@ -379,7 +380,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
     return layout;
   }
 
-  private void configureGrid(TrampolineOrderService trampolineOrderService, SplitLayout splitLayout) {
+  private void configureGrid(SplitLayout splitLayout) {
     grid.setColumnReorderingAllowed(true);
     grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
     grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
@@ -450,7 +451,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
     return new ComponentRenderer<>(Span::new, statusComponentUpdater);
   }
 
-  private void createContextMenu(TrampolineOrderService trampolineOrderService) {
+  private void createContextMenu() {
     // Add the context menu to the grid.
     menu = grid.addContextMenu();
 
