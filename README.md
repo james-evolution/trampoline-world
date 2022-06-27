@@ -52,62 +52,64 @@ The following SQL script can be executed in any MySQL database to rebuild the sc
 CREATE SCHEMA trampolineworld;
 
 CREATE TABLE application_user ( 
-  id                   VARCHAR(200)  NOT NULL DEFAULT ('')   PRIMARY KEY,
-  username             VARCHAR(255)   DEFAULT (NULL)   ,
-  display_name         VARCHAR(255)   DEFAULT (NULL)   ,
-  email                VARCHAR(255)   DEFAULT (NULL)   ,
-  hashed_password      VARCHAR(255)   DEFAULT (NULL)   ,
-  roles                SET('Value A','Value B')   DEFAULT (NULL)   ,
-  profile_picture_url  VARCHAR(255)   DEFAULT (NULL)   ,
-  color_index          INT  NOT NULL DEFAULT ('0')   
+	id                   VARCHAR(200)  NOT NULL DEFAULT ''   PRIMARY KEY,
+	username             VARCHAR(255)   DEFAULT NULL   ,
+	display_name         VARCHAR(255)   DEFAULT NULL   ,
+	email                VARCHAR(255)   DEFAULT NULL   ,
+	hashed_password      VARCHAR(255)   DEFAULT NULL   ,
+	roles                SET('Value A','Value B')   DEFAULT NULL   ,
+	profile_picture_url  VARCHAR(255)   DEFAULT NULL   ,
+	color_index          INT  NOT NULL DEFAULT '0'   
  ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE audit_logs ( 
-  id                   VARCHAR(200)  NOT NULL    PRIMARY KEY,
-  user_id              VARCHAR(200)  NOT NULL    ,
-  username             VARCHAR(255)  NOT NULL    ,
-  target_user_id       VARCHAR(200)   DEFAULT (NULL)   ,
-  target_order_id      VARCHAR(255)   DEFAULT (NULL)   ,
-  customer_name        VARCHAR(255)   DEFAULT (NULL)   ,
-  action_category      VARCHAR(255)   DEFAULT (NULL)   ,
-  action_details       TEXT      ,
-  timestamp            TIMESTAMP  NOT NULL DEFAULT (CURRENT_TIMESTAMP)   
+	id                   VARCHAR(200)  NOT NULL    PRIMARY KEY,
+	user_id              VARCHAR(200)  NOT NULL    ,
+	username             VARCHAR(255)  NOT NULL    ,
+	target_user_id       VARCHAR(200)   DEFAULT NULL   ,
+	target_order_id      VARCHAR(255)   DEFAULT NULL   ,
+	customer_name        VARCHAR(255)   DEFAULT NULL   ,
+	action_category      VARCHAR(255)   DEFAULT NULL   ,
+	action_details       TEXT      ,
+	timestamp            TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP   
  ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE chat_logs ( 
-  id                   VARCHAR(200)  NOT NULL    PRIMARY KEY,
-  topic                VARCHAR(255)  NOT NULL    ,
-  `text`               VARCHAR(255)  NOT NULL    ,
-  author_id            VARCHAR(200)  NOT NULL    ,
-  timestamp            TIMESTAMP  NOT NULL DEFAULT (CURRENT_TIMESTAMP)   
+	topic                VARCHAR(255)  NOT NULL    ,
+	`text`               VARCHAR(255)  NOT NULL    ,
+	author_id            VARCHAR(200)  NOT NULL    ,
+	timestamp            TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP   ,
+	id                   VARCHAR(200)  NOT NULL    PRIMARY KEY,
+	author_name          VARCHAR(255)   DEFAULT NULL   ,
+	author_avatar_url    VARCHAR(255)   DEFAULT NULL   ,
+	author_color_index   INT   DEFAULT NULL   
  ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE trampoline_order ( 
-  id                   BIGINT  NOT NULL  AUTO_INCREMENT  PRIMARY KEY,
-  complete             TINYINT   DEFAULT (NULL)   ,
-  first_name           VARCHAR(255)   DEFAULT (NULL)   ,
-  last_name            VARCHAR(255)   DEFAULT (NULL)   ,
-  phone_number         VARCHAR(255)   DEFAULT (NULL)   ,
-  email                VARCHAR(255)   DEFAULT (NULL)   ,
-  order_description    TEXT      ,
-  measurements         VARCHAR(255)   DEFAULT (NULL)   ,
-  subtotal             DOUBLE   DEFAULT (NULL)   ,
-  total                DOUBLE   DEFAULT (NULL)   ,
-  `date`               DATE   DEFAULT (NULL)   ,
-  deleted              TINYINT   DEFAULT ('0')   
+	id                   BIGINT  NOT NULL  AUTO_INCREMENT  PRIMARY KEY,
+	complete             TINYINT   DEFAULT NULL   ,
+	first_name           VARCHAR(255)   DEFAULT NULL   ,
+	last_name            VARCHAR(255)   DEFAULT NULL   ,
+	phone_number         VARCHAR(255)   DEFAULT NULL   ,
+	email                VARCHAR(255)   DEFAULT NULL   ,
+	order_description    TEXT      ,
+	measurements         VARCHAR(255)   DEFAULT NULL   ,
+	subtotal             DOUBLE   DEFAULT NULL   ,
+	total                DOUBLE   DEFAULT NULL   ,
+	`date`               DATE   DEFAULT NULL   ,
+	deleted              TINYINT   DEFAULT '0'   
  ) ENGINE=InnoDB AUTO_INCREMENT=70039 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE user_roles ( 
-  user_id              VARCHAR(200)   DEFAULT (NULL)   ,
-  roles                VARCHAR(255)   DEFAULT (NULL)   
+	user_id              VARCHAR(200)   DEFAULT NULL   ,
+	roles                VARCHAR(255)   DEFAULT NULL   
  ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE webhooks ( 
-  id                   VARCHAR(200)  NOT NULL    PRIMARY KEY,
-  webhook_name         VARCHAR(255)  NOT NULL    ,
-  webhook_url          VARCHAR(255)  NOT NULL    
+	id                   VARCHAR(200)  NOT NULL    PRIMARY KEY,
+	webhook_name         VARCHAR(255)  NOT NULL    ,
+	webhook_url          VARCHAR(255)  NOT NULL    
  ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
 ```
 
 ## Database Structure
