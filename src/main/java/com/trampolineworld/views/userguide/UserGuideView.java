@@ -1,40 +1,37 @@
 package com.trampolineworld.views.userguide;
 
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.accordion.Accordion;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.details.Details;
-import com.vaadin.flow.component.details.DetailsVariant;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.IFrame;
 import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.html.UnorderedList;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.notification.Notification.Position;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
-import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.virtuallist.VirtualList;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.RouteAlias;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.security.RolesAllowed;
 
+import com.trampolineworld.data.entity.Feature;
 import com.trampolineworld.views.*;
-import com.trampolineworld.views.trampolineorders.TrampolineOrdersView;
+import com.trampolineworld.views.MainLayout.MenuItemInfo.LineAwesomeIcon;
 
+@SuppressWarnings("serial")
 @Route(value = "userguide", layout = MainLayout.class)
 @PageTitle("User Guide")
 //@CssImport("./styles/views/view_order/single-order-view.css")
@@ -50,10 +47,8 @@ public class UserGuideView extends HorizontalLayout {
   private Label createLabel, editLabel, viewLabel, deleteLabel, fontSizeLabel, featuresLabel;
   private Paragraph createParagraph, editParagraph, viewParagraph, deleteParagraph, fontSizeParagraph;
   private Paragraph videoCaption;
-  private UnorderedList featuresList;
+//  private UnorderedList featuresList;
   private VerticalLayout layout = new VerticalLayout();
-
-  private Accordion accordionBasicsGuide = new Accordion();
 
   Tab documentationTab, desktopApplicationTab, mobileApplicationTab;
   private H2 installationHeader = new H2();
@@ -62,6 +57,8 @@ public class UserGuideView extends HorizontalLayout {
   private IFrame videoFrame = new IFrame();
   private IFrame desktopInstallationFrame = new IFrame();
   private IFrame mobileInstallationFrame = new IFrame();
+
+  VirtualList<Feature> featuresList = new VirtualList<>();
 
   public UserGuideView() {
     this.setWidthFull();
@@ -86,10 +83,6 @@ public class UserGuideView extends HorizontalLayout {
     createLabelElements();
     createParagraphElements();
 
-//    Details details = new Details("Application Features", featuresList);
-//    details.setOpened(true);
-//    details.addThemeVariants(DetailsVariant.FILLED);
-
     // Create layout & add components to it.
     layout.add(tabs);
     layout.add(header1);
@@ -98,7 +91,6 @@ public class UserGuideView extends HorizontalLayout {
     layout.add(new Hr());
     layout.add(featuresLabel);
     layout.add(featuresList);
-//    layout.add(details);
     layout.add(new Hr());
     layout.add(header2);
     layout.add(createLabel, createParagraph);
@@ -126,6 +118,28 @@ public class UserGuideView extends HorizontalLayout {
       }
     });
   }
+
+  private ComponentRenderer<Component, Feature> featureRenderer = new ComponentRenderer<>(feature -> {
+    HorizontalLayout cardLayout = new HorizontalLayout();
+    cardLayout.setMargin(true);
+
+    VerticalLayout infoLayout = new VerticalLayout();
+    infoLayout.setSpacing(false);
+    infoLayout.setPadding(false);
+    infoLayout.getElement().appendChild(ElementFactory.createStrong(feature.getLabel()));
+    infoLayout.add(new Div(new Text(feature.getDescription())));
+
+    if (feature.getLabel().equals("Discord Integration")) {
+      LineAwesomeIcon icon = new LineAwesomeIcon("lab la-discord");
+      icon.getStyle().set("zoom", "150%");
+      icon.getStyle().set("margin-right", "0px !important");
+      cardLayout.add(icon, infoLayout);
+    } else {
+      Icon icon = feature.getIcon();
+      cardLayout.add(icon, infoLayout);
+    }
+    return cardLayout;
+  });
 
   private void configureTabs() {
     documentationTab = new Tab("Overview");
@@ -164,43 +178,149 @@ public class UserGuideView extends HorizontalLayout {
 
     videoCaption = new Paragraph(
         "\nThe above video gives a comprehensive overview of this application's many different features, and will also teach you how to use it."
-            + "\nIt's highly recommended that one watches it to gain a thorough understanding of how the system works & how to operate it, as the features list alone will likely not suffice."
-            + "\nIn addition to this being a website, this system is also both a desktop and mobile application (compatible with macOS, Windows, iPhones, and Androids)");
+        + " It's highly recommended that one watches it to gain a thorough understanding of how the system works & how to operate it, as the features list alone lacks much of this information.");
 
-    featuresList = new UnorderedList(new ListItem(
-        "Login & Security: Users must log in to access this application. Individual permissions depend upon account type."),
-        new ListItem("Order Management: Admins can create, read, update, and delete orders. Non-admins cannot delete orders."),
-        new ListItem(
-            "User Management: Admins can manage user accounts and modify their names, passwords, and roles - which impact their permissions"),
-        new ListItem(
-            "Searching, Sorting, & Filtering: All pages with grid views have these features enabled. Admins can search through orders, system users, and system logs in a variety of ways."),
-        new ListItem(
-            "Column Reordering, Resizing, & Filtering: Users can drag columns to reorder and resize them. Additionally, they can hide/show specific columns with the Show/Hide button. (On pages with an abundance of detailed information, some columns are not shown by default, but users can opt in to see them with the aforementioned button.)"),
-        new ListItem("Data Exports: Order information can be exported as needed in either PDF or CSV format."),
-        new ListItem(
-            "Order Archives: When an order gets deleted from the system, it isn't actually deleted from the database. Instead, it is simply flagged so that it does not appear on the orders page. Admins can view deleted orders in the archives, where they can restore them if they desire."),
-        new ListItem(
-            "Audit Log: All user actions are logged in the system. Administrators can see who made what changes at what time."),
-        new ListItem(
-            "Live Chat: All users have access to a chat room in which they can communicate to each other via different devices and locations. They can also store notes here. The chat history is persisted to the database and should never be lost, even between server restarts."),
-        new ListItem(
-            "Profile Customization: Users can customize their own profile picture, color, display name, email address, and password."),
-        new ListItem(
-            "Password Resets: If a user forgets their password they can have a reset code sent to their email via the login page. Alternatively, administrators can change their password by hand."),
-        new ListItem(
-            "In-Application Database Configuration: This application uses a MySQL database on Bluehost to store & retrieve order information. However, administrators can point this application to a database of their own choosing via the database configuration page."),
-        new ListItem(
-            "Date/Time Sorting: By default, all orders and logs are sorted by their date or timestamp, with the most recent entries showing at the top of the grid."),
-        new ListItem(
-            "Form Validation: The form used to create new orders and edit existing ones can validate input to meet any specified requirements."),
-        new ListItem(
-            "Tooltips & Helper Text: Some columns on the user management page show helpful hints/information if you hover over them with your cursor. Many input fields also have helper text beneath them as guidelines."),
-        new ListItem(
-            "Discord Integration: Admins & Techs can use the Discord Integration page to configure, enable, or disable data logging to Discord. Three log categories exist: Audit, Chat, and UUID. If desired, admins can edit webhook URLs to send this data to whichever Discord server channels they wish."),
-        new ListItem(
-            "Open Source: The full source code used to develop this application is freely available to the current owners of Trampoline World, to be modified however they wish."),
-        new ListItem(
-            "Questions & Requests: The contact page allows admins to instantly contact the developer via email or text-to-speech Discord message if they have questions or want to make requests."));
+    // Create collection of Feature objects.
+    List<Feature> features = new ArrayList<>();
+    // Login & Security
+    Feature featureLogin = new Feature();
+    featureLogin.setLabel("Login & Security");
+    featureLogin.setDescription(
+        "Users must log in to access this application. Individual permissions depend upon account type. Passwords are hash-encrypted and all client-server requests are protected against CSRF and XSS attacks.");
+    featureLogin.setIcon(new Icon(VaadinIcon.LOCK));
+    // Mobile & Desktop
+    Feature featureMobileDesktop = new Feature();
+    featureMobileDesktop.setLabel("Mobile & Desktop");
+    featureMobileDesktop.setDescription(
+        "In addition to this being a website, this system is also both a desktop and mobile application (compatible with macOS, Windows, iPhones, and Androids)");
+    featureMobileDesktop.setIcon(new Icon(VaadinIcon.MOBILE_BROWSER));
+    // Order Management
+    Feature featureOrderManagement = new Feature();
+    featureOrderManagement.setLabel("Order Management");
+    featureOrderManagement
+        .setDescription("Admins can create, edit, and delete orders. Non-admins cannot delete orders.");
+    featureOrderManagement.setIcon(new Icon(VaadinIcon.TABLE));
+    // User Management
+    Feature featureUserManagement = new Feature();
+    featureUserManagement.setLabel("User Management");
+    featureUserManagement.setDescription(
+        "Admins can manage user accounts and modify their names, passwords, and roles - which impact their permissions.");
+    featureUserManagement.setIcon(new Icon(VaadinIcon.USERS));
+    // Searching, Sorting, & Filtering
+    Feature featureSearching = new Feature();
+    featureSearching.setLabel("Searching, Sorting, & Filtering");
+    featureSearching.setDescription(
+        "All pages with grid views have these features enabled. Admins can search through orders, system users, and system logs in a variety of ways.");
+    featureSearching.setIcon(new Icon(VaadinIcon.SEARCH));
+    // Resizable, Draggable & Filterable Columns
+    Feature featureColumns = new Feature();
+    featureColumns.setLabel("Resizable, Draggable, & Filterable Columns");
+    featureColumns.setDescription(
+        "Users can drag columns to reorder and resize them. Additionally, they can hide/show specific columns with the Show/Hide button. (On pages with an abundance of detailed information, some columns are not shown by default, but users can opt in to see them with the aforementioned button.)");
+    featureColumns.setIcon(new Icon(VaadinIcon.GRID_H));
+    // Data Exports
+    Feature featureExports = new Feature();
+    featureExports.setLabel("Data Exports");
+    featureExports
+        .setDescription("A comprehensive list of all orders be exported whenever desired in either PDF or CSV format.");
+    featureExports.setIcon(new Icon(VaadinIcon.DOWNLOAD));
+    // Order Archives
+    Feature featureArchives = new Feature();
+    featureArchives.setLabel("Order Archives");
+    featureArchives.setDescription(
+        "When an order gets deleted from the system, it isn't actually deleted from the database. Instead, it is simply flagged so that it does not appear on the orders page. Admins can view deleted orders in the archives, where they can restore them if they desire.");
+    featureArchives.setIcon(new Icon(VaadinIcon.ARCHIVES));
+    // Audit Log
+    Feature featureAuditLog = new Feature();
+    featureAuditLog.setLabel("Audit Log");
+    featureAuditLog.setDescription(
+        "All user actions are logged in the system. Administrators can see who made what changes at what time.");
+    featureAuditLog.setIcon(new Icon(VaadinIcon.OPEN_BOOK));
+    // Live Chat
+    Feature featureLiveChat = new Feature();
+    featureLiveChat.setLabel("Live Chat Room");
+    featureLiveChat.setDescription(
+        "All users have access to a chat room in which they can communicate to each other via different devices and locations. They can also store notes here. The chat history is persisted to the database and should never be lost, even between server restarts.");
+    featureLiveChat.setIcon(new Icon(VaadinIcon.CHAT));
+    // Profile Customization
+    Feature featureProfileCustomization = new Feature();
+    featureProfileCustomization.setLabel("Profile Customization");
+    featureProfileCustomization.setDescription(
+        "Users can customize their own profile picture, color, display name, email address, and password.");
+    featureProfileCustomization.setIcon(new Icon(VaadinIcon.USER));
+    // Profile Customization
+    Feature featurePasswordResets = new Feature();
+    featurePasswordResets.setLabel("Password Resets");
+    featurePasswordResets.setDescription(
+        "If a user forgets their password they can have a reset code sent to their email via the login page. Alternatively, administrators can change their password by hand.");
+    featurePasswordResets.setIcon(new Icon(VaadinIcon.PASSWORD));
+    // In-Application Database Configuration
+    Feature featureDatabaseConfiguration = new Feature();
+    featureDatabaseConfiguration.setLabel("In-Application Database Configuration");
+    featureDatabaseConfiguration.setDescription(
+        "This application uses a MySQL database on Bluehost to store & retrieve order information. However, administrators can point this application to a database of their own choosing via the database configuration page.");
+    featureDatabaseConfiguration.setIcon(new Icon(VaadinIcon.DATABASE));
+    // Date/Time Sorting
+    Feature featureDateSorting = new Feature();
+    featureDateSorting.setLabel("Date/Time Sorting");
+    featureDateSorting.setDescription(
+        "By default, all orders and logs are sorted by their date or timestamp, with the most recent entries showing at the top of the grid.");
+    featureDateSorting.setIcon(new Icon(VaadinIcon.CALENDAR_CLOCK));
+    // Form Validation
+    Feature featureFormValidation = new Feature();
+    featureFormValidation.setLabel("Form Validation");
+    featureFormValidation.setDescription(
+        "The forms used to create and edit new orders or users can validate input to meet any specified requirements.");
+    featureFormValidation.setIcon(new Icon(VaadinIcon.FORM));
+    // Tooltips & Helper Text
+    Feature featureTooltips = new Feature();
+    featureTooltips.setLabel("Tooltips & Helper Text");
+    featureTooltips.setDescription(
+        "Some columns on the user management page show helpful hints/information if you hover over them with your cursor. Many input fields also have helper text beneath them as guidelines.");
+    featureTooltips.setIcon(new Icon(VaadinIcon.INFO_CIRCLE_O));
+    // Discord Integration
+    Feature featureDiscord = new Feature();
+    featureDiscord.setLabel("Discord Integration");
+    featureDiscord.setDescription(
+        "Admins & Techs can use the Discord Integration page to configure, enable, or disable data logging to Discord. Two log categories exist: Audit & Chat. If desired, admins can edit webhook URLs to send this data to whichever Discord server channels they wish.");
+    // Open Source
+    Feature featureOpenSource = new Feature();
+    featureOpenSource.setLabel("Open Source");
+    featureOpenSource.setDescription(
+        "The full source code used to develop this application is freely available to the current owners of Trampoline World, to be modified however they wish.");
+    featureOpenSource.setIcon(new Icon(VaadinIcon.GIFT));
+    // Questions & Requests
+    Feature featureQuestions = new Feature();
+    featureQuestions.setLabel("Developer Contact");
+    featureQuestions.setDescription("Have any questions or requests? You can instantly reach the developer through the contact page via text-to-speech Discord message or email. If it's an emergency, he can join the live chat to help, or you may call him if you have his number.");
+    featureQuestions.setIcon(new Icon(VaadinIcon.QUESTION_CIRCLE_O));
+
+    // Add features to collection.
+    features.add(featureLogin);
+    features.add(featureMobileDesktop);
+    features.add(featureOrderManagement);
+    features.add(featureUserManagement);
+    features.add(featureSearching);
+    features.add(featureColumns);
+    features.add(featureExports);
+    features.add(featureArchives);
+    features.add(featureAuditLog);
+    features.add(featureLiveChat);
+    features.add(featureProfileCustomization);
+    features.add(featurePasswordResets);
+    features.add(featureDatabaseConfiguration);
+    features.add(featureDateSorting);
+    features.add(featureFormValidation);
+    features.add(featureTooltips);
+    features.add(featureDiscord);
+    features.add(featureOpenSource);
+//    features.add(featureQuestions);
+
+    // Set items & renderer.
+    featuresList.setItems(features);
+    featuresList.setRenderer(featureRenderer);
+//    featuresList.setHeight("500px");
+
   }
 
   private void createLabelElements() {

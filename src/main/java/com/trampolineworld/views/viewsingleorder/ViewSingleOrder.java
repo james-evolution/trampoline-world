@@ -36,7 +36,7 @@ public class ViewSingleOrder extends HorizontalLayout implements BeforeEnterObse
       completeParagraph;
   private Label firstNameLabel, lastNameLabel, phoneNumberLabel, emailLabel, descriptionLabel, measurementsLabel,
       subtotalLabel, totalLabel, dateLabel, completeLabel;
-  private HorizontalLayout row1, row2, row3, row4, row5;
+  private HorizontalLayout row1, row2, row3, row4, row5, row6, row7;
 
   private TrampolineOrder trampolineOrder;
 
@@ -72,10 +72,12 @@ public class ViewSingleOrder extends HorizontalLayout implements BeforeEnterObse
     layout.add(orderIdTitle);
     layout.add(row1);
     layout.add(row2);
-    layout.add(descriptionLabel, orderDescriptionParagraph);
     layout.add(row3);
     layout.add(row4);
+    layout.add(descriptionLabel, orderDescriptionParagraph);
     layout.add(row5);
+    layout.add(row6);
+    layout.add(row7);
     layout.add(goBackButton);
     this.setClassName("view-single-order-layout");
     // Add layout to the view.
@@ -86,26 +88,32 @@ public class ViewSingleOrder extends HorizontalLayout implements BeforeEnterObse
     row1 = new HorizontalLayout();
     row1.setAlignItems(Alignment.BASELINE);
     row1.add(firstNameLabel, firstNameParagraph);
-    row1.add(lastNameLabel, lastNameParagraph);
-
+    
     row2 = new HorizontalLayout();
     row2.setAlignItems(Alignment.BASELINE);
-    row2.add(phoneNumberLabel, phoneNumberParagraph);
-    row2.add(emailLabel, emailParagraph);
-
+    row2.add(lastNameLabel, lastNameParagraph);
+    
     row3 = new HorizontalLayout();
     row3.setAlignItems(Alignment.BASELINE);
-    row3.add(measurementsLabel, measurementsParagraph);
-
+    row3.add(phoneNumberLabel, phoneNumberParagraph);
+    
     row4 = new HorizontalLayout();
     row4.setAlignItems(Alignment.BASELINE);
-    row4.add(subtotalLabel, subtotalParagraph);
-    row4.add(totalLabel, totalParagraph);
+    row4.add(emailLabel, emailParagraph);
 
     row5 = new HorizontalLayout();
     row5.setAlignItems(Alignment.BASELINE);
-    row5.add(dateLabel, dateParagraph);
-    row5.add(completeLabel, completeParagraph);
+    row5.add(measurementsLabel, measurementsParagraph);
+
+    row6 = new HorizontalLayout();
+    row6.setAlignItems(Alignment.BASELINE);
+    row6.add(subtotalLabel, subtotalParagraph);
+    row6.add(totalLabel, totalParagraph);
+
+    row7 = new HorizontalLayout();
+    row7.setAlignItems(Alignment.BASELINE);
+    row7.add(dateLabel, dateParagraph);
+    row7.add(completeLabel, completeParagraph);
   }
 
   private void createLabels() {

@@ -21,25 +21,26 @@ import com.vaadin.flow.component.notification.Notification.Position;
 @Table(name = "audit_logs")
 public class LogEntry extends AbstractEntityUUID {
 
-    @Type(type = "uuid-char")
+  @Type(type = "uuid-char")
   private UUID userId;
   private String username;
-    @Type(type = "uuid-char")
+  @Type(type = "uuid-char")
   private UUID targetUserId;
-    // Making this a string so we can store multiple order ids via collections toString()
+  // Making this a string so we can store multiple order ids via collections
+  // toString()
   private String targetOrderId;
   private String customerName;
   private String actionCategory;
   private String actionDetails;
   private Timestamp timestamp;
-  
+
   public LogEntry() {
-    
+
   }
 
   // Order targets.
-  public LogEntry(LogEntryRepository logEntryRepository, WebhookRepository webhookRepository, UUID userId, String username, String targetOrderId, String customerName, String actionCategory,
-      String actionDetails) {
+  public LogEntry(LogEntryRepository logEntryRepository, WebhookRepository webhookRepository, UUID userId,
+      String username, String targetOrderId, String customerName, String actionCategory, String actionDetails) {
     this.userId = userId;
     this.username = username;
     this.targetOrderId = targetOrderId;
@@ -47,22 +48,28 @@ public class LogEntry extends AbstractEntityUUID {
     this.actionCategory = actionCategory;
     this.actionDetails = actionDetails;
     this.timestamp = new Timestamp(new Date().getTime());
-    
+
     logEntryRepository.save(this);
-    sendDiscordWebhookMessage(webhookRepository, actionDetails + " at " + timestamp.toString());
+
+    if (System.getenv("discordAuditLoggingEnabled").equals("true")) {
+      sendDiscordWebhookMessage(webhookRepository, actionDetails + " at " + timestamp.toString());
+    }
   }
+
   // User targets.
-  public LogEntry(LogEntryRepository logEntryRepository, WebhookRepository webhookRepository, UUID userId, String username, UUID targetUserId, String actionCategory,
-      String actionDetails) {
+  public LogEntry(LogEntryRepository logEntryRepository, WebhookRepository webhookRepository, UUID userId,
+      String username, UUID targetUserId, String actionCategory, String actionDetails) {
     this.userId = userId;
     this.username = username;
     this.targetUserId = targetUserId;
     this.actionCategory = actionCategory;
     this.actionDetails = actionDetails;
     this.timestamp = new Timestamp(new Date().getTime());
-    
+
     logEntryRepository.save(this);
-    sendDiscordWebhookMessage(webhookRepository, actionDetails + " at " + timestamp.toString());
+    if (System.getenv("discordAuditLoggingEnabled").equals("true")) {
+      sendDiscordWebhookMessage(webhookRepository, actionDetails + " at " + timestamp.toString());
+    }
   }
 
   public UUID getUserId() {
@@ -120,7 +127,6 @@ public class LogEntry extends AbstractEntityUUID {
   public void setTimestamp(Timestamp timestamp) {
     this.timestamp = timestamp;
   }
-  
 
   public String getCustomerName() {
     return customerName;
@@ -131,9 +137,9 @@ public class LogEntry extends AbstractEntityUUID {
   }
 
   public static void sendDiscordWebhookMessage(WebhookRepository webhookRepository, String message) {
-    
+
     String webhookURL = webhookRepository.findByWebhookName("Logs (Audit)").getWebhookUrl();
-    
+
     // Trim leading & trailing whitespaces.
     webhookURL = webhookURL.trim();
     // Check for null or empty URL, if so - return, don't attempt to send.
@@ -144,17 +150,17 @@ public class LogEntry extends AbstractEntityUUID {
     // Log output.
     System.out.println("Attempting to send webhook message.");
     System.out.println(webhookURL);
-    
+
     // Create & send webhook.
     DiscordWebhook webhook = new DiscordWebhook(webhookURL);
     webhook.setContent(message);
     webhook.setTts(false);
-    
+
     try {
       webhook.execute();
     } catch (IOException e1) {
       System.out.println(e1.toString());
     }
-  
+
   }
 }

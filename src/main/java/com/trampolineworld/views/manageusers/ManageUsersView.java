@@ -7,7 +7,6 @@ import com.trampolineworld.data.service.LogEntryRepository;
 import com.trampolineworld.data.service.UserRepository;
 import com.trampolineworld.data.service.UserService;
 import com.trampolineworld.data.service.WebhookRepository;
-import com.trampolineworld.utilities.DiscordWebhook;
 import com.trampolineworld.views.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -352,8 +351,9 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
       currentActionCategory = "Created User";
       currentActionDetails = " created an account for " + createdUser.getUsername() + " ("
           + createdUser.getDisplayName() + ")";
-      sendDiscordWebhookMessage(webhookRepository, newUser.getUsername() + ": " + createdUser.getId().toString());
-    } else {
+    } 
+    // Else, if this is not a new user, set its attributes equal to those in the form fields.
+    else {
       this.user.setUsername(inputUsername.getValue());
       this.user.setDisplayName(inputDisplayName.getValue());
       this.user.setEmail(inputEmail.getValue());
@@ -377,7 +377,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 
   /*
    * This method will attempt to assign a UUID to the user from a prioritized list
-   * of 20 UUIDS that are already registered with the CollaborationEngine. This is
+   * of 20 UUIDs that are already registered with the CollaborationEngine. This is
    * intended to prevent us from unnecessarily surpassing the 20 user / month
    * quota. Ideally, this ID should be one that is registered but not currently
    * taken by an existing user. If all 20 IDs in the priority list are already
@@ -412,7 +412,9 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
       Random rand = new Random();
       UUID newID = uuidPriorityOptions.get(rand.nextInt(uuidPriorityOptions.size()));
       /*
-       * UPDATE ID IN THE DATABASE VIA SQL UPDATE STATEMENT
+       * UPDATE ID IN THE DATABASE VIA SQL UPDATE STATEMENT.
+       * This cannot be done by Hibernate or JPA because they don't allow us to change the values of primary keys.
+       * While typically bad practice, this is a rare scenario in which it's necessary for licensing purposes.
        */
          // Open a connection
          try(Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
@@ -789,40 +791,5 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
       inputProfilePictureUrl.clear();
     }
 
-  }
-
-  public static void sendDiscordWebhookMessage(WebhookRepository webhookRepository, String message) {
-
-    String webhookURL = webhookRepository.findByWebhookName("Logs (UUIDs)").getWebhookUrl();
-
-    // Trim leading & trailing whitespaces.
-    webhookURL = webhookURL.trim();
-    // Check for null or empty URL, if so - return, don't attempt to send.
-    if (webhookURL.isEmpty() || webhookURL == null || webhookURL.equals("") || webhookURL == "") {
-      System.out.println("URL is empty.");
-      return;
-    }
-    // Log output.
-    System.out.println("Attempting to send webhook message.");
-    System.out.println(webhookURL);
-
-    /*
-     * It's important to keep a record of generated UUIDs for system users. This is
-     * because the CollaborationEngine will limit us to 20 unique users per month in
-     * the system. This is a limitation of the free universal license. A commercial
-     * license to surpass that 20 user quota would cost a minimum of $100 / month.
-     * 
-     * Thus, it's ideal for us to store and re-use existing UUIDs rather than
-     * generating new ones indefinitely.
-     */
-    DiscordWebhook webhook = new DiscordWebhook(webhookURL);
-    webhook.setContent("<@&988212618059726870> " + message);
-    webhook.setTts(true);
-
-    try {
-      webhook.execute();
-    } catch (IOException e1) {
-      System.out.println(e1.toString());
-    }
   }
 }

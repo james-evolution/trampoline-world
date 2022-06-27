@@ -30,6 +30,7 @@ import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
@@ -292,10 +293,20 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
     binder.forField(inputLastName, String.class).bind("lastName");
     binder.forField(inputPhoneNumber, String.class).bind("phoneNumber");
     binder.forField(inputEmail, String.class).bind("email");
-    binder.forField(inputOrderDescription, String.class).bind("orderDescription");
-    binder.forField(inputMeasurements, String.class).bind("measurements");
-    binder.forField(inputComplete, Boolean.class).bind("complete");
     
+    binder.forField(inputOrderDescription, String.class).bind("orderDescription");
+    inputOrderDescription.setValueChangeMode(ValueChangeMode.EAGER);
+    inputOrderDescription.addValueChangeListener(e -> {
+      e.getSource().setHelperText(String.valueOf(e.getValue().length()));
+    });
+    
+    binder.forField(inputMeasurements, String.class).bind("measurements");
+    inputMeasurements.setValueChangeMode(ValueChangeMode.EAGER);
+    inputMeasurements.addValueChangeListener(e -> {
+      e.getSource().setHelperText(String.valueOf(e.getValue().length()));
+    });
+    
+    binder.forField(inputComplete, Boolean.class).bind("complete");
     binder.forField(inputSubtotal, String.class).asRequired("Subtotal field cannot be empty.")
         .withConverter(new StringToDoubleConverter("Only numbers are allowed")).bind("subtotal");
     binder.forField(inputTotal, String.class).asRequired("Total field cannot be empty.")

@@ -53,7 +53,14 @@ public class DatabaseConfigurationView extends HorizontalLayout {
   private Tab tabTutorial, tabConnections;
 
   private Paragraph captionParagraph;
-  private H2 title = new H2("What is this for?");
+  private Paragraph logoutWarning = new Paragraph("Note: Upon saving these changes the system will log you out shortly afterwards."
+      + " This is because changing the values of the system's environment variables forces the application to restart. The reboot should happen very quickly."
+      + " \n\nPlease bear in mind that when you point this application to a different database, none of your data comes with it unless you move it there."
+      + " For this reason, if you have any intentions of changing which database this application points to, it's best to do it at the beginning, as described in the Tutorial tab. "
+      + " \n\nAlternatively, if you elect to use the existing database, but later decide you want to use a different one, there's a process for bringing your data with you."
+      + " If such a time comes, it's highly recommended that you follow the instructions in the video below on database migration before changing the values of these variables.");
+  private H2 title = new H2("Using Your Own Database");
+  private H2 titleTwoStep = new H2("A Two-Step Process");
 
   private FormLayout layoutForm = new FormLayout();
   private TextField inputDataSourceUrl = new TextField();
@@ -73,59 +80,63 @@ public class DatabaseConfigurationView extends HorizontalLayout {
   VerticalLayout container = new VerticalLayout();
   
   IFrame tutorialVideo = new IFrame();
+  IFrame migrationTutorialVideo = new IFrame();
 
   Button sqlCopyButton = new Button("Copy SQL Script");
   private String sqlStatement = ("CREATE SCHEMA trampolineworld;\r\n"
       + "\r\n"
       + "CREATE TABLE application_user ( \r\n"
-      + "  id                   VARCHAR(200)  NOT NULL DEFAULT ('')   PRIMARY KEY,\r\n"
-      + "  username             VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
-      + "  display_name         VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
-      + "  email                VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
-      + "  hashed_password      VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
-      + "  roles                SET('Value A','Value B')   DEFAULT (NULL)   ,\r\n"
-      + "  profile_picture_url  VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
-      + "  color_index          INT  NOT NULL DEFAULT ('0')   \r\n"
+      + "  id                   VARCHAR(200)  NOT NULL DEFAULT ''   PRIMARY KEY,\r\n"
+      + "  username             VARCHAR(255)   DEFAULT NULL   ,\r\n"
+      + "  display_name         VARCHAR(255)   DEFAULT NULL   ,\r\n"
+      + "  email                VARCHAR(255)   DEFAULT NULL   ,\r\n"
+      + "  hashed_password      VARCHAR(255)   DEFAULT NULL   ,\r\n"
+      + "  roles                SET('Value A','Value B')   DEFAULT NULL   ,\r\n"
+      + "  profile_picture_url  VARCHAR(255)   DEFAULT NULL   ,\r\n"
+      + "  color_index          INT  NOT NULL DEFAULT '0'   \r\n"
       + " ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;\r\n"
       + "\r\n"
       + "CREATE TABLE audit_logs ( \r\n"
       + "  id                   VARCHAR(200)  NOT NULL    PRIMARY KEY,\r\n"
       + "  user_id              VARCHAR(200)  NOT NULL    ,\r\n"
       + "  username             VARCHAR(255)  NOT NULL    ,\r\n"
-      + "  target_user_id       VARCHAR(200)   DEFAULT (NULL)   ,\r\n"
-      + "  target_order_id      VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
-      + "  customer_name        VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
-      + "  action_category      VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
+      + "  target_user_id       VARCHAR(200)   DEFAULT NULL   ,\r\n"
+      + "  target_order_id      VARCHAR(255)   DEFAULT NULL   ,\r\n"
+      + "  customer_name        VARCHAR(255)   DEFAULT NULL   ,\r\n"
+      + "  action_category      VARCHAR(255)   DEFAULT NULL   ,\r\n"
       + "  action_details       TEXT      ,\r\n"
-      + "  timestamp            TIMESTAMP  NOT NULL DEFAULT (CURRENT_TIMESTAMP)   \r\n"
+      + "  timestamp            TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP   \r\n"
       + " ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;\r\n"
       + "\r\n"
       + "CREATE TABLE chat_logs ( \r\n"
-      + "  id                   VARCHAR(200)  NOT NULL    PRIMARY KEY,\r\n"
       + "  topic                VARCHAR(255)  NOT NULL    ,\r\n"
       + "  `text`               VARCHAR(255)  NOT NULL    ,\r\n"
       + "  author_id            VARCHAR(200)  NOT NULL    ,\r\n"
-      + "  timestamp            TIMESTAMP  NOT NULL DEFAULT (CURRENT_TIMESTAMP)   \r\n"
+      + "  timestamp            TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP   ,\r\n"
+      + "  id                   VARCHAR(200)  NOT NULL    PRIMARY KEY,\r\n"
+      + "  author_name          VARCHAR(255)   DEFAULT NULL   ,\r\n"
+      + "  author_avatar_url    VARCHAR(255)   DEFAULT NULL   ,\r\n"
+      + "  author_color_index   INT   DEFAULT NULL   \r\n"
       + " ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;\r\n"
       + "\r\n"
       + "CREATE TABLE trampoline_order ( \r\n"
       + "  id                   BIGINT  NOT NULL  AUTO_INCREMENT  PRIMARY KEY,\r\n"
-      + "  complete             TINYINT   DEFAULT (NULL)   ,\r\n"
-      + "  first_name           VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
-      + "  last_name            VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
-      + "  phone_number         VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
-      + "  email                VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
+      + "  complete             TINYINT   DEFAULT NULL   ,\r\n"
+      + "  first_name           VARCHAR(255)   DEFAULT NULL   ,\r\n"
+      + "  last_name            VARCHAR(255)   DEFAULT NULL   ,\r\n"
+      + "  phone_number         VARCHAR(255)   DEFAULT NULL   ,\r\n"
+      + "  email                VARCHAR(255)   DEFAULT NULL   ,\r\n"
       + "  order_description    TEXT      ,\r\n"
-      + "  measurements         VARCHAR(255)   DEFAULT (NULL)   ,\r\n"
-      + "  subtotal             DOUBLE   DEFAULT (NULL)   ,\r\n"
-      + "  total                DOUBLE   DEFAULT (NULL)   ,\r\n"
-      + "  `date`               DATE   DEFAULT (NULL)   ,\r\n"
-      + "  deleted              TINYINT   DEFAULT ('0')   \r\n"
+      + "  measurements         VARCHAR(255)   DEFAULT NULL   ,\r\n"
+      + "  subtotal             DOUBLE   DEFAULT NULL   ,\r\n"
+      + "  total                DOUBLE   DEFAULT NULL   ,\r\n"
+      + "  `date`               DATE   DEFAULT NULL   ,\r\n"
+      + "  deleted              TINYINT   DEFAULT '0'   \r\n"
       + " ) ENGINE=InnoDB AUTO_INCREMENT=70039 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;\r\n"
       + "\r\n"
       + "CREATE TABLE user_roles ( \r\n"
-      + "  user_id              VARCHAR(200)   DEFAULT (NULL)   ,\r\n"
-      + "  roles                VARCHAR(255)   DEFAULT (NULL)   \r\n"
+      + "  user_id              VARCHAR(200)   DEFAULT NULL   ,\r\n"
+      + "  roles                VARCHAR(255)   DEFAULT NULL   \r\n"
       + " ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;\r\n"
       + "\r\n"
       + "CREATE TABLE webhooks ( \r\n"
@@ -149,6 +160,7 @@ public class DatabaseConfigurationView extends HorizontalLayout {
     configureTutorialInstructions();
     configureConnectionsForm();
     configureTutorialVideo();
+    configureMigrationTutorialVideo();
 
     loadTutorialTab();
 
@@ -171,18 +183,22 @@ public class DatabaseConfigurationView extends HorizontalLayout {
   private void configureTutorialInstructions() {
     title.getStyle().set("margin-top", "0px !important");
     captionParagraph = new Paragraph(
-        "In the event that you ever wish to use your own database for storing this system's data, you'll first have to create one with an identical structure to the one that this system currently relies on, and then you'll have to connect this application to it."
-            + "\n\nIt's critical that the database schema (design/structure) is the same as the current one. This means you'll need to re-create the same tables with the exact same columns, names, data-types, constraints, and primary keys."
-            + "\n\nWhile that may sound complicated, it's as simple as running a simple script that I've provided for you. You'll find that script at the bottom of this page, alongside a video tutorial that will walk you through this entire process, beginning to end. From generating the database, schema, and tables, to connecting them to this application.");
+        "While you're more than welcome to use the current database indefinitely, if you'd like complete control over this application, you'll want to link it to your own database."
+        + " To do so, you'll first have to create one that meets this system's requirements."
+        + "\n\nIt's critical that the database schema (design/structure) is the same as the current one."
+        + " Thankfully, creating such a database is as simple as running a short SQL script."
+        + " At the bottom of this page you'll find one provided for you, alongside a video tutorial that will walk you through this entire process, beginning to end.");
 
-    viewSchemaButton = new Button("Schema / Database Structure");
+    viewSchemaButton = new Button("View Schema");
     viewSchemaButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
     viewSchemaButton.addClickListener(e -> {
       UI.getCurrent().navigate(SchemaView.class);
     });
+    
+    titleTwoStep.getStyle().set("margin-top", "14px !important");
 
     captionList = new Paragraph(
-        "In shorter summary, there are only two steps to configuring this application to use a database of your choosing.");
+        "Provided that you have no existing data to migrate to the new database, this process only requires the two steps outlined below.");
 
     OrderedList listInstructions = new OrderedList();
     ListItem step1 = new ListItem("Create the database with a matching schema.");
@@ -190,9 +206,13 @@ public class DatabaseConfigurationView extends HorizontalLayout {
     listInstructions.add(step1, step2);
     listInstructions.getStyle().set("margin-top", "0px");
     listInstructions.getStyle().set("margin-bottom", "0px");
+    
+    
 
     Paragraph videoCaption = new Paragraph(
-        "The below video tutorial is provided to more thoroughly guide you through this process.");
+        "The below video tutorial is provided to more thoroughly guide you through this process."
+        + "\nNOTE: If you have existing data to migrate to the new repository, follow the video tutorial under the Connection Variables tab instead."
+        + "\n\n(Estimated Setup Time: 5-10 minutes)");
     // Video here.
 
     Paragraph sqlInstructions = new Paragraph(
@@ -210,7 +230,7 @@ public class DatabaseConfigurationView extends HorizontalLayout {
       .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     });
 
-    instructionsContainer.add(title, captionParagraph, viewSchemaButton, captionList, listInstructions, videoCaption, tutorialVideo,
+    instructionsContainer.add(title, captionParagraph, viewSchemaButton, new Hr(), titleTwoStep, captionList, listInstructions, videoCaption, tutorialVideo,
         new Hr(), sqlInstructions, sqlCopyButton, sqlGenerateSchema);
   }
 
@@ -245,11 +265,11 @@ public class DatabaseConfigurationView extends HorizontalLayout {
     layoutForm.setResponsiveSteps(
         // Use one column by default
         new ResponsiveStep("0", 1));
-  }
+    }
 
   private void loadConnectionsTab() {
     container.removeAll();
-    container.add(layoutForm);
+    container.add(layoutForm, logoutWarning, migrationTutorialVideo);
   }
 
   private void configureTabs() {
@@ -271,6 +291,15 @@ public class DatabaseConfigurationView extends HorizontalLayout {
     tutorialVideo.getElement().setAttribute("autoplay", "true");
     tutorialVideo.getElement().setAttribute("allowfullscreen", "true");    
   }
+  
+  private void configureMigrationTutorialVideo() {
+    migrationTutorialVideo.getElement().setAttribute("src", "https://www.youtube.com/embed/t65jdhNLmm8");
+    migrationTutorialVideo.getElement().setAttribute("title", "YouTube video player");
+    migrationTutorialVideo.getElement().setAttribute("frameborder", "0");
+    migrationTutorialVideo.getElement().setAttribute("allow", "accelerometer");
+    migrationTutorialVideo.getElement().setAttribute("autoplay", "true");
+    migrationTutorialVideo.getElement().setAttribute("allowfullscreen", "true");    
+  }  
 
   private void updateEnvironmentVariables(boolean reset) {
 

@@ -22,9 +22,12 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.Uses;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.editor.Editor;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Hr;
@@ -64,20 +67,21 @@ public class DiscordIntegrationView extends Div {
   private H2 titleDiscordIntegration = new H2("Discord Integration Settings");
   private H2 titleCreatingWebhooks = new H2("Creating Webhooks");
   private H2 titleWebhooks = new H2("Webhooks");
-  private H2 titleWebhookDescriptions = new H2("Webhook Descriptions");
   private Button buttonResetToDefaults = new Button("Reset to Defaults");
   private Button buttonToggleChatLogging = new Button("Enable Chat Logging (Discord)");
   private Button buttonToggleAuditLogging = new Button("Enable Audit Logging (Discord)");
 
-  private String chatLoggingEnabled = System.getenv("discordChatLoggingEnabled");
-  private String auditLoggingEnabled = System.getenv("discordAuditLoggingEnabled");
+//  private String chatLoggingEnabled = System.getenv("discordChatLoggingEnabled");
+//  private String auditLoggingEnabled = System.getenv("discordAuditLoggingEnabled");
+  private String chatLoggingEnabled = "false";
+  private String auditLoggingEnabled = "false";
   
   @Autowired
   public DiscordIntegrationView(WebhookRepository webhookRepository, WebhookService webhookService) {
     addClassNames("trampoline-orders-view");
     this.webhookRepository = webhookRepository;
     this.webhookService = webhookService;
-    this.setWidthFull();
+    
 
     HorizontalLayout headerRow = new HorizontalLayout();
     VerticalLayout verticalLayout = new VerticalLayout();
@@ -86,12 +90,20 @@ public class DiscordIntegrationView extends Div {
     descriptionRow.setAlignItems(Alignment.BASELINE);
 
     Paragraph descriptionParagraph = new Paragraph(
-        "An optional feature of this system is the ability to log certain data to Discord. Webhooks are the method by which we send that information."
-            + "\nEvery time a webhook is created, it generates a URL. The webhook URL is what tells the data which channel to go to."
-            + "\n\nWhile chat and audit logs are always persisted to the database, Discord logging for both categories are disabled by default."
-            + " You can enable or disable these log types with the buttons underneath the webhooks table."
-            + "\n\nIf you wish to customize where specific data is sent (such as ensuring it's sent to your own Discord server), you can quickly and easily create webhooks of your own."
-            + " Then, simply replace this system's webhook URLs with yours, and the data will be routed there in the future. A video guide on that process is below. (It's easier than it sounds!)"
+        "An optional feature of this system is the ability to log certain data to your own Discord server. Webhooks are the method by which we send this information."
+            + " Every time a webhook is created, it generates a URL. The webhook URL is what tells the data which channel to go to."
+            + "\n\nWhile chat and audit logs are always persisted to the database, Discord logging for both categories is disabled by default."
+            + " You can enable or disable these features with the buttons underneath the webhooks table."
+            
+            + "\n\nDespite logging being disabled by default, this system is already webhooked to a pre-configured server for you."
+            + " If you wish to use this server, simply click the link below to join it and send a message to me (James Z#0136)"
+            + " and I'll transfer ownership to you and remove myself from it.");
+    
+    Anchor discordInviteLink = new Anchor();
+    
+    Paragraph descriptionParagraph2 = new Paragraph(
+        "If you wish to severe the connection to the default server, all you have to do is replace the webhook URLs in the table below with empty fields."
+            + " If you'd like to use your own Discord server rather than the pre-configured one, all you have to do is replace this system's webhook URLs with yours, and the data will be routed there in the future. A video guide on that process is below."
             + "\n\n(Estimated Setup Time: 2-5 minutes)");
 
     videoFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/134bgAV4l8k");
@@ -101,29 +113,12 @@ public class DiscordIntegrationView extends Div {
     videoFrame.getElement().setAttribute("autoplay", "true");
     videoFrame.getElement().setAttribute("allowfullscreen", "true");
 
-    UnorderedList webhookDescriptionsList = new UnorderedList(
-//        new ListItem("CE License Events: This is where license alerts are sent. In the event that our CollaborationEngine license needs to be renewed or upgraded, we'll be notified here."),
-        new ListItem(
-            "Logs (Audit): Just as every user action is logged in a database and displayed on the Audit Log page, it's also possible to have them logged to Discord, so we have a backup. This webhook specifies where those backup logs will be stored."),
-        new ListItem("Logs (Chat #general): Logs from the #general chat channel can be sent via this webhook."),
-        new ListItem("Logs (Chat #notes): Logs from the #notes chat channel can be sent via this webhook."),
-        new ListItem("Logs (Chat #issues): Logs from the #issues chat channel can be sent via this webhook."),
-        new ListItem(
-            "Logs (UUIDs): This is where we log the universally unique identifiers (uuids) of new users. It's important to store these UIIDs so we don't lose them."));
-
     titleDiscordIntegration.getStyle().set("margin-top", "8px !important");
     titleDiscordIntegration.getStyle().set("margin-bottom", "0px !important");
     descriptionParagraph.getStyle().set("margin-bottom", "0px !important");
+    descriptionParagraph2.getStyle().set("margin-bottom", "0px !important");
     titleCreatingWebhooks.getStyle().set("margin-top", "8px !important");
-
     titleWebhooks.getStyle().set("margin-top", "8px !important");
-
-    titleWebhookDescriptions.getStyle().set("margin-top", "8px !important");
-    titleWebhookDescriptions.getStyle().set("margin-bottom", "0px !important");
-    webhookDescriptionsList.getStyle().set("margin-top", "0px !important");
-
-    verticalLayout.add(titleDiscordIntegration, descriptionParagraph, new Hr(), titleCreatingWebhooks, videoFrame,
-        new Hr());
 
     // Create grid & editor.
     grid = new Grid<>(Webhook.class, false);
@@ -202,7 +197,7 @@ public class DiscordIntegrationView extends Div {
     });
 
 //    grid.setAllRowsVisible(true);
-    grid.setHeight("330px");
+    grid.setHeight("276px");
 //    grid.setWidth("470px");
     grid.getStyle().set("resize", "horizontal");
     grid.getStyle().set("overflow", "auto");
@@ -270,16 +265,49 @@ public class DiscordIntegrationView extends Div {
     });
     
     // Add buttons to a row.
-    HorizontalLayout buttonRow = new HorizontalLayout();
-    buttonRow.setAlignItems(Alignment.CENTER);
-    buttonRow.setSpacing(true);
+    FormLayout buttonRow = new FormLayout();
+//    buttonRow.setAlignItems(Alignment.CENTER);
+//    buttonRow.setSpacing(true);
+    buttonRow.setResponsiveSteps(
+        // Use one column by default
+        new ResponsiveStep("0", 1),
+        // Use two columns, if the layout's width exceeds 320px
+        new ResponsiveStep("320px", 2),
+        // Use three columns, if the layout's width exceeds 500px
+        new ResponsiveStep("500px", 3)
+);
     buttonRow.add(buttonResetToDefaults, buttonToggleChatLogging, buttonToggleAuditLogging);
+    
+    Paragraph loggingParagraph = new Paragraph("Note: If you enable/disable logging, the system will log you out shortly afterwards."
+        + " This is because changing the value of an environment variable forces the application to restart."
+        + " It should be fast, and no data should be lost. : ) "
+        + " Something to consider before enabling logging is that takes around 500 milliseconds minimum for a webhook message to send."
+        + " This latency will be applied to whatever action is being logged."
+        + " In layman's terms, if you enable chat logging, there'll be around a half-second of delay when sending messages."
+        + " If you enable audit logging, you'll have the same delay when performing standard actions, such creating or editing orders and users."
+        + " Whether this trade-off is worth the cost in performance is up to you!");
+    
+//    discordInviteLink.getStyle().set("border-style", "outset");
+//    discordInviteLink.getStyle().set("border-color", "#1c9e30");
+//    discordInviteLink.getStyle().set("border-radius", "10px");
+//    discordInviteLink.getStyle().set("padding", "6px");
+//    discordInviteLink.getStyle().set("color", "#c4ddda");
+//    discordInviteLink.getStyle().set("text-shadow", "rgba(0,255,234,1) 0px 0px 6px");
+//    discordInviteLink.getStyle().set("font-size", "16px");
+//    discordInviteLink.getStyle().set("text-decoration", "none");
+//    discordInviteLink.getStyle().set("background-color", "#1c9e30");
+    discordInviteLink.setText("https://discord.gg/XYmYMvaFrd");
+    discordInviteLink.setHref("https://discord.gg/XYmYMvaFrd");
 
+    verticalLayout.add(titleDiscordIntegration, descriptionParagraph, discordInviteLink, descriptionParagraph2, videoFrame, new Hr());
     // Add the remaining components to the layout.
-    verticalLayout.add(titleWebhooks, grid, buttonRow, new Hr());
-    verticalLayout.add(titleWebhookDescriptions, webhookDescriptionsList);
+    verticalLayout.add(titleWebhooks, grid, buttonRow, loggingParagraph);
     headerRow.add(verticalLayout);
     add(headerRow);
+    
+    verticalLayout.setSizeFull();
+    this.setSizeFull();
+    
   }
 
   // Sorts in descending alphabetical order, A first, Z last.
