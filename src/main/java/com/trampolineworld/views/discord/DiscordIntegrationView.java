@@ -170,7 +170,7 @@ public class DiscordIntegrationView extends Div {
     resetToDefaultsButton.addClickListener(e -> {
       try {
         resetToDefaults();
-        Notification.show("Webhooks URLs reset to their default values.", 4000, Position.TOP_CENTER)
+        Notification.show("Webhook URLs reset to their default values.", 4000, Position.TOP_CENTER)
             .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
       } catch (Exception exception) {
         Notification.show("An error occurred.", 4000, Position.TOP_CENTER)

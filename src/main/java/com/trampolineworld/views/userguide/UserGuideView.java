@@ -168,37 +168,37 @@ public class UserGuideView extends HorizontalLayout {
             + "\nIn addition to this being a website, this system is also both a desktop and mobile application (compatible with macOS, Windows, iPhones, and Androids)");
 
     featuresList = new UnorderedList(new ListItem(
-        "Authentication & Authorization: Users must log in to access this application. Individual permissions depend upon account type."),
-        new ListItem("CRUD Operations: Users can create, read, update, and delete orders."),
+        "Login & Security: Users must log in to access this application. Individual permissions depend upon account type."),
+        new ListItem("Order Management: Admins can create, read, update, and delete orders. Non-admins cannot delete orders."),
+        new ListItem(
+            "User Management: Admins can manage user accounts and modify their names, passwords, and roles - which impact their permissions"),
         new ListItem(
             "Searching, Sorting, & Filtering: All pages with grid views have these features enabled. Admins can search through orders, system users, and system logs in a variety of ways."),
         new ListItem(
             "Column Reordering, Resizing, & Filtering: Users can drag columns to reorder and resize them. Additionally, they can hide/show specific columns with the Show/Hide button. (On pages with an abundance of detailed information, some columns are not shown by default, but users can opt in to see them with the aforementioned button.)"),
         new ListItem("Data Exports: Order information can be exported as needed in either PDF or CSV format."),
         new ListItem(
-            "Form Validation: The form used to create new orders and edit existing ones can validate input to meet any specified requirements."),
-        new ListItem(
-            "Live Chat: A still-in-development and optional feature is live-chat. This is showcased in the video."),
-        new ListItem(
-            "Persistent Data Storage: This application uses a MySQL database to store & retrieve order information."),
-        new ListItem(
-            "Archives: When an order gets deleted from the system, it isn't actually deleted from the database. Instead, it is simply flagged so that it does not appear on the orders page. Admins can view deleted orders in the archives, where they can restore them if they desire."),
-        new ListItem(
-            "User Management: Admins can manage user accounts and modify their names, passwords, and permissions."),
+            "Order Archives: When an order gets deleted from the system, it isn't actually deleted from the database. Instead, it is simply flagged so that it does not appear on the orders page. Admins can view deleted orders in the archives, where they can restore them if they desire."),
         new ListItem(
             "Audit Log: All user actions are logged in the system. Administrators can see who made what changes at what time."),
         new ListItem(
-            "Date/Time Sorting: By default, all orders and logs are sorted by their date or timestamp, with the most recent entries showing at the top of the grid."),
+            "Live Chat: All users have access to a chat room in which they can communicate to each other via different devices and locations. They can also store notes here. The chat history is persisted to the database and should never be lost, even between server restarts."),
         new ListItem(
             "Profile Customization: Users can customize their own profile picture, color, display name, email address, and password."),
         new ListItem(
             "Password Resets: If a user forgets their password they can have a reset code sent to their email via the login page. Alternatively, administrators can change their password by hand."),
         new ListItem(
+            "In-Application Database Configuration: This application uses a MySQL database on Bluehost to store & retrieve order information. However, administrators can point this application to a database of their own choosing via the database configuration page."),
+        new ListItem(
+            "Date/Time Sorting: By default, all orders and logs are sorted by their date or timestamp, with the most recent entries showing at the top of the grid."),
+        new ListItem(
+            "Form Validation: The form used to create new orders and edit existing ones can validate input to meet any specified requirements."),
+        new ListItem(
             "Tooltips & Helper Text: Some columns on the user management page show helpful hints/information if you hover over them with your cursor. Many input fields also have helper text beneath them as guidelines."),
         new ListItem(
-            "Discord Integration: Admins & Techs can use the Discord Integration page to enable or disable data logging to Discord. Three log categories exist: Audit, Chat, and UUID. Alternatively, they can edit webhook URLs to send this data to whichever channel or server they wish."),
+            "Discord Integration: Admins & Techs can use the Discord Integration page to configure, enable, or disable data logging to Discord. Three log categories exist: Audit, Chat, and UUID. If desired, admins can edit webhook URLs to send this data to whichever Discord server channels they wish."),
         new ListItem(
-            "Open Source: The full source code used to develop this application is freely available to the owners of Trampoline World."),
+            "Open Source: The full source code used to develop this application is freely available to the current owners of Trampoline World, to be modified however they wish."),
         new ListItem(
             "Questions & Requests: The contact page allows admins to instantly contact the developer via email or text-to-speech Discord message if they have questions or want to make requests."));
   }

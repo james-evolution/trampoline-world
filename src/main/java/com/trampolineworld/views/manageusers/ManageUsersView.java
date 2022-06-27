@@ -74,9 +74,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @CssImport(value = "./themes/trampolineworld/views/dialog.css", themeFor = "vaadin-dialog-overlay")
 public class ManageUsersView extends Div implements BeforeEnterObserver {
 
-  private final String DB_URL = "jdbc:mysql://162.241.244.22/faintdev_trampolineworld";
-  private final String USER = "faintdev_twadmin";
-  private final String PASS = "beautifulstranger410";
+  private final String DB_URL = System.getenv("spring.datasource.url");
+  private final String USER = System.getenv("spring.datasource.username");
+  private final String PASS = System.getenv("spring.datasource.password");
 
   private String currentActionCategory;
   private String currentActionDetails;
@@ -132,7 +132,6 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
       UUID.fromString("52d1376a-b8d4-4d60-874e-b804d078f780"), // TW Tech
       UUID.fromString("275626f5-d4a0-4ce7-b90f-f34e236b8c6f"), // TW User
       UUID.fromString("830b6bf0-d783-491c-b7e1-98e219548ab8"), // Sneaky Rat
-      UUID.fromString("11c0475e-e6c4-4885-ab3b-933afc925831"), 
       UUID.fromString("f60e2718-0600-48a9-849f-20ee79ebdf45"),
       UUID.fromString("f56e5fd7-4bbc-4d8e-890b-affadbc35d78"), 
       UUID.fromString("e761fb9a-5e84-4854-ab7c-aa9551791a40"),
@@ -145,6 +144,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
       UUID.fromString("88518b49-916d-4c08-a3b3-a1d85c92939b"), 
       UUID.fromString("5c2f378b-7667-447a-a996-d8360f6a5451"),
       UUID.fromString("5c17735c-774b-4c59-ad49-db3829a4d218"),
+      UUID.fromString("016c6be5-9926-474a-a555-1ea24bfdd7ea"),
       UUID.fromString("59469b67-fe3a-42cb-b8c1-9d0d4327d5d6")));
 
   @Autowired
@@ -402,7 +402,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
       }
     }
 
-    System.out.println("Options left: " + String.valueOf(uuidPriorityOptions.size()));
+    System.out.println("Priority ID options left: " + String.valueOf(uuidPriorityOptions.size()));
 
     /*
      * If there are still priority options left in the options list, use one of those.
@@ -424,7 +424,9 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
          } catch (SQLException e) {
             e.printStackTrace();
          } 
-      System.out.println("Priority ID selected: " + newID);
+      System.out.println("User created with priority ID: " + newID);
+      Notification.show("User created with priority ID: " + newID, 8000, Position.TOP_CENTER)
+      .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
     /*
      * If there are NO PRIORITY OPTIONS LEFT, do nothing.
@@ -432,6 +434,8 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
      */
     else {
       System.out.println("No priority IDs available. Using generated ID: " + newUser.getId().toString());
+      Notification.show("No priority IDs available. User created with generated ID: " + newUser.getId().toString(), 8000, Position.TOP_CENTER)
+      .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
       // Do nothing. Keep the ID as is.
     }
     System.out.println("---------------------------\n\n");
@@ -677,6 +681,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
     
     inputID = new TextField("ID");
     inputID.setReadOnly(true);
+    inputID.setHelperText("This field is read-only and cannot be changed.");
 
     inputUsername = new TextField("Username");
     inputUsername.setHelperText(
@@ -711,8 +716,8 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
     inputProfilePictureUrl.setHelperText(
         "File uploads are not yet supported for profile pictures. You can, however, pass in an image URL. Right click on an image from the net and select 'Copy Image Address' and then paste it here. The url path must end in .jpg, .png, or .webp");
 
-    Component[] fields = new Component[] { inputID, inputUsername, inputDisplayName, inputEmail, inputRoles, inputHashedPassword,
-        inputProfilePictureUrl, inputColorIndex };
+    Component[] fields = new Component[] { inputUsername, inputDisplayName, inputEmail, inputRoles, inputHashedPassword,
+        inputProfilePictureUrl, inputColorIndex, inputID};
 
     formLayout.add(fields);
 

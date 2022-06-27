@@ -654,6 +654,7 @@ public class TrampolineOrdersView extends Div implements BeforeEnterObserver {
     inputTotal = new TextField("Total");
     inputDate = new DatePicker("Date");
     inputOrderID = new TextField("Order ID");
+    inputOrderID.setHelperText("This field is read-only and cannot be changed.");
     inputComplete = new Checkbox("Complete");
     Component[] fields = new Component[] { inputFirstName, inputLastName, inputPhoneNumber, inputEmail, inputOrderDescription, inputMeasurements,
         inputSubtotal, inputTotal, inputDate, inputOrderID, inputComplete };
