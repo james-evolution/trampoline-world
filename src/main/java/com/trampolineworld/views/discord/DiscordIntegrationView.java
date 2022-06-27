@@ -209,19 +209,29 @@ public class DiscordIntegrationView extends Div {
     updateGrid();
     
     
+    // If chat logging is disabled, style the button for enabling.
     if (chatLoggingEnabled.equals("false")) {
       buttonToggleChatLogging.addThemeVariants(ButtonVariant.LUMO_SUCCESS, ButtonVariant.LUMO_PRIMARY);
+      buttonToggleChatLogging.setText("Enable Chat Logging (Discord)");
     }
     else {
       buttonToggleChatLogging.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_PRIMARY);
+      buttonToggleChatLogging.setText("Disable Chat Logging (Discord)");
     }
+    
+    // If audit logging is disabled, style the button for enabling.
     if (auditLoggingEnabled.equals("false")) {
       buttonToggleAuditLogging.addThemeVariants(ButtonVariant.LUMO_SUCCESS, ButtonVariant.LUMO_PRIMARY);
+      buttonToggleAuditLogging.setText("Enable Audit Logging (Discord)");
     }
     else {
       buttonToggleAuditLogging.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_PRIMARY);
+      buttonToggleAuditLogging.setText("Disable Audit Logging (Discord)");
     }
     
+    /*
+     * Click listeners for the button to toggle chat logging.
+     */
     buttonToggleChatLogging.addClickListener(e -> {
       if (chatLoggingEnabled.equals("false")) {
         updateEnvironmentVariable("discordChatLoggingEnabled", "true");
@@ -239,6 +249,9 @@ public class DiscordIntegrationView extends Div {
       }
     });
     
+    /*
+     * Click listeners for the button to toggle audit logging.
+     */
     buttonToggleAuditLogging.addClickListener(e -> {
       if (auditLoggingEnabled.equals("false")) {
         updateEnvironmentVariable("discordAuditLoggingEnabled", "true");
@@ -256,11 +269,13 @@ public class DiscordIntegrationView extends Div {
       }
     });
     
+    // Add buttons to a row.
     HorizontalLayout buttonRow = new HorizontalLayout();
     buttonRow.setAlignItems(Alignment.CENTER);
     buttonRow.setSpacing(true);
     buttonRow.add(buttonResetToDefaults, buttonToggleChatLogging, buttonToggleAuditLogging);
 
+    // Add the remaining components to the layout.
     verticalLayout.add(titleWebhooks, grid, buttonRow, new Hr());
     verticalLayout.add(titleWebhookDescriptions, webhookDescriptionsList);
     headerRow.add(verticalLayout);
