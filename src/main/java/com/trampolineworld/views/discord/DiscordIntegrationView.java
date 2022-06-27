@@ -1,5 +1,9 @@
 package com.trampolineworld.views.discord;
 
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -7,6 +11,7 @@ import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.trampolineworld.data.entity.Webhook;
@@ -60,8 +65,13 @@ public class DiscordIntegrationView extends Div {
   private H2 titleCreatingWebhooks = new H2("Creating Webhooks");
   private H2 titleWebhooks = new H2("Webhooks");
   private H2 titleWebhookDescriptions = new H2("Webhook Descriptions");
-  private Button resetToDefaultsButton = new Button("Reset to Defaults");
+  private Button buttonResetToDefaults = new Button("Reset to Defaults");
+  private Button buttonToggleChatLogging = new Button("Enable Chat Logging (Discord)");
+  private Button buttonToggleAuditLogging = new Button("Enable Audit Logging (Discord)");
 
+  private String chatLoggingEnabled = System.getenv("discordChatLoggingEnabled");
+  private String auditLoggingEnabled = System.getenv("discordAuditLoggingEnabled");
+  
   @Autowired
   public DiscordIntegrationView(WebhookRepository webhookRepository, WebhookService webhookService) {
     addClassNames("trampoline-orders-view");
@@ -78,9 +88,10 @@ public class DiscordIntegrationView extends Div {
     Paragraph descriptionParagraph = new Paragraph(
         "An optional feature of this system is the ability to log certain data to Discord. Webhooks are the method by which we send that information."
             + "\nEvery time a webhook is created, it generates a URL. The webhook URL is what tells the data which channel to go to."
-            + "\n\nTo disable logging, simply edit the webhook URL and save it as an empty field."
-            + "\n\nAlternatively, if you wish to customize where this data is sent (such as ensuring it's sent to your own Discord server), you can quickly and easily create webhooks of your own."
-            + " Then, simply replace these URLs with yours, and the data will be routed there in the future. A video guide on that process is below. (It's easier than it sounds!)"
+            + "\n\nWhile chat and audit logs are always persisted to the database, Discord logging for both categories are disabled by default."
+            + " You can enable or disable these log types with the buttons underneath the webhooks table."
+            + "\n\nIf you wish to customize where specific data is sent (such as ensuring it's sent to your own Discord server), you can quickly and easily create webhooks of your own."
+            + " Then, simply replace this system's webhook URLs with yours, and the data will be routed there in the future. A video guide on that process is below. (It's easier than it sounds!)"
             + "\n\n(Estimated Setup Time: 2-5 minutes)");
 
     videoFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/134bgAV4l8k");
@@ -94,9 +105,9 @@ public class DiscordIntegrationView extends Div {
 //        new ListItem("CE License Events: This is where license alerts are sent. In the event that our CollaborationEngine license needs to be renewed or upgraded, we'll be notified here."),
         new ListItem(
             "Logs (Audit): Just as every user action is logged in a database and displayed on the Audit Log page, it's also possible to have them logged to Discord, so we have a backup. This webhook specifies where those backup logs will be stored."),
-        new ListItem("Logs (Chat #general): Logs from the #general chat channel are sent via this webhook."),
-        new ListItem("Logs (Chat #notes): Logs from the #notes chat channel are sent via this webhook."),
-        new ListItem("Logs (Chat #issues): Logs from the #issues chat channel are sent via this webhook."),
+        new ListItem("Logs (Chat #general): Logs from the #general chat channel can be sent via this webhook."),
+        new ListItem("Logs (Chat #notes): Logs from the #notes chat channel can be sent via this webhook."),
+        new ListItem("Logs (Chat #issues): Logs from the #issues chat channel can be sent via this webhook."),
         new ListItem(
             "Logs (UUIDs): This is where we log the universally unique identifiers (uuids) of new users. It's important to store these UIIDs so we don't lose them."));
 
@@ -129,7 +140,6 @@ public class DiscordIntegrationView extends Div {
     Grid.Column<Webhook> webhookUrlColumn = grid.addColumn(Webhook::getWebhookUrl).setHeader("Webhook URL")
         .setAutoWidth(true).setFlexGrow(0).setResizable(true).setSortable(true);
     ;
-
     // Create edit column & add edit button to it.
     Grid.Column<Webhook> editColumn = grid.addComponentColumn(webhook -> {
       Button editButton = new Button("Edit");
@@ -142,7 +152,7 @@ public class DiscordIntegrationView extends Div {
       });
       editButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
       return editButton;
-    }).setWidth("100px").setFlexGrow(0);
+    }).setWidth("160px").setFlexGrow(0);
 
     // Create data binder for the Webhook class, and bind to the editor.
     Binder<Webhook> binder = new Binder<>(Webhook.class);
@@ -150,7 +160,7 @@ public class DiscordIntegrationView extends Div {
     editor.setBuffered(true);
 
     TextField webhookUrlField = new TextField();
-//    webhookUrlField.setWidthFull();
+    webhookUrlField.setWidthFull();
     binder.forField(webhookUrlField).bind(Webhook::getWebhookUrl, Webhook::setWebhookUrl);
     webhookUrlColumn.setEditorComponent(webhookUrlField);
 
@@ -167,7 +177,7 @@ public class DiscordIntegrationView extends Div {
       }
     });
     saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
-    resetToDefaultsButton.addClickListener(e -> {
+    buttonResetToDefaults.addClickListener(e -> {
       try {
         resetToDefaults();
         Notification.show("Webhook URLs reset to their default values.", 4000, Position.TOP_CENTER)
@@ -177,11 +187,13 @@ public class DiscordIntegrationView extends Div {
             .addThemeVariants(NotificationVariant.LUMO_ERROR);
       }
     });
-    resetToDefaultsButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+    buttonResetToDefaults.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
 
     Button cancelButton = new Button(VaadinIcon.CLOSE.create(), e -> editor.cancel());
     cancelButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_ERROR);
+
     HorizontalLayout actions = new HorizontalLayout(saveButton, cancelButton);
+
     actions.setPadding(false);
     editColumn.setEditorComponent(actions);
 
@@ -196,7 +208,60 @@ public class DiscordIntegrationView extends Div {
     grid.getStyle().set("overflow", "auto");
     updateGrid();
     
-    verticalLayout.add(titleWebhooks, grid, resetToDefaultsButton, new Hr());
+    
+    if (chatLoggingEnabled.equals("false")) {
+      buttonToggleChatLogging.addThemeVariants(ButtonVariant.LUMO_SUCCESS, ButtonVariant.LUMO_PRIMARY);
+    }
+    else {
+      buttonToggleChatLogging.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_PRIMARY);
+    }
+    if (auditLoggingEnabled.equals("false")) {
+      buttonToggleAuditLogging.addThemeVariants(ButtonVariant.LUMO_SUCCESS, ButtonVariant.LUMO_PRIMARY);
+    }
+    else {
+      buttonToggleAuditLogging.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_PRIMARY);
+    }
+    
+    buttonToggleChatLogging.addClickListener(e -> {
+      if (chatLoggingEnabled.equals("false")) {
+        updateEnvironmentVariable("discordChatLoggingEnabled", "true");
+        buttonToggleChatLogging.removeThemeVariants(ButtonVariant.LUMO_SUCCESS);
+        buttonToggleChatLogging.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        buttonToggleChatLogging.setText("Disable Chat Logging (Discord)");
+        chatLoggingEnabled = "true";
+      }
+      else {
+        updateEnvironmentVariable("discordChatLoggingEnabled", "false");
+        buttonToggleChatLogging.removeThemeVariants(ButtonVariant.LUMO_ERROR);
+        buttonToggleChatLogging.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+        buttonToggleChatLogging.setText("Enable Chat Logging (Discord)");
+        chatLoggingEnabled = "false";
+      }
+    });
+    
+    buttonToggleAuditLogging.addClickListener(e -> {
+      if (auditLoggingEnabled.equals("false")) {
+        updateEnvironmentVariable("discordAuditLoggingEnabled", "true");
+        buttonToggleAuditLogging.removeThemeVariants(ButtonVariant.LUMO_SUCCESS);
+        buttonToggleAuditLogging.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        buttonToggleAuditLogging.setText("Disable Audit Logging (Discord)");
+        auditLoggingEnabled = "true";
+      }
+      else {
+        updateEnvironmentVariable("discordAuditLoggingEnabled", "false");
+        buttonToggleAuditLogging.removeThemeVariants(ButtonVariant.LUMO_ERROR);
+        buttonToggleAuditLogging.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+        buttonToggleAuditLogging.setText("Enable Audit Logging (Discord)");
+        auditLoggingEnabled = "false";
+      }
+    });
+    
+    HorizontalLayout buttonRow = new HorizontalLayout();
+    buttonRow.setAlignItems(Alignment.CENTER);
+    buttonRow.setSpacing(true);
+    buttonRow.add(buttonResetToDefaults, buttonToggleChatLogging, buttonToggleAuditLogging);
+
+    verticalLayout.add(titleWebhooks, grid, buttonRow, new Hr());
     verticalLayout.add(titleWebhookDescriptions, webhookDescriptionsList);
     headerRow.add(verticalLayout);
     add(headerRow);
@@ -293,5 +358,38 @@ public class DiscordIntegrationView extends Div {
     webhookRepository.save(debugLogsWebhook);
 
     updateGrid();
+  }
+  
+  private void updateEnvironmentVariable(String environmentVariableName, String value) {
+
+    try {
+      URL url = new URL("https://api.heroku.com/apps/trampolineworld/config-vars");
+      HttpURLConnection http = (HttpURLConnection) url.openConnection();
+      // Patch fix.
+      http.setRequestProperty("X-HTTP-Method-Override", "PATCH");
+      http.setRequestMethod("POST");
+      http.setDoOutput(true);
+      http.setRequestProperty("Content-Type", "application/json");
+      http.setRequestProperty("Accept", "application/vnd.heroku+json; version=3");
+      http.setRequestProperty("Authorization", "Bearer cdc36c38-a8e0-4e3d-a904-17d58b1b49e2");
+      JSONObject configVars = new JSONObject();
+
+      configVars.put(environmentVariableName, value);
+      
+      String stringConfigVars = configVars.toString();
+
+      byte[] out = stringConfigVars.getBytes(StandardCharsets.UTF_8);
+
+      OutputStream stream = http.getOutputStream();
+      stream.write(out);
+
+      System.out.println(http.getResponseCode() + " " + http.getResponseMessage());
+      http.disconnect();
+      Notification.show("Environment variables updated!", 4000, Position.TOP_CENTER)
+          .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+    } catch (Exception exception) {
+      Notification.show(exception.toString(), 4000, Position.TOP_CENTER)
+          .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+    }
   }
 }

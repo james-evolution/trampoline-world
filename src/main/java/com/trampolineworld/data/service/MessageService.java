@@ -76,7 +76,6 @@ public class MessageService {
     
     public Stream<Message> findAllByTopicSince(String topicId, Instant since) {
       
-//      List<Message> allMessages = repository.findAll();
       List<Message> allMessages = repository.search(topicId);
       List<Message> filteredMessages = new ArrayList<Message>();
       

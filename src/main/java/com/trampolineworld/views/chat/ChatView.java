@@ -46,6 +46,8 @@ public class ChatView extends VerticalLayout implements BeforeEnterObserver {
   private MessageManager messageManagerGeneral;
   private MessageManager messageManagerNotes;
   private MessageManager messageManagerIssues;
+  
+  private String discordChatLoggingEnabled = System.getenv("discordChatLoggingEnabled");
 
   public ChatView(UserService userService, UserRepository userRepository, WebhookRepository webhookRepository,
       MessageService messageService, MessageRepository messageRepository) {
@@ -98,7 +100,10 @@ public class ChatView extends VerticalLayout implements BeforeEnterObserver {
         messageManagerIssues.submit(message);
         System.out.println("Trying to store an issue");
       }
-      sendDiscordWebhookMessage(webhookRepository, userInfo.getName(), userInfo.getImage(), message);
+      
+      if (discordChatLoggingEnabled.equals("true")) {
+        sendDiscordWebhookMessage(webhookRepository, userInfo.getName(), userInfo.getImage(), message);
+      }
     });
 
     // Add components to layout.

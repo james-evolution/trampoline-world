@@ -15,6 +15,9 @@ public class Message extends AbstractEntityUUID {
   private String topic;
   private String text;
   private String authorId;
+  private String authorName;
+  private String authorAvatarUrl;
+  private int authorColorIndex;
   @Column(columnDefinition="TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
   private Instant timestamp;
 
@@ -51,6 +54,31 @@ public class Message extends AbstractEntityUUID {
   public void setAuthorId(String authorId) {
     this.authorId = authorId;
   }
+  
+  public String getAuthorName() {
+    return authorName;
+  }
+
+  public void setAuthorName(String authorName) {
+    this.authorName = authorName;
+  }
+
+  public String getAuthorAvatarUrl() {
+    return authorAvatarUrl;
+  }
+
+  public void setAuthorAvatarUrl(String authorAvatarUrl) {
+    this.authorAvatarUrl = authorAvatarUrl;
+  }  
+  
+  public int getAuthorColorIndex() {
+    return authorColorIndex;
+  }
+
+  public void setAuthorColorIndex(int authorColorIndex) {
+    this.authorColorIndex = authorColorIndex;
+  }
+  
 
   public Instant getTimestamp() {
     return timestamp;

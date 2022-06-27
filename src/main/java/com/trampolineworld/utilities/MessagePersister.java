@@ -24,27 +24,20 @@ public class MessagePersister implements CollaborationMessagePersister {
     this.userService = userService;
     this.messageRepository = messageRepository;
   }
-
+  
   @Override
   public Stream<CollaborationMessage> fetchMessages(FetchQuery query) {
-    return messageService.findAllByTopicSince(query.getTopicId(), query.getSince()).map(messageEntity -> {
-      
-//      System.out.println("\n\n-------------------------------------");
-//      System.out.println(query.getTopicId());
-//      System.out.println(messageEntity.getId()); // Message ID
-//      System.out.println(messageEntity.getAuthorId()); // User ID
-//      System.out.println(messageEntity.getText());
-//      System.out.println(messageEntity.getTopic());
-//      System.out.println(messageEntity.getTimestamp());
-//      System.out.println("-------------------------------------\n\n");
-      
-      User author = userService.findById(messageEntity.getAuthorId().toString()).get();
-      UserInfo userInfo = new UserInfo(author.getId().toString(), author.getDisplayName(),
-          author.getProfilePictureUrl());
-      userInfo.setColorIndex(author.getColorIndex());
+      return messageService
+              .findAllByTopicSince(query.getTopicId(), query.getSince())
+              .map(messageEntity -> {
+//                  User author = messageEntity.getAuthor(); 
+                  UserInfo userInfo = new UserInfo(messageEntity.getAuthorId(),
+                          messageEntity.getAuthorName(), messageEntity.getAuthorAvatarUrl());
+                  userInfo.setColorIndex(messageEntity.getAuthorColorIndex());
 
-      return new CollaborationMessage(userInfo, messageEntity.getText(), messageEntity.getTimestamp());
-    });
+                  return new CollaborationMessage(userInfo,
+                          messageEntity.getText(), messageEntity.getTimestamp());
+              });
   }
 
   @Override
@@ -55,11 +48,13 @@ public class MessagePersister implements CollaborationMessagePersister {
     messageEntity.setTopic(request.getTopicId());
     messageEntity.setText(message.getText());
     messageEntity.setAuthorId(message.getUser().getId());
+    messageEntity.setAuthorName(message.getUser().getName());
+    messageEntity.setAuthorAvatarUrl(message.getUser().getImage());
+    messageEntity.setAuthorColorIndex(message.getUser().getColorIndex());
 
     // Set the time from the message only as a fallback option if your
     // database can't automatically add an insertion timestamp:
     // messageEntity.setTime(message.getTime());
-
     messageRepository.save(messageEntity);
   }
 }
