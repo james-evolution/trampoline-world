@@ -120,7 +120,7 @@ While the above script should create the necessary schema automatically, if you 
 
 ## Tables
 
-1. [trampolineworld.application_user](#table-trampolineworldapplication_user) 2. [trampolineworld.audit_logs](#table-trampolineworldaudit_logs) 3. [trampolineworld.chat_logs](#table-trampolineworldchat_logs) 4. [trampolineworld.trampoline_order](#table-trampolineworldtrampoline_order) 5. [trampolineworld.user_roles](#table-trampolineworlduser_roles) 6. [trampolineworld.webhooks](#table-trampolineworldwebhooks) 
+1. [trampolineworld.application_user](#table-application_user) 2. [trampolineworld.audit_logs](#table-audit_logs) 3. [trampolineworld.chat_logs](#table-chat_logs) 4. [trampolineworld.trampoline_order](#table-trampoline_order) 5. [trampolineworld.user_roles](#table-user_roles) 6. [trampolineworld.webhooks](#table-webhooks) 
 
 
 ### Table application_user 
