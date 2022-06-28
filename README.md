@@ -117,11 +117,13 @@ While the above script should create the necessary schema automatically, if you 
 
 <img src="https://faintdev.net/trampolineworld/tw_layout.svg">
 
+
 ## Tables
 
 1. [trampolineworld.application_user](#table-trampolineworldapplication_user) 2. [trampolineworld.audit_logs](#table-trampolineworldaudit_logs) 3. [trampolineworld.chat_logs](#table-trampolineworldchat_logs) 4. [trampolineworld.trampoline_order](#table-trampolineworldtrampoline_order) 5. [trampolineworld.user_roles](#table-trampolineworlduser_roles) 6. [trampolineworld.webhooks](#table-trampolineworldwebhooks) 
 
-### Table trampolineworld.application_user 
+
+### Table application_user 
 | Idx | Field Name | Data Type |
 |---|---|---|
 | *🔑 | <a name='trampolineworld.application_user_id'>id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT '' |
@@ -138,7 +140,7 @@ While the above script should create the necessary schema automatically, if you 
 | ENGINE&#61;InnoDB DEFAULT CHARSET&#61;utf8 COLLATE&#61;utf8&#95;unicode&#95;ci |
 
 
-### Table trampolineworld.audit_logs 
+### Table audit_logs 
 | Idx | Field Name | Data Type |
 |---|---|---|
 | *🔑 | <a name='trampolineworld.audit_logs_id'>id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci |
@@ -156,7 +158,7 @@ While the above script should create the necessary schema automatically, if you 
 | ENGINE&#61;InnoDB DEFAULT CHARSET&#61;utf8 COLLATE&#61;utf8&#95;unicode&#95;ci |
 
 
-### Table trampolineworld.chat_logs 
+### Table chat_logs 
 | Idx | Field Name | Data Type |
 |---|---|---|
 | *| <a name='trampolineworld.chat_logs_topic'>topic</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci |
@@ -164,13 +166,16 @@ While the above script should create the necessary schema automatically, if you 
 | *| <a name='trampolineworld.chat_logs_author_id'>author&#95;id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci |
 | *| <a name='trampolineworld.chat_logs_timestamp'>timestamp</a>| TIMESTAMP ON UPDATE CURRENT&#95;TIMESTAMP DEFAULT CURRENT_TIMESTAMP |
 | *🔑 | <a name='trampolineworld.chat_logs_id'>id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci |
+|  | <a name='trampolineworld.chat_logs_author_name'>author&#95;name</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
+|  | <a name='trampolineworld.chat_logs_author_avatar_url'>author&#95;avatar&#95;url</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
+|  | <a name='trampolineworld.chat_logs_author_color_index'>author&#95;color&#95;index</a>| INT  DEFAULT NULL |
 | Indexes |
 | 🔑 | pk&#95;chat&#95;logs || ON id|
 | Options |
 | ENGINE&#61;InnoDB DEFAULT CHARSET&#61;utf8 COLLATE&#61;utf8&#95;unicode&#95;ci |
 
 
-### Table trampolineworld.trampoline_order 
+### Table trampoline_order 
 | Idx | Field Name | Data Type |
 |---|---|---|
 | *🔑 | <a name='trampolineworld.trampoline_order_id'>id</a>| BIGINT AUTO_INCREMENT |
@@ -191,7 +196,7 @@ While the above script should create the necessary schema automatically, if you 
 | ENGINE&#61;InnoDB AUTO&#95;INCREMENT&#61;70039 DEFAULT CHARSET&#61;utf8 COLLATE&#61;utf8&#95;unicode&#95;ci |
 
 
-### Table trampolineworld.user_roles 
+### Table user_roles 
 | Idx | Field Name | Data Type |
 |---|---|---|
 |  | <a name='trampolineworld.user_roles_user_id'>user&#95;id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
@@ -200,7 +205,7 @@ While the above script should create the necessary schema automatically, if you 
 | ENGINE&#61;InnoDB DEFAULT CHARSET&#61;utf8 COLLATE&#61;utf8&#95;unicode&#95;ci |
 
 
-### Table trampolineworld.webhooks 
+### Table webhooks 
 | Idx | Field Name | Data Type |
 |---|---|---|
 | *🔑 | <a name='trampolineworld.webhooks_id'>id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci |
@@ -210,9 +215,6 @@ While the above script should create the necessary schema automatically, if you 
 | 🔑 | pk&#95;webhooks || ON id|
 | Options |
 | ENGINE&#61;InnoDB DEFAULT CHARSET&#61;utf8 COLLATE&#61;utf8&#95;unicode&#95;ci |
-
-
-
 
 
 ## Collaboration Engine & The Universal License File
