@@ -249,7 +249,7 @@ public class UserGuideView extends HorizontalLayout {
     Feature featureProfileCustomization = new Feature();
     featureProfileCustomization.setLabel("Profile Customization");
     featureProfileCustomization.setDescription(
-        "Users can customize their own profile picture, color, display name, email address, and password.");
+        "Users can customize their own profile picture, color, display name, email address, and password. Profile pictures can be animated gifs!");
     featureProfileCustomization.setIcon(new Icon(VaadinIcon.USER));
     // Password Resets
     Feature featurePasswordResets = new Feature();

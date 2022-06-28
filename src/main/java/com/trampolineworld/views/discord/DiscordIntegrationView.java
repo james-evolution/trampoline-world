@@ -266,13 +266,12 @@ public class DiscordIntegrationView extends Div {
     
     // Add buttons to a row.
     FormLayout buttonRow = new FormLayout();
+    buttonRow.setWidth("50%");
 //    buttonRow.setAlignItems(Alignment.CENTER);
 //    buttonRow.setSpacing(true);
     buttonRow.setResponsiveSteps(
         // Use one column by default
         new ResponsiveStep("0", 1),
-        // Use two columns, if the layout's width exceeds 320px
-        new ResponsiveStep("320px", 2),
         // Use three columns, if the layout's width exceeds 500px
         new ResponsiveStep("500px", 3)
 );
