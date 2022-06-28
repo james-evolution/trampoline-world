@@ -3,6 +3,7 @@ package com.trampolineworld.views.userguide;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Hr;
@@ -47,7 +48,6 @@ public class UserGuideView extends HorizontalLayout {
   private Label createLabel, editLabel, viewLabel, deleteLabel, fontSizeLabel, featuresLabel;
   private Paragraph createParagraph, editParagraph, viewParagraph, deleteParagraph, fontSizeParagraph;
   private Paragraph videoCaption;
-//  private UnorderedList featuresList;
   private VerticalLayout layout = new VerticalLayout();
 
   Tab documentationTab, desktopApplicationTab, mobileApplicationTab;
@@ -73,7 +73,7 @@ public class UserGuideView extends HorizontalLayout {
     header2 = new H2("The Basics: A Simple Guide");
     header2.getElement().getStyle().set("margin-top", "18px !important");
 
-    videoFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/134bgAV4l8k");
+    videoFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/bV3vTn0YcLk");
     videoFrame.getElement().setAttribute("title", "YouTube video player");
     videoFrame.getElement().setAttribute("frameborder", "0");
     videoFrame.getElement().setAttribute("allow", "accelerometer");
@@ -82,6 +82,7 @@ public class UserGuideView extends HorizontalLayout {
 
     createLabelElements();
     createParagraphElements();
+    configureFeaturesList();
 
     // Create layout & add components to it.
     layout.add(tabs);
@@ -177,16 +178,18 @@ public class UserGuideView extends HorizontalLayout {
     fontSizeParagraph.getElement().getStyle().set("margin-top", "0px !important");
 
     videoCaption = new Paragraph(
-        "\nThe above video gives a comprehensive overview of this application's many different features, and will also teach you how to use it."
-        + " It's highly recommended that one watches it to gain a thorough understanding of how the system works & how to operate it, as the features list alone lacks much of this information.");
-
+        "\nAn in-depth overview & video tutorial on how to operate this application. Enjoy : )");
+    videoCaption.getStyle().set("margin-top", "0px");
+  }
+  
+  private void configureFeaturesList() {
     // Create collection of Feature objects.
     List<Feature> features = new ArrayList<>();
     // Login & Security
     Feature featureLogin = new Feature();
     featureLogin.setLabel("Login & Security");
     featureLogin.setDescription(
-        "Users must log in to access this application. Individual permissions depend upon account type. Passwords are hash-encrypted and all client-server requests are protected against CSRF and XSS attacks.");
+        "Users must log in to access this system. Passwords are hash-encrypted and all client-server requests are protected against CSRF and XSS attacks.");
     featureLogin.setIcon(new Icon(VaadinIcon.LOCK));
     // Mobile & Desktop
     Feature featureMobileDesktop = new Feature();
@@ -248,7 +251,7 @@ public class UserGuideView extends HorizontalLayout {
     featureProfileCustomization.setDescription(
         "Users can customize their own profile picture, color, display name, email address, and password.");
     featureProfileCustomization.setIcon(new Icon(VaadinIcon.USER));
-    // Profile Customization
+    // Password Resets
     Feature featurePasswordResets = new Feature();
     featurePasswordResets.setLabel("Password Resets");
     featurePasswordResets.setDescription(
@@ -320,7 +323,6 @@ public class UserGuideView extends HorizontalLayout {
     featuresList.setItems(features);
     featuresList.setRenderer(featureRenderer);
 //    featuresList.setHeight("500px");
-
   }
 
   private void createLabelElements() {
@@ -340,6 +342,7 @@ public class UserGuideView extends HorizontalLayout {
   }
 
   private void loadDocumentationTab() {
+    configureFeaturesList();
     // https://www.youtube.com/embed/-ZnYEI14B8c
     layout.removeAll();
     layout.add(tabs);
@@ -370,7 +373,7 @@ public class UserGuideView extends HorizontalLayout {
         "Installing this system as a desktop application is quite an easy process! It should take under a minute.\n"
             + "\nOn Windows, please make sure you're using the Google Chrome browser if you decide to do this, as not all browsers offer this capability."
             + "\nOn Apple devices, you'll want to use Safari. It's possible that the icon may look like a plus sign instead of the one showcased in the video.\n");
-    desktopInstallationFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/t65jdhNLmm8");
+    desktopInstallationFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/DQbD6ukvdSI");
     desktopInstallationFrame.getElement().setAttribute("title", "YouTube video player");
     desktopInstallationFrame.getElement().setAttribute("frameborder", "0");
     desktopInstallationFrame.getElement().setAttribute("allow", "accelerometer");

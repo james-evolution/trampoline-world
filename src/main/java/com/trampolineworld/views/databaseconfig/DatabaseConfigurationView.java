@@ -60,7 +60,7 @@ public class DatabaseConfigurationView extends HorizontalLayout {
       + " \n\nAlternatively, if you elect to use the existing database, but later decide you want to use a different one, there's a process for bringing your data with you."
       + " If such a time comes, it's highly recommended that you follow the instructions in the video below on database migration before changing the values of these variables.");
   private H2 title = new H2("Using Your Own Database");
-  private H2 titleTwoStep = new H2("A Two-Step Process");
+  private H2 titleTwoStep = new H2("A Three-Step Process");
 
   private FormLayout layoutForm = new FormLayout();
   private TextField inputDataSourceUrl = new TextField();
@@ -198,12 +198,13 @@ public class DatabaseConfigurationView extends HorizontalLayout {
     titleTwoStep.getStyle().set("margin-top", "14px !important");
 
     captionList = new Paragraph(
-        "Provided that you have no existing data to migrate to the new database, this process only requires the two steps outlined below.");
+        "Provided that you have no existing data to migrate to the new database, this process only requires the three steps outlined below.");
 
     OrderedList listInstructions = new OrderedList();
-    ListItem step1 = new ListItem("Create the database with a matching schema.");
-    ListItem step2 = new ListItem("Change the values of this application's connection variables to point to your new database.");
-    listInstructions.add(step1, step2);
+    ListItem step1 = new ListItem("Secure a host for your database.");
+    ListItem step2 = new ListItem("Create a database with the required structure.");
+    ListItem step3 = new ListItem("Connection this application to your new database via the Connection Variables page.");
+    listInstructions.add(step1, step2, step3);
     listInstructions.getStyle().set("margin-top", "0px");
     listInstructions.getStyle().set("margin-bottom", "0px");
     
@@ -284,7 +285,7 @@ public class DatabaseConfigurationView extends HorizontalLayout {
   }
   
   private void configureTutorialVideo() {
-    tutorialVideo.getElement().setAttribute("src", "https://www.youtube.com/embed/t65jdhNLmm8");
+    tutorialVideo.getElement().setAttribute("src", "https://www.youtube.com/embed/AYaZ_6yzB0o");
     tutorialVideo.getElement().setAttribute("title", "YouTube video player");
     tutorialVideo.getElement().setAttribute("frameborder", "0");
     tutorialVideo.getElement().setAttribute("allow", "accelerometer");
@@ -293,7 +294,7 @@ public class DatabaseConfigurationView extends HorizontalLayout {
   }
   
   private void configureMigrationTutorialVideo() {
-    migrationTutorialVideo.getElement().setAttribute("src", "https://www.youtube.com/embed/t65jdhNLmm8");
+    migrationTutorialVideo.getElement().setAttribute("src", "https://www.youtube.com/embed/OitbVnZPYaA");
     migrationTutorialVideo.getElement().setAttribute("title", "YouTube video player");
     migrationTutorialVideo.getElement().setAttribute("frameborder", "0");
     migrationTutorialVideo.getElement().setAttribute("allow", "accelerometer");

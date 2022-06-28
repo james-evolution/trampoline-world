@@ -475,7 +475,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
     icon.getStyle().set("height", "var(--lumo-font-size-m)").set("color", "var(--lumo-contrast-70pct)");
     icon.getStyle().set("margin-right", "4px");
     HorizontalLayout layout = new HorizontalLayout(icon, span);
-    layout.getElement().setAttribute("title", "Please ensure the URL ends in .jpg, .png, or .webp");
+    layout.getElement().setAttribute("title", "Please ensure the URL ends in .jpg, .png, .gif, or .webp");
     layout.setAlignItems(Alignment.AUTO);
     layout.setSpacing(false);
     return layout;
@@ -716,7 +716,7 @@ public class ManageUsersView extends Div implements BeforeEnterObserver {
 
     inputProfilePictureUrl = new TextField("Profile Picture URL");
     inputProfilePictureUrl.setHelperText(
-        "File uploads are not yet supported for profile pictures. You can, however, pass in an image URL. Right click on an image from the net and select 'Copy Image Address' and then paste it here. The url path must end in .jpg, .png, or .webp");
+        "File uploads are not yet supported for profile pictures. You can, however, pass in an image URL. Right click on an image from the net and select 'Copy Image Address' and then paste it here. The url path must end in .jpg, .png, .gif, or .webp");
 
     Component[] fields = new Component[] { inputUsername, inputDisplayName, inputEmail, inputRoles, inputHashedPassword,
         inputProfilePictureUrl, inputColorIndex, inputID};

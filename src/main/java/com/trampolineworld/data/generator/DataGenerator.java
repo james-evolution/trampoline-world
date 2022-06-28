@@ -101,26 +101,26 @@ public class DataGenerator {
               // For backing up the audit logs to Discord.
               Webhook auditLogWebhook = new Webhook();
               auditLogWebhook.setWebhookName("Logs (Audit)");
-              auditLogWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/988942093059784734/AUdjyyXznFlN1T7IovybkPlu6h_HEdVK4gE80uTgvRiIKEg7UXrvQaHvLtbV66zuwFRY");
+              auditLogWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/991335829031092224/attxMscwJLS-NS3tn0kG0umRptNnbpjJJ2WFYPDK9hwvPEjSedBPrcxGKJcu5L24of10");
               webhookRepository.save(auditLogWebhook);
               
               // For persisting chat logs to Discord (optional - if Admins desire this)
-              Webhook chatLogsWebhook = new Webhook();
-              chatLogsWebhook.setWebhookName("Logs (Chat)");
-              chatLogsWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/988770668554375240/r-W13i9JLGQxmvV-6UzLiPVtTCzKBzG_jNUaJiwUtislZ4t_7MqflRb3uPTW1A93SjDL");
-              webhookRepository.save(chatLogsWebhook);
-
-              // For logging the universally unique identifiers (UUIDS) of newly created users. This allows us to re-use them to avoid surpassing the 20 user CollaborationEngine monthly quota.
-              Webhook userUuidWebhook = new Webhook();
-              userUuidWebhook.setWebhookName("Logs (UUIDs)");
-              userUuidWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/988570358691016784/MWE8EIOOh7-Eohofs0Dp6Wu6DiyEmr91hUcUXBMnyt6t0esLraN7XPTc-fKTNpfOjjvW");
-              webhookRepository.save(userUuidWebhook);
+              Webhook chatGeneralWebhook = new Webhook();
+              chatGeneralWebhook.setWebhookName("Logs (Chat #general)");
+              chatGeneralWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/991336020798877736/ndL5pndaw0Y9hTszotLknoJosnKHKAqVud3nJr-_9pAQteyr0tGcckZ9aNMH-uJ_p2CT");
+              webhookRepository.save(chatGeneralWebhook);
               
-              // For routing debug logs to Discord for developer usage.
-              Webhook debugLogsWebhook = new Webhook();
-              debugLogsWebhook.setWebhookName("Logs (Debug)");
-              debugLogsWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/988568130093744218/xoLscoKMWCX3_7t63MESyA4FW3P_KSY6dlLB0hzYxbrqw6mTLlLsMXr7GlBbYd5rI3Ku");
-              webhookRepository.save(debugLogsWebhook);
+              // For persisting chat logs to Discord (optional - if Admins desire this)
+              Webhook chatNotesWebhook = new Webhook();
+              chatNotesWebhook.setWebhookName("Logs (Chat #notes)");
+              chatNotesWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/991336219092996146/XWQWGkonLA2dvJB50mopIM_cQ5HDG-GGv6bkI8EateG2vXbSZ2lkVzWJIAKu8g3tg2Xe");
+              webhookRepository.save(chatNotesWebhook);
+             
+              // For persisting chat logs to Discord (optional - if Admins desire this)
+              Webhook chatIssuesWebhook = new Webhook();
+              chatIssuesWebhook.setWebhookName("Logs (Chat #issues)");
+              chatIssuesWebhook.setWebhookUrl("https://ptb.discord.com/api/webhooks/991336275321823232/SMG1EdT2oxpjKCjfexGI-c6UNrCgILzDO1VVLXP3Lg9DiGH8oofnWJZ08-cSw6Tb4EQH");
+              webhookRepository.save(chatIssuesWebhook);
             }
         };
     }

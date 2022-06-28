@@ -71,10 +71,10 @@ public class DiscordIntegrationView extends Div {
   private Button buttonToggleChatLogging = new Button("Enable Chat Logging (Discord)");
   private Button buttonToggleAuditLogging = new Button("Enable Audit Logging (Discord)");
 
-//  private String chatLoggingEnabled = System.getenv("discordChatLoggingEnabled");
-//  private String auditLoggingEnabled = System.getenv("discordAuditLoggingEnabled");
-  private String chatLoggingEnabled = "false";
-  private String auditLoggingEnabled = "false";
+  private String chatLoggingEnabled = System.getenv("discordChatLoggingEnabled");
+  private String auditLoggingEnabled = System.getenv("discordAuditLoggingEnabled");
+//  private String chatLoggingEnabled = "false";
+//  private String auditLoggingEnabled = "false";
   
   @Autowired
   public DiscordIntegrationView(WebhookRepository webhookRepository, WebhookService webhookService) {
@@ -360,28 +360,28 @@ public class DiscordIntegrationView extends Div {
     Webhook auditLogWebhook = new Webhook();
     auditLogWebhook.setWebhookName("Logs (Audit)");
     auditLogWebhook.setWebhookUrl(
-        "https://ptb.discord.com/api/webhooks/988942093059784734/AUdjyyXznFlN1T7IovybkPlu6h_HEdVK4gE80uTgvRiIKEg7UXrvQaHvLtbV66zuwFRY");
+        "https://ptb.discord.com/api/webhooks/991335829031092224/attxMscwJLS-NS3tn0kG0umRptNnbpjJJ2WFYPDK9hwvPEjSedBPrcxGKJcu5L24of10");
     webhookRepository.save(auditLogWebhook);
 
     // For persisting chat logs to Discord (optional - if Admins desire this)
     Webhook chatLogsGeneralWebhook = new Webhook();
     chatLogsGeneralWebhook.setWebhookName("Logs (Chat #general)");
     chatLogsGeneralWebhook.setWebhookUrl(
-        "https://ptb.discord.com/api/webhooks/990505609147338773/Mc95ah2V7y_FRxTpRbuafOyZ8cPFwYtsi5hjC0ZCJXJYcU8H_v_VMKImAxWyI39XCbxI");
+        "https://ptb.discord.com/api/webhooks/991336020798877736/ndL5pndaw0Y9hTszotLknoJosnKHKAqVud3nJr-_9pAQteyr0tGcckZ9aNMH-uJ_p2CT");
     webhookRepository.save(chatLogsGeneralWebhook);
 
     // For persisting chat logs to Discord (optional - if Admins desire this)
     Webhook chatLogsNotesWebhook = new Webhook();
     chatLogsNotesWebhook.setWebhookName("Logs (Chat #notes)");
     chatLogsNotesWebhook.setWebhookUrl(
-        "https://ptb.discord.com/api/webhooks/990507943042625576/jHMaf8WyhW7pt6--bJ1Svj1j60bFtQDKWxJKBJhc260OZg_pRjlHfMg5Gm6Ufvku9D0c");
+        "https://ptb.discord.com/api/webhooks/991336219092996146/XWQWGkonLA2dvJB50mopIM_cQ5HDG-GGv6bkI8EateG2vXbSZ2lkVzWJIAKu8g3tg2Xe");
     webhookRepository.save(chatLogsNotesWebhook);
 
     // For persisting chat logs to Discord (optional - if Admins desire this)
     Webhook chatLogsIssuesWebhook = new Webhook();
     chatLogsIssuesWebhook.setWebhookName("Logs (Chat #issues)");
     chatLogsIssuesWebhook.setWebhookUrl(
-        "https://ptb.discord.com/api/webhooks/990508043160678460/RvEZrMfakiqBMRq1xRYEjyYCtR3-quSPSUGIWhIBF9meBgiw7o7K7TfbBn47vxN1ivHg");
+        "https://ptb.discord.com/api/webhooks/991336275321823232/SMG1EdT2oxpjKCjfexGI-c6UNrCgILzDO1VVLXP3Lg9DiGH8oofnWJZ08-cSw6Tb4EQH");
     webhookRepository.save(chatLogsIssuesWebhook);
 
     // For logging the universally unique identifiers (UUIDS) of newly created

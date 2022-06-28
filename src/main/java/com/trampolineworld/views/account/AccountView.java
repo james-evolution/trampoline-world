@@ -144,6 +144,7 @@ public class AccountView extends HorizontalLayout implements BeforeEnterObserver
     avatar.setName(currentUsername);
     avatar.setImage(avatarImageUrl);
     avatar.setColorIndex(currentUser.getColorIndex());
+    avatar.getStyle().set("zoom", "200%");
     
     // Row to show avatar color previews.
     configureAvatarPreviews(currentUsername, avatarImageUrl);
