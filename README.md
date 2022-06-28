@@ -115,13 +115,14 @@ CREATE TABLE webhooks (
 ## Database Structure
 While the above script should create the necessary schema automatically, if you wish to do it by hand, the database structure is outlined below.
 
-<img src="https://faintdev.net/trampolineworld/tw_layout.svg">
+<img src="https://faintdev.net/trampolineworld/tw_schema.svg">
 
 ## Tables
 
-1. [trampolineworld.application_user](#table-trampolineworldapplication_user) 2. [trampolineworld.audit_logs](#table-trampolineworldaudit_logs) 3. [trampolineworld.chat_logs](#table-trampolineworldchat_logs) 4. [trampolineworld.trampoline_order](#table-trampolineworldtrampoline_order) 5. [trampolineworld.user_roles](#table-trampolineworlduser_roles) 6. [trampolineworld.webhooks](#table-trampolineworldwebhooks) 
+1. [trampolineworld.application_user](#table-application_user) 2. [trampolineworld.audit_logs](#table-audit_logs) 3. [trampolineworld.chat_logs](#table-chat_logs) 4. [trampolineworld.trampoline_order](#table-trampoline_order) 5. [trampolineworld.user_roles](#table-user_roles) 6. [trampolineworld.webhooks](#table-webhooks) 
 
-### Table trampolineworld.application_user 
+
+### Table application_user 
 | Idx | Field Name | Data Type |
 |---|---|---|
 | *🔑 | <a name='trampolineworld.application_user_id'>id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT '' |
@@ -138,7 +139,7 @@ While the above script should create the necessary schema automatically, if you 
 | ENGINE&#61;InnoDB DEFAULT CHARSET&#61;utf8 COLLATE&#61;utf8&#95;unicode&#95;ci |
 
 
-### Table trampolineworld.audit_logs 
+### Table audit_logs 
 | Idx | Field Name | Data Type |
 |---|---|---|
 | *🔑 | <a name='trampolineworld.audit_logs_id'>id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci |
@@ -156,7 +157,7 @@ While the above script should create the necessary schema automatically, if you 
 | ENGINE&#61;InnoDB DEFAULT CHARSET&#61;utf8 COLLATE&#61;utf8&#95;unicode&#95;ci |
 
 
-### Table trampolineworld.chat_logs 
+### Table chat_logs 
 | Idx | Field Name | Data Type |
 |---|---|---|
 | *| <a name='trampolineworld.chat_logs_topic'>topic</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci |
@@ -164,13 +165,16 @@ While the above script should create the necessary schema automatically, if you 
 | *| <a name='trampolineworld.chat_logs_author_id'>author&#95;id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci |
 | *| <a name='trampolineworld.chat_logs_timestamp'>timestamp</a>| TIMESTAMP ON UPDATE CURRENT&#95;TIMESTAMP DEFAULT CURRENT_TIMESTAMP |
 | *🔑 | <a name='trampolineworld.chat_logs_id'>id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci |
+|  | <a name='trampolineworld.chat_logs_author_name'>author&#95;name</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
+|  | <a name='trampolineworld.chat_logs_author_avatar_url'>author&#95;avatar&#95;url</a>| VARCHAR&#40;255&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
+|  | <a name='trampolineworld.chat_logs_author_color_index'>author&#95;color&#95;index</a>| INT  DEFAULT NULL |
 | Indexes |
 | 🔑 | pk&#95;chat&#95;logs || ON id|
 | Options |
 | ENGINE&#61;InnoDB DEFAULT CHARSET&#61;utf8 COLLATE&#61;utf8&#95;unicode&#95;ci |
 
 
-### Table trampolineworld.trampoline_order 
+### Table trampoline_order 
 | Idx | Field Name | Data Type |
 |---|---|---|
 | *🔑 | <a name='trampolineworld.trampoline_order_id'>id</a>| BIGINT AUTO_INCREMENT |
@@ -191,7 +195,7 @@ While the above script should create the necessary schema automatically, if you 
 | ENGINE&#61;InnoDB AUTO&#95;INCREMENT&#61;70039 DEFAULT CHARSET&#61;utf8 COLLATE&#61;utf8&#95;unicode&#95;ci |
 
 
-### Table trampolineworld.user_roles 
+### Table user_roles 
 | Idx | Field Name | Data Type |
 |---|---|---|
 |  | <a name='trampolineworld.user_roles_user_id'>user&#95;id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci DEFAULT NULL |
@@ -200,7 +204,7 @@ While the above script should create the necessary schema automatically, if you 
 | ENGINE&#61;InnoDB DEFAULT CHARSET&#61;utf8 COLLATE&#61;utf8&#95;unicode&#95;ci |
 
 
-### Table trampolineworld.webhooks 
+### Table webhooks 
 | Idx | Field Name | Data Type |
 |---|---|---|
 | *🔑 | <a name='trampolineworld.webhooks_id'>id</a>| VARCHAR&#40;200&#41; COLLATE utf8&#95;unicode&#95;ci |
@@ -212,14 +216,13 @@ While the above script should create the necessary schema automatically, if you 
 | ENGINE&#61;InnoDB DEFAULT CHARSET&#61;utf8 COLLATE&#61;utf8&#95;unicode&#95;ci |
 
 
-
-
-
 ## Collaboration Engine & The Universal License File
 
-The universal license file only authorizes 20 unique users per month to use the CollaborationEngine. At the beginning of each month, the counter is set back to zero. Each time a new user is created, a UUID (universally unique identifier) is generated for them. If they then interact with any CE features, such as order editing or live chat, their UUID is registered with the CollaborationEngine and counts towards the monthly 20 user quota. 
+The universal license file only authorizes 20 unique users per month to use the CollaborationEngine. Each time a new user is created, a UUID (universally unique identifier) is generated for them. If they then interact with any CE features, such as order editing or live chat, their UUID is registered with the CollaborationEngine and counts towards the monthly 20 user quota. Each user is only counted once per month, and the counter is reset back to 0 at the beginning of each new month.
 
-For this reason, it's best not to delete & re-create new accounts as that will cause unnecessary inflation of the quota due to the repeated generation of new UUIDs. Instead, it's best to simply maintain the same 20 accounts and re-purpose them as people come and go. (This is why the User Management page does not allow account deletion. Existing UUIDs are valuable. They're also logged to Discord via webhook so that they can be re-used if ever they are somehow lost.)
+This application is coded to recycle UUIDs. It has a list of 20 priority UUIDs that have already been registered with the engine. If a new user is created, the system will attempt to assign it a priority ID first. If none are available (as they're all taken) they'll be left with one auto-generated by JPA.
+
+The first time you surpass the 20 user limit, you enter a 30 day grace period in which the limit is raised to 200. After 30 days it goes back down to 20. From then, if you surpass the limit again, CollabrationEngine features are disabled for anyone past the first 20 users. The system still works as intended and will operate normally, but users beyond the original 20 will not have fields they're editing highlighted in their profile color, and they'll only be able to see their own avatar in avatar groups. Basically, there'll be some aesthetic differences for additional users, but things should still work fine from a functionality standpoint.
 
 ## Project Structure
 
