@@ -7,6 +7,8 @@ A full-stack persistent web application that doubles as both a desktop and mobil
 
 https://youtu.be/134bgAV4l8k
 
+<img src="https://faintdev.net/trampolineworld/tw_schema.svg">
+
 # Running the Application (Localhost)
 
 The project is a standard Maven project. To run it from the command line,
