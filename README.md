@@ -5,9 +5,7 @@ Built for someone very dear to my heart.
 A full-stack web application that doubles as both a desktop and mobile app.
 <br>Compatible with macOS, Windows, iOS, and Android. This application is effectively a CRM intended for tracking trampoline orders.
 
-https://youtu.be/134bgAV4l8k
-
-<img src="https://faintdev.net/trampolineworld/tw_schema.svg">
+https://youtu.be/aWSZ6CWmWPA
 
 # Running the Application (Localhost)
 
