@@ -203,7 +203,7 @@ public class DatabaseConfigurationView extends HorizontalLayout {
     OrderedList listInstructions = new OrderedList();
     ListItem step1 = new ListItem("Secure a host for your database.");
     ListItem step2 = new ListItem("Create a database with the required structure.");
-    ListItem step3 = new ListItem("Connection this application to your new database via the Connection Variables page.");
+    ListItem step3 = new ListItem("Connect this application to your new database via the Connection Variables page.");
     listInstructions.add(step1, step2, step3);
     listInstructions.getStyle().set("margin-top", "0px");
     listInstructions.getStyle().set("margin-bottom", "0px");
@@ -285,7 +285,7 @@ public class DatabaseConfigurationView extends HorizontalLayout {
   }
   
   private void configureTutorialVideo() {
-    tutorialVideo.getElement().setAttribute("src", "https://www.youtube.com/embed/AYaZ_6yzB0o");
+    tutorialVideo.getElement().setAttribute("src", "https://www.youtube.com/embed/uDIBY05RZDo");
     tutorialVideo.getElement().setAttribute("title", "YouTube video player");
     tutorialVideo.getElement().setAttribute("frameborder", "0");
     tutorialVideo.getElement().setAttribute("allow", "accelerometer");
@@ -294,7 +294,7 @@ public class DatabaseConfigurationView extends HorizontalLayout {
   }
   
   private void configureMigrationTutorialVideo() {
-    migrationTutorialVideo.getElement().setAttribute("src", "https://www.youtube.com/embed/OitbVnZPYaA");
+    migrationTutorialVideo.getElement().setAttribute("src", "https://www.youtube.com/embed/ZaFOAClhL3Q");
     migrationTutorialVideo.getElement().setAttribute("title", "YouTube video player");
     migrationTutorialVideo.getElement().setAttribute("frameborder", "0");
     migrationTutorialVideo.getElement().setAttribute("allow", "accelerometer");

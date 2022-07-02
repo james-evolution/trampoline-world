@@ -1,20 +1,15 @@
 package com.trampolineworld.data.generator;
 
 import com.trampolineworld.data.Role;
-import com.trampolineworld.data.entity.TrampolineOrder;
 import com.trampolineworld.data.entity.User;
 import com.trampolineworld.data.entity.Webhook;
 import com.trampolineworld.data.service.TrampolineOrderRepository;
 import com.trampolineworld.data.service.UserRepository;
 import com.trampolineworld.data.service.WebhookRepository;
-import com.vaadin.exampledata.DataType;
-import com.vaadin.exampledata.ExampleDataGenerator;
 import com.vaadin.flow.spring.annotation.SpringComponent;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -34,14 +29,13 @@ public class DataGenerator {
             if (userRepository.count() != 0L) {
               // If not empty, use existing database.
                 logger.info("Using existing database");
-//                return; // Return to exit method.
             }
             else {
                 /*
                  * GENERATE DEFAULT SYSTEM USERS.
                  */
                 
-                // Generate TW User with Uer permissions.
+                // Generate TW User with User permissions.
                 User user = new User();
                 user.setId(UUID.fromString("275626f5-d4a0-4ce7-b90f-f34e236b8c6f"));
                 user.setDisplayName("TW User");

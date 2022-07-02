@@ -73,7 +73,7 @@ public class UserGuideView extends HorizontalLayout {
     header2 = new H2("The Basics: A Simple Guide");
     header2.getElement().getStyle().set("margin-top", "18px !important");
 
-    videoFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/aWSZ6CWmWPA");
+    videoFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/d7rl-Afnaa4");
     videoFrame.getElement().setAttribute("title", "YouTube video player");
     videoFrame.getElement().setAttribute("frameborder", "0");
     videoFrame.getElement().setAttribute("allow", "accelerometer");
