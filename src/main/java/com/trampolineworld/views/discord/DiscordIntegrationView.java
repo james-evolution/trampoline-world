@@ -106,7 +106,7 @@ public class DiscordIntegrationView extends Div {
             + " If you'd like to use your own Discord server rather than the pre-configured one, all you have to do is replace this system's webhook URLs with yours, and the data will be routed there in the future. A video guide on that process is below."
             + "\n\n(Estimated Setup Time: 2-5 minutes)");
 
-    videoFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/134bgAV4l8k");
+    videoFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/puI3es2Pm8Y");
     videoFrame.getElement().setAttribute("title", "YouTube video player");
     videoFrame.getElement().setAttribute("frameborder", "0");
     videoFrame.getElement().setAttribute("allow", "accelerometer");

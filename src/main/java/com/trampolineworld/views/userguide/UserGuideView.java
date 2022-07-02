@@ -201,7 +201,7 @@ public class UserGuideView extends HorizontalLayout {
     Feature featureOrderManagement = new Feature();
     featureOrderManagement.setLabel("Order Management");
     featureOrderManagement
-        .setDescription("Admins can create, edit, and delete orders. Non-admins cannot delete orders.");
+        .setDescription("Users can create, edit, and delete orders. Non-admins cannot delete orders.");
     featureOrderManagement.setIcon(new Icon(VaadinIcon.TABLE));
     // User Management
     Feature featureUserManagement = new Feature();
@@ -373,7 +373,7 @@ public class UserGuideView extends HorizontalLayout {
         "Installing this system as a desktop application is quite an easy process! It should take under a minute.\n"
             + "\nOn Windows, please make sure you're using the Google Chrome browser if you decide to do this, as not all browsers offer this capability."
             + "\nOn Apple devices, you'll want to use Safari. It's possible that the icon may look like a plus sign instead of the one showcased in the video.\n");
-    desktopInstallationFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/DQbD6ukvdSI");
+    desktopInstallationFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/CP9fvTKluV8");
     desktopInstallationFrame.getElement().setAttribute("title", "YouTube video player");
     desktopInstallationFrame.getElement().setAttribute("frameborder", "0");
     desktopInstallationFrame.getElement().setAttribute("allow", "accelerometer");
@@ -393,7 +393,7 @@ public class UserGuideView extends HorizontalLayout {
     installationDescription.setText(
         "The installation process for the mobile app is just as quick! The steps are relatively the same for both iPhone and Android devices.\n"
             + "\niPhone users should use Safari." + "\nAndroid users should use Google Chrome.\n\n");
-    mobileInstallationFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/9HWKx4NncvM");
+    mobileInstallationFrame.getElement().setAttribute("src", "https://www.youtube.com/embed/ThWTqH3x2Eo");
     mobileInstallationFrame.getElement().setAttribute("title", "YouTube video player");
     mobileInstallationFrame.getElement().setAttribute("frameborder", "0");
     mobileInstallationFrame.getElement().setAttribute("allow", "accelerometer");
