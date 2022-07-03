@@ -5,7 +5,7 @@ Built for someone very dear to my heart.
 A full-stack web application that doubles as both a desktop and mobile app.
 <br>Compatible with macOS, Windows, iOS, and Android. This application is effectively a CRM intended for tracking trampoline orders.
 
-https://youtu.be/aWSZ6CWmWPA
+https://youtu.be/d7rl-Afnaa4
 
 # Running the Application (Localhost)
 
