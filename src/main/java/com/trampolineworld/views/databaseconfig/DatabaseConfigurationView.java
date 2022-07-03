@@ -315,7 +315,8 @@ public class DatabaseConfigurationView extends HorizontalLayout {
       http.setDoOutput(true);
       http.setRequestProperty("Content-Type", "application/json");
       http.setRequestProperty("Accept", "application/vnd.heroku+json; version=3");
-      http.setRequestProperty("Authorization", "Bearer cdc36c38-a8e0-4e3d-a904-17d58b1b49e2");
+//      http.setRequestProperty("Authorization", "Bearer cdc36c38-a8e0-4e3d-a904-17d58b1b49e2");
+      http.setRequestProperty("Authorization", "Bearer e393df14-1a22-4ac8-bfe5-6e609030edbb");
 
       JSONObject configVars = new JSONObject();
       String stringConfigVars;
